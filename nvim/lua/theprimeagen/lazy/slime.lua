@@ -47,9 +47,11 @@ return {
 			vim.keymap.set("n", "<leader>cm", mark_terminal, { desc = "[m]ark terminal" })
 			vim.keymap.set("n", "<leader>cs", set_terminal, { desc = "[s]et terminal" })
 
-			-- Helper functions to open new terminals
+			-- Helper functions to open new terminals (horizontal split below)
 			local function new_terminal(lang)
-				vim.cmd("vsplit term://" .. lang)
+				vim.cmd("split term://" .. lang)
+				vim.cmd("wincmd J") -- Move window to bottom
+				vim.cmd("resize 15") -- Set height to 15 lines
 			end
 
 			vim.keymap.set("n", "<leader>cr", function()
