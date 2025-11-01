@@ -54,6 +54,39 @@ return {
                     }
                 end,
 
+                -- R Language Server with rich documentation
+                ["r_language_server"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.r_language_server.setup({
+                        capabilities = capabilities,
+                        filetypes = { "r", "rmd", "rmarkdown", "quarto" },
+                        settings = {
+                            r = {
+                                lsp = {
+                                    rich_documentation = true,
+                                },
+                            },
+                        },
+                    })
+                end,
+
+                -- Python (Pyright) with workspace analysis
+                ["pyright"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.pyright.setup({
+                        capabilities = capabilities,
+                        settings = {
+                            python = {
+                                analysis = {
+                                    autoSearchPaths = true,
+                                    useLibraryCodeForTypes = true,
+                                    diagnosticMode = "workspace",
+                                },
+                            },
+                        },
+                    })
+                end,
+
                 zls = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.zls.setup({

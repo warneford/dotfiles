@@ -43,6 +43,20 @@ return {
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter",
 		},
-		opts = {},
+		ft = { "quarto", "markdown" },
+		opts = {
+			buffers = {
+				set_filetype = true,
+			},
+		},
+		config = function()
+			-- Automatically activate otter for code blocks in quarto files
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "quarto", "markdown" },
+				callback = function()
+					require("otter").activate({ "r", "python", "julia", "bash" })
+				end,
+			})
+		end,
 	},
 }
