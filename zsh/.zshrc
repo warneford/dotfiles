@@ -34,7 +34,10 @@ alias v='nvim'
 alias lg='lazygit'
 
 # Add any custom paths here
-export PATH="/Applications/quarto/bin:$PATH"
+# Add Quarto to PATH if it exists (macOS cask install)
+if [ -d "/Applications/quarto/bin" ]; then
+    export PATH="/Applications/quarto/bin:$PATH"
+fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
