@@ -20,14 +20,17 @@ return {
 				end
 			end
 
-			-- Run code cell with <leader><CR> (space + enter) or Cmd+Enter
+			-- Run code cell with <leader><CR> (space + enter) or Shift+Enter or Cmd+Enter
 			vim.keymap.set("n", "<leader><CR>", send_cell, { desc = "run code cell" })
-			vim.keymap.set("n", "<D-CR>", send_cell, { desc = "run code cell" }) -- Cmd+Enter (macOS)
-			vim.keymap.set("i", "<D-CR>", "<Esc>:lua send_cell()<CR>a", { desc = "run code cell from insert mode" })
+			vim.keymap.set("n", "<S-CR>", send_cell, { desc = "run code cell" }) -- Shift+Enter
+			vim.keymap.set("i", "<S-CR>", function()
+				vim.cmd("stopinsert")
+				send_cell()
+			end, { desc = "run code cell from insert mode" })
 
 			-- Run visual selection
 			vim.keymap.set("v", "<CR>", ":<C-u>call slime#send_op(visualmode(), 1)<CR>", { desc = "run code region" })
-			vim.keymap.set("v", "<D-CR>", ":<C-u>call slime#send_op(visualmode(), 1)<CR>", { desc = "run code region" })
+			vim.keymap.set("v", "<S-CR>", ":<C-u>call slime#send_op(visualmode(), 1)<CR>", { desc = "run code region" })
 
 			-- Otter keybindings
 			vim.keymap.set("n", "<leader>oa", function()
