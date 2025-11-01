@@ -118,10 +118,28 @@ print_success "Linked nvim config"
 echo ""
 print_success "Installation complete!"
 echo ""
+print_info "Installing Quarto CLI (requires password)..."
+if ! command -v quarto &> /dev/null; then
+    brew install --cask quarto
+    print_success "Quarto CLI installed"
+else
+    print_success "Quarto CLI already installed"
+fi
+
+# Install R packages for nvim-r
+print_info "Installing R packages for nvim-r..."
+Rscript -e 'if (!require("languageserver")) install.packages("languageserver", repos="https://cloud.r-project.org")'
+print_success "R languageserver package installed"
+
+echo ""
+print_success "Installation complete!"
+echo ""
 print_info "Next steps:"
 echo "  1. Restart your terminal or run: source ~/.zshrc"
 echo "  2. Run 'p10k configure' to configure your Powerlevel10k theme"
 echo "  3. Open nvim - lazy.nvim will auto-install and plugins will be loaded"
+echo "  4. In an R file, press ,rf to start R REPL"
+echo "  5. In a Quarto file (.qmd), press ,qp to preview"
 echo ""
 print_info "Included nvim plugins:"
 echo "  - Harpoon2 (file navigation)"
