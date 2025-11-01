@@ -23,8 +23,8 @@ return {
 				},
 				air = {
 					command = "air",
-					args = { "format", "--stdin", "$FILENAME" },
-					stdin = true,
+					args = { "format", "$FILENAME" },
+					stdin = false,
 				},
 			},
 		})
