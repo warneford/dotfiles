@@ -34,7 +34,7 @@ alias v='nvim'
 alias lg='lazygit'
 
 # Add any custom paths here
-# export PATH="$HOME/bin:$PATH"
+export PATH="/Applications/quarto/bin:$PATH"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
