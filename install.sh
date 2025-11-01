@@ -115,6 +115,10 @@ mkdir -p "$HOME/.config"
 ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 print_success "Linked nvim config"
 
+# Symlink tmux config
+ln -sf "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
+print_success "Linked tmux config"
+
 echo ""
 print_success "Installation complete!"
 echo ""
