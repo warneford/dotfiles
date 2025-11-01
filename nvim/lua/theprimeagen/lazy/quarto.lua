@@ -27,11 +27,15 @@ return {
 			})
 
 			-- Keybindings for Quarto
-			local quarto = require("quarto")
-			vim.keymap.set("n", "<localleader>qp", quarto.quartoPreview, { desc = "Quarto: Preview document" })
-			vim.keymap.set("n", "<localleader>qq", quarto.quartoClosePreview, { desc = "Quarto: Close preview" })
-			vim.keymap.set("n", "<localleader>qh", ":QuartoHelp ", { desc = "Quarto: Help" })
-			vim.keymap.set("n", "<localleader>qe", ":QuartoExport ", { desc = "Quarto: Export" })
+			vim.keymap.set("n", "<localleader>qp", function()
+				vim.cmd("!quarto preview " .. vim.fn.expand("%") .. " &")
+			end, { desc = "Quarto: Preview document" })
+			vim.keymap.set("n", "<localleader>qr", function()
+				vim.cmd("!quarto render " .. vim.fn.expand("%"))
+			end, { desc = "Quarto: Render document" })
+			vim.keymap.set("n", "<localleader>qq", function()
+				vim.cmd("!pkill -f 'quarto preview'")
+			end, { desc = "Quarto: Close preview" })
 		end,
 	},
 	{
