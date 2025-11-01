@@ -1,0 +1,12 @@
+# Neovim
+nvim/plugin/packer_compiled.lua
+nvim/.DS_Store
+
+# Zsh
+zsh/.zsh_history
+
+# macOS
+.DS_Store
+
+# Local customizations (optional - uncomment if you want to keep local changes private)
+# zsh/.zshrc.local
