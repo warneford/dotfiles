@@ -2,13 +2,9 @@
 -- Loaded after quarto.nvim and vim-slime are set up
 
 -- Global function for send_cell so it can be called from keybindings
+-- Uses vim-slime's send_cell which relies on b:slime_cell_delimiter
 _G.send_cell = function()
-	if vim.bo.filetype == "quarto" or vim.bo.filetype == "markdown" then
-		vim.cmd("QuartoSend")
-	else
-		-- Fallback to slime for other filetypes
-		vim.fn["slime#send_cell"]()
-	end
+	vim.fn["slime#send_cell"]()
 end
 
 return {
@@ -16,9 +12,14 @@ return {
 		"quarto-dev/quarto-nvim",
 		optional = true,
 		config = function()
-			-- Run code cell with <leader><CR> (space + enter) or Shift+Enter
+			-- Run code cell with <leader><CR> (space + enter) or Ctrl+Enter
 			vim.keymap.set("n", "<leader><CR>", _G.send_cell, { desc = "run code cell" })
-			vim.keymap.set("n", "<S-CR>", _G.send_cell, { desc = "run code cell" }) -- Shift+Enter
+			vim.keymap.set("n", "<C-CR>", _G.send_cell, { desc = "run code cell" }) -- Ctrl+Enter
+			vim.keymap.set("n", "<S-CR>", _G.send_cell, { desc = "run code cell" }) -- Shift+Enter (may not work in all terminals)
+			vim.keymap.set("i", "<C-CR>", function()
+				vim.cmd("stopinsert")
+				_G.send_cell()
+			end, { desc = "run code cell from insert mode" })
 			vim.keymap.set("i", "<S-CR>", function()
 				vim.cmd("stopinsert")
 				_G.send_cell()
