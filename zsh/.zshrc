@@ -39,5 +39,8 @@ if [ -d "/Applications/quarto/bin" ]; then
     export PATH="/Applications/quarto/bin:$PATH"
 fi
 
+# Add Python user bin to PATH
+export PATH="$HOME/Library/Python/3.9/bin:$PATH"
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

@@ -126,6 +126,11 @@ else
     print_success "Quarto CLI already installed"
 fi
 
+# Install Python packages for Molten
+print_info "Installing Python packages for Molten..."
+python3 -m pip install --user pynvim jupyter_client cairosvg pillow plotly kaleido pnglatex pyperclip nbformat
+print_success "Python packages installed"
+
 # Install R packages for nvim-r
 print_info "Installing R packages for nvim-r..."
 Rscript -e 'if (!require("languageserver")) install.packages("languageserver", repos="https://cloud.r-project.org")'
