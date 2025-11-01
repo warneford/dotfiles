@@ -42,6 +42,7 @@ DEPENDENCIES=(
     "r"             # R language
     "ripgrep"       # Required for Telescope fuzzy finder
     "neovim"        # Neovim editor
+    "air"           # R code formatter (Posit/tidyverse)
 )
 
 for dep in "${DEPENDENCIES[@]}"; do
