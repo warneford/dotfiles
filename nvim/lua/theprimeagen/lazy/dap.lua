@@ -39,6 +39,48 @@ return {
             local dap = require("dap")
             dap.set_log_level("DEBUG")
 
+            -- R debugger configuration
+            dap.adapters.r = {
+                type = "executable",
+                command = "R",
+                args = { "--slave", "-e", "vscDebugger::.vsc.listen()" },
+            }
+
+            dap.configurations.r = {
+                {
+                    type = "r",
+                    request = "launch",
+                    name = "Debug R file",
+                    debugMode = "file",
+                },
+                {
+                    type = "r",
+                    request = "attach",
+                    name = "Attach to R process",
+                    debugMode = "workspace",
+                },
+            }
+
+            -- Python debugger configuration
+            dap.adapters.python = {
+                type = "executable",
+                command = "python",
+                args = { "-m", "debugpy.adapter" },
+            }
+
+            dap.configurations.python = {
+                {
+                    type = "python",
+                    request = "launch",
+                    name = "Launch file",
+                    program = "${file}",
+                    pythonPath = function()
+                        return "/opt/homebrew/bin/python3"
+                    end,
+                },
+            }
+
+            -- Keybindings
             vim.keymap.set("n", "<F8>", dap.continue, { desc = "Debug: Continue" })
             vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Debug: Step Over" })
             vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Debug: Step Into" })
@@ -47,6 +89,7 @@ return {
             vim.keymap.set("n", "<leader>B", function()
                 dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
             end, { desc = "Debug: Set Conditional Breakpoint" })
+            vim.keymap.set("n", "<leader>dt", dap.terminate, { desc = "Debug: Terminate" })
         end
     },
 
