@@ -26,6 +26,34 @@ print_info() {
 # Get the directory where the script is located
 DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Check for Homebrew and install dependencies
+if ! command -v brew &> /dev/null; then
+    print_error "Homebrew not found. Please install Homebrew first:"
+    echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    exit 1
+fi
+
+print_info "Installing dependencies via Homebrew..."
+
+# Install required dependencies for LSP servers and nvim plugins
+DEPENDENCIES=(
+    "node"          # Required for pyright and ts_ls (JavaScript/TypeScript LSP)
+    "python"        # Python and pip
+    "r"             # R language
+    "ripgrep"       # Required for Telescope fuzzy finder
+    "neovim"        # Neovim editor
+)
+
+for dep in "${DEPENDENCIES[@]}"; do
+    if brew list "$dep" &> /dev/null; then
+        print_success "$dep already installed"
+    else
+        print_info "Installing $dep..."
+        brew install "$dep"
+        print_success "$dep installed"
+    fi
+done
+
 # Install oh-my-zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     print_info "Installing oh-my-zsh..."
