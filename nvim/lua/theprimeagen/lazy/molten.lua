@@ -1,33 +1,12 @@
 return {
+	-- Molten disabled in favor of vim-slime for simpler workflow
+	-- Can be re-enabled by setting enabled = true
 	{
 		"benlubas/molten-nvim",
-		version = "^1.0.0", -- use version <2.0.0 to avoid breaking changes
+		enabled = false,
+		version = "^1.0.0",
 		dependencies = { "3rd/image.nvim" },
 		build = ":UpdateRemotePlugins",
-		init = function()
-			-- Configuration options
-			vim.g.molten_image_provider = "image.nvim"
-			vim.g.molten_output_win_max_height = 20
-			vim.g.molten_auto_open_output = true
-			vim.g.molten_wrap_output = true
-			vim.g.molten_virt_text_output = true
-			vim.g.molten_virt_lines_off_by_1 = true
-		end,
-		config = function()
-			-- Keybindings for Molten
-			vim.keymap.set("n", "<localleader>mi", ":MoltenInit<CR>", { desc = "Molten: Initialize kernel", silent = true })
-			vim.keymap.set("n", "<localleader>me", ":MoltenEvaluateOperator<CR>", { desc = "Molten: Evaluate operator", silent = true })
-			vim.keymap.set("n", "<localleader>ml", ":MoltenEvaluateLine<CR>", { desc = "Molten: Evaluate line", silent = true })
-			vim.keymap.set("n", "<localleader>mr", ":MoltenReevaluateCell<CR>", { desc = "Molten: Re-evaluate cell", silent = true })
-			vim.keymap.set("v", "<localleader>mv", ":<C-u>MoltenEvaluateVisual<CR>gv", { desc = "Molten: Evaluate visual selection", silent = true })
-			vim.keymap.set("n", "<localleader>md", ":MoltenDelete<CR>", { desc = "Molten: Delete cell", silent = true })
-			vim.keymap.set("n", "<localleader>mo", ":MoltenShowOutput<CR>", { desc = "Molten: Show output", silent = true })
-			vim.keymap.set("n", "<localleader>mh", ":MoltenHideOutput<CR>", { desc = "Molten: Hide output", silent = true })
-
-			-- Quarto integration - run code cell
-			vim.keymap.set("n", "<localleader><CR>", ":MoltenEvaluateOperator<CR>", { desc = "Run code cell", silent = true })
-			vim.keymap.set("v", "<localleader><CR>", ":<C-u>MoltenEvaluateVisual<CR>gv", { desc = "Run visual selection", silent = true })
-		end,
 	},
 	{
 		"3rd/image.nvim",

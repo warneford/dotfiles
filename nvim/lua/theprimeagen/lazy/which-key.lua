@@ -1,0 +1,24 @@
+return {
+	"folke/which-key.nvim",
+	event = "VeryLazy",
+	config = function()
+		local wk = require("which-key")
+		wk.setup({
+			preset = "modern",
+			delay = 300,
+		})
+
+		-- Register group names so they show up in which-key
+		wk.add({
+			{ "<leader>c", group = "[c]ode / terminal" },
+			{ "<leader>f", group = "[f]ind (telescope)" },
+			{ "<leader>g", group = "[g]it" },
+			{ "<leader>h", group = "[h]arpoon" },
+			{ "<leader>o", group = "[o]tter / c[o]de chunk" },
+			{ "<leader>q", group = "[q]uarto" },
+			{ "<leader>qr", group = "[r]un" },
+			{ "<leader>r", group = "[r] R specific" },
+			{ "<leader>v", group = "[v]im" },
+		})
+	end,
+}
