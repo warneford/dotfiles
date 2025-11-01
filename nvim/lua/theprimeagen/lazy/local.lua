@@ -18,20 +18,20 @@ local local_plugins = {
 				harpoon.ui:toggle_quick_menu(harpoon:list())
 			end, { desc = "Harpoon: Toggle menu" })
 
-			-- Jump to files (Ctrl + QWERTY home row)
-			vim.keymap.set("n", "<C-j>", function()
+			-- Jump to files (leader + number)
+			vim.keymap.set("n", "<leader>1", function()
 				harpoon:list():select(1)
 			end, { desc = "Harpoon: File 1" })
 
-			vim.keymap.set("n", "<C-k>", function()
+			vim.keymap.set("n", "<leader>2", function()
 				harpoon:list():select(2)
 			end, { desc = "Harpoon: File 2" })
 
-			vim.keymap.set("n", "<C-l>", function()
+			vim.keymap.set("n", "<leader>3", function()
 				harpoon:list():select(3)
 			end, { desc = "Harpoon: File 3" })
 
-			vim.keymap.set("n", "<C-;>", function()
+			vim.keymap.set("n", "<leader>4", function()
 				harpoon:list():select(4)
 			end, { desc = "Harpoon: File 4" })
 
