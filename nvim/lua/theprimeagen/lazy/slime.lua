@@ -51,7 +51,7 @@ return {
 			local function new_terminal(lang)
 				vim.cmd("split term://" .. lang)
 				vim.cmd("wincmd J") -- Move window to bottom
-				vim.cmd("resize 15") -- Set height to 15 lines
+				vim.cmd("resize 10") -- Set height to 10 lines
 			end
 
 			vim.keymap.set("n", "<leader>cr", function()

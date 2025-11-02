@@ -77,8 +77,13 @@ vim.keymap.set("n", "<leader>ca", function()
     require("cellular-automaton").start_animation("make_it_rain")
 end)
 
+-- Reload current file if it's a vim config, otherwise reload init.lua
 vim.keymap.set("n", "<leader><leader>", function()
-    vim.cmd("so")
+    if vim.bo.filetype == "lua" and vim.fn.expand("%:p"):match("nvim") then
+        vim.cmd("so")
+    else
+        vim.cmd("source $MYVIMRC")
+    end
 end)
 
 -- Terminal mode: easier escape from terminal mode
