@@ -1,0 +1,101 @@
+# Ghostty Terminal Configuration
+# https://ghostty.org/docs
+
+# ============================================================================
+# Font Configuration
+# ============================================================================
+font-family = JetBrainsMono Nerd Font
+font-size = 14
+font-feature = -calt  # Disable ligatures (optional, remove if you like them)
+
+# ============================================================================
+# Theme: Rose Pine Moon
+# ============================================================================
+# Based on https://rosepinetheme.com/palette/ingredients/
+
+# Background and foreground
+background = 232136
+foreground = e0def4
+
+# Cursor
+cursor-color = eb6f92
+cursor-style = block
+cursor-style-blink = true
+
+# Selection
+selection-background = 2a273f
+selection-foreground = e0def4
+
+# Normal colors
+palette = 0=#393552
+palette = 1=#eb6f92
+palette = 2=#3e8fb0
+palette = 3=#f6c177
+palette = 4=#9ccfd8
+palette = 5=#c4a7e7
+palette = 6=#ea9a97
+palette = 7=#e0def4
+
+# Bright colors
+palette = 8=#6e6a86
+palette = 9=#eb6f92
+palette = 10=#3e8fb0
+palette = 11=#f6c177
+palette = 12=#9ccfd8
+palette = 13=#c4a7e7
+palette = 14=#ea9a97
+palette = 15=#e0def4
+
+# ============================================================================
+# Background Image
+# ============================================================================
+background-image = /Users/rwarne/horses_art_night_129683_1680x1050.jpg
+background-opacity = 0.8
+
+# ============================================================================
+# Window Configuration
+# ============================================================================
+window-padding-x = 8
+window-padding-y = 8
+window-padding-balance = true
+window-theme = dark
+
+# ============================================================================
+# Key Bindings for Quarto/R Workflow
+# ============================================================================
+# Shift+Enter for running code cells
+keybind = shift+enter=text:\x1b[13;2u
+
+# Ctrl+Enter for running code cells
+keybind = ctrl+enter=text:\x1b[13;5u
+
+# ============================================================================
+# Shell Integration
+# ============================================================================
+# Enable cursor positioning and visual feedback
+shell-integration = true
+shell-integration-features = cursor,sudo,title
+
+# ============================================================================
+# Alt/Option Key Configuration
+# ============================================================================
+# Use Option as Alt/Meta for R operators (Alt+-, Alt+m, Alt+i)
+macos-option-as-alt = true
+
+# ============================================================================
+# Clipboard
+# ============================================================================
+clipboard-read = allow
+clipboard-write = allow
+copy-on-select = true
+
+# ============================================================================
+# Mouse
+# ============================================================================
+mouse-hide-while-typing = true
+
+# ============================================================================
+# Performance
+# ============================================================================
+# Enable GPU acceleration
+unfocused-split-opacity = 0.9

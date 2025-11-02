@@ -24,7 +24,7 @@ _G.send_line = function()
 	vim.cmd("normal! j")
 end
 
--- View R object/dataframe in browser (like RStudio's View())
+-- View R object/dataframe (multiple options)
 _G.view_r_object = function()
 	-- Get the word under cursor (the variable name)
 	local var = vim.fn.expand("<cword>")
@@ -33,11 +33,29 @@ _G.view_r_object = function()
 		return
 	end
 
-	-- Send command to view in browser using DT::datatable or base View
-	-- For dataframes, use DT for interactive viewing
+	-- Display in console with nice formatting using tibble's print or head
 	local cmd = string.format(
-		'if (is.data.frame(%s)) { print(DT::datatable(%s)); browseURL(paste0("data:text/html,", htmltools::html_print(DT::datatable(%s)))) } else { print(%s) }',
+		'if (is.data.frame(%s)) { cat("\\n"); print(%s); cat("\\nDimensions:", nrow(%s), "rows x", ncol(%s), "columns\\n") } else { print(%s) }',
 		var,
+		var,
+		var,
+		var,
+		var
+	)
+	vim.fn["slime#send"](cmd .. "\r")
+end
+
+-- View R object in browser (for when you want the full interactive table)
+_G.view_r_object_browser = function()
+	local var = vim.fn.expand("<cword>")
+	if var == "" then
+		vim.notify("No variable under cursor", vim.log.levels.WARN)
+		return
+	end
+
+	-- Open in default browser with DT for interactive viewing
+	local cmd = string.format(
+		'if (is.data.frame(%s)) { DT::datatable(%s) } else { print(%s) }',
 		var,
 		var,
 		var
