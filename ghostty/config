@@ -9,47 +9,47 @@ font-size = 14
 font-feature = -calt  # Disable ligatures (optional, remove if you like them)
 
 # ============================================================================
-# Theme: Rose Pine Moon
+# Theme: Catppuccin Mocha
 # ============================================================================
-# Based on https://rosepinetheme.com/palette/ingredients/
+# Based on https://github.com/catppuccin/catppuccin
 
 # Background and foreground
-background = 232136
-foreground = e0def4
+background = 1e1e2e
+foreground = cdd6f4
 
 # Cursor
-cursor-color = eb6f92
+cursor-color = f5e0dc
 cursor-style = block
 cursor-style-blink = true
 
 # Selection
-selection-background = 2a273f
-selection-foreground = e0def4
+selection-background = 585b70
+selection-foreground = cdd6f4
 
 # Normal colors
-palette = 0=#393552
-palette = 1=#eb6f92
-palette = 2=#3e8fb0
-palette = 3=#f6c177
-palette = 4=#9ccfd8
-palette = 5=#c4a7e7
-palette = 6=#ea9a97
-palette = 7=#e0def4
+palette = 0=#45475a
+palette = 1=#f38ba8
+palette = 2=#a6e3a1
+palette = 3=#f9e2af
+palette = 4=#89b4fa
+palette = 5=#f5c2e7
+palette = 6=#94e2d5
+palette = 7=#bac2de
 
 # Bright colors
-palette = 8=#6e6a86
-palette = 9=#eb6f92
-palette = 10=#3e8fb0
-palette = 11=#f6c177
-palette = 12=#9ccfd8
-palette = 13=#c4a7e7
-palette = 14=#ea9a97
-palette = 15=#e0def4
+palette = 8=#585b70
+palette = 9=#f38ba8
+palette = 10=#a6e3a1
+palette = 11=#f9e2af
+palette = 12=#89b4fa
+palette = 13=#f5c2e7
+palette = 14=#94e2d5
+palette = 15=#a6adc8
 
 # ============================================================================
 # Background Image
 # ============================================================================
-background-image = /Users/rwarne/horses_art_night_129683_1680x1050.jpg
+background-image = /Users/rwarne/mountain_sunset_twilight.jpg
 background-opacity = 0.9
 
 # ============================================================================
