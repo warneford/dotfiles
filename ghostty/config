@@ -49,7 +49,7 @@ palette = 15=#a6adc8
 # ============================================================================
 # Background Image
 # ============================================================================
-background-image = /Users/rwarne/mountain_sunset_twilight.jpg
+background-image = /Users/rwarne/dotfiles/ghostty/backgrounds/mountain_sunset_twilight.jpg
 background-opacity = 0.9
 
 # ============================================================================
