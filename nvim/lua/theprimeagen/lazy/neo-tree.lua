@@ -20,6 +20,11 @@ return {
 					indent_marker = "│",
 					last_indent_marker = "└",
 					highlight = "NeoTreeIndentMarker",
+					-- Add expander icons (arrows)
+					with_expanders = true,
+					expander_collapsed = "",
+					expander_expanded = "",
+					expander_highlight = "NeoTreeExpander",
 				},
 				icon = {
 					folder_closed = "",
@@ -51,7 +56,7 @@ return {
 				mappings = {
 					["<space>"] = {
 						"toggle_node",
-						nowait = false,
+						nowait = true,  -- No delay when pressing space
 					},
 					["<2-LeftMouse>"] = "open",
 					["<cr>"] = "open",
