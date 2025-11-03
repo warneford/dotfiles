@@ -22,6 +22,9 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+# Load enhanced completion settings
+source ~/dotfiles/zsh/completion.zsh
+
 # User configuration
 
 # Export preferred editor

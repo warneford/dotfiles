@@ -197,6 +197,14 @@ Complete reference for your custom Neovim-based R development environment.
 
 ## Editing & Text Manipulation
 
+### Commenting
+| Keybinding | Mode | Description |
+|------------|------|-------------|
+| `gcc` | Normal | Toggle comment on current line |
+| `gc{motion}` | Normal | Toggle comment on motion (e.g., `gcap` for paragraph) |
+| `gc` | Visual | Toggle comment on selected lines |
+| `gbc` | Normal | Toggle block comment |
+
 ### Clipboard Operations
 | Keybinding | Mode | Description |
 |------------|------|-------------|
@@ -253,11 +261,30 @@ Complete reference for your custom Neovim-based R development environment.
 
 ---
 
+## Ghostty Terminal
+
+### Terminal Configuration
+| Keybinding | Mode | Description |
+|------------|------|-------------|
+| `<Cmd+,>` | Terminal | Open Ghostty config in nvim |
+
+### Custom Shaders
+The config includes 30+ custom shaders for visual effects. Edit shader in config and restart Ghostty to apply.
+
+**Categories:**
+- Subtle/Readable: bloom, cursor_blaze, starfield
+- Cool Effects: matrix, galaxy, fireworks, underwater
+- Retro/Vintage: crt, retro-terminal, dither
+- Experimental: glitchy, drunkard, negative
+
+---
+
 ## Configuration Files Location
 
 - **Neovim config**: `~/.config/nvim/` or `/Users/rwarne/dotfiles/nvim/`
 - **Tmux config**: `/Users/rwarne/dotfiles/tmux/.tmux.conf`
 - **Zsh config**: `/Users/rwarne/dotfiles/zsh/.zshrc`
+- **Ghostty config**: `/Users/rwarne/dotfiles/ghostty/config`
 
 ---
 
