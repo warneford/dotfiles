@@ -119,6 +119,31 @@ print_success "Linked nvim config"
 ln -sf "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 print_success "Linked tmux config"
 
+# Setup Ghostty config (only if Ghostty is installed)
+if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
+    print_info "Setting up Ghostty configuration..."
+
+    # Remove Application Support config if it exists (to avoid conflicts)
+    if [ -d "$HOME/Library/Application Support/com.mitchellh.ghostty" ]; then
+        rm -f "$HOME/Library/Application Support/com.mitchellh.ghostty/config"*
+        print_info "Removed Application Support config (using ~/.config/ghostty instead)"
+    fi
+
+    # Backup existing ghostty config if it exists and is not a symlink
+    if [ -e "$HOME/.config/ghostty" ] && [ ! -L "$HOME/.config/ghostty" ]; then
+        mv "$HOME/.config/ghostty" "$HOME/.config/ghostty.backup.$(date +%Y%m%d_%H%M%S)"
+        print_success "Backed up existing ghostty config"
+    fi
+
+    # Remove existing symlink if present, then create new one
+    rm -rf "$HOME/.config/ghostty"
+    ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
+    print_success "Linked Ghostty directory to ~/.config/ghostty"
+else
+    print_info "Ghostty not found - skipping Ghostty configuration"
+    print_info "Install with: brew install --cask ghostty"
+fi
+
 echo ""
 print_success "Installation complete!"
 echo ""
@@ -149,6 +174,9 @@ echo "  2. Run 'p10k configure' to configure your Powerlevel10k theme"
 echo "  3. Open nvim - lazy.nvim will auto-install and plugins will be loaded"
 echo "  4. In an R file, press ,rf to start R REPL"
 echo "  5. In a Quarto file (.qmd), press ,qp to preview"
+if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
+    echo "  6. Restart Ghostty to load the configuration"
+fi
 echo ""
 print_info "Included nvim plugins:"
 echo "  - Harpoon2 (file navigation)"
