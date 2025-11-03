@@ -54,10 +54,7 @@ return {
 					nowait = true,
 				},
 				mappings = {
-					["<space>"] = {
-						"toggle_node",
-						nowait = true,  -- No delay when pressing space
-					},
+					["<tab>"] = "toggle_node",
 					["<2-LeftMouse>"] = "open",
 					["<cr>"] = "open",
 					["<esc>"] = "cancel",
