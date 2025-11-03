@@ -20,11 +20,19 @@ return {
 					indent_marker = "│",
 					last_indent_marker = "└",
 					highlight = "NeoTreeIndentMarker",
-					-- Add expander icons (arrows)
 					with_expanders = true,
-					expander_collapsed = "",
-					expander_expanded = "",
+					expander_collapsed = "›",
+					expander_expanded = "▾",
 					expander_highlight = "NeoTreeExpander",
+				},
+				modified = {
+					symbol = "[+]",
+					highlight = "NeoTreeModified",
+				},
+				name = {
+					trailing_slash = false,
+					use_git_status_colors = true,
+					highlight = "NeoTreeFileName",
 				},
 				icon = {
 					folder_closed = "",
