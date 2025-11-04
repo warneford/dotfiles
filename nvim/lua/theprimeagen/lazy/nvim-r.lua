@@ -4,6 +4,7 @@ return {
 	config = function()
 		-- Create a table with the options to be passed to setup()
 		local opts = {
+			R_app = "/Library/Frameworks/R.framework/Resources/bin/R",
 			R_args = { "--quiet", "--no-save" },
 			min_editor_width = 72,
 			rconsole_width = 78,

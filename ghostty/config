@@ -23,9 +23,10 @@ cursor-style = block
 cursor-style-blink = true
 adjust-cursor-thickness = 30
 
-# Selection
-selection-background = 585b70
-selection-foreground = cdd6f4
+# Selection - High contrast for visibility with shaders
+selection-background = 94e2d5
+selection-foreground = 1e1e2e
+selection-invert-fg-bg = false
 
 # Normal colors
 palette = 0=#45475a
@@ -112,8 +113,11 @@ unfocused-split-opacity = 0.9
 
 # ===== RECOMMENDED (Subtle & Readable) =====
 
-# Simple Bloom (subtle glow on bright text) - ACTIVE (stacked with underwater)
+# Simple Bloom (subtle glow on bright text)
 custom-shader = shaders/bloom.glsl
+
+# Subtle Bloom (reduced intensity, better selection visibility)
+# custom-shader = shaders/bloom-subtle.glsl
 
 # Cursor Blaze (glowing yellow/orange trail when cursor moves)
 custom-shader = shaders/cursor_blaze.glsl
@@ -157,7 +161,7 @@ custom-shader = shaders/cursor_blaze.glsl
 # custom-shader = shaders/water.glsl
 
 # Underwater (underwater effect) - ACTIVE
-custom-shader = shaders/underwater.glsl
+# custom-shader = shaders/underwater.glsl
 
 # Lava (cinematic lava effect)
 # custom-shader = shaders/cineShader-Lava.glsl
@@ -206,7 +210,7 @@ custom-shader = shaders/underwater.glsl
 # custom-shader = shaders/sin-interference.glsl
 
 # Noise (noise effect)
-# custom-shader = shaders/mnoise.glsl
+custom-shader = shaders/mnoise.glsl
 
 # Negative (inverted colors)
 # custom-shader = shaders/negative.glsl

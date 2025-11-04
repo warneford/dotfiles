@@ -24,51 +24,49 @@ return {
 			endfunction
 			]])
 
-			vim.g.slime_target = "neovim"
+			vim.g.slime_target = "tmux"
 			vim.g.slime_no_mappings = true
 			vim.g.slime_python_ipython = 1
+			-- Default tmux target (current window, right pane)
+			vim.g.slime_default_config = {
+				socket_name = "default",
+				target_pane = "{right-of}",
+			}
 		end,
 		config = function()
 			vim.g.slime_input_pid = false
 			vim.g.slime_suggest_default = true
 			vim.g.slime_menu_config = false
-			vim.g.slime_neovim_ignore_unlisted = true
 
-			local function mark_terminal()
-				local job_id = vim.b.terminal_job_id
-				vim.print("job_id: " .. job_id)
-			end
-
-			local function set_terminal()
+			-- Configure slime target manually (no prompts)
+			local function set_slime_target_manual()
 				vim.fn.call("slime#config", {})
 			end
 
-			-- Keybindings
-			vim.keymap.set("n", "<leader>cm", mark_terminal, { desc = "[m]ark terminal" })
-			vim.keymap.set("n", "<leader>cs", set_terminal, { desc = "[s]et terminal" })
-
-			-- Helper functions to open new terminals (horizontal split below)
-			local function new_terminal(lang)
-				vim.cmd("split term://" .. lang)
-				vim.cmd("wincmd J") -- Move window to bottom
-				vim.cmd("resize 10") -- Set height to 10 lines
+			-- Auto-configure slime to right pane (.2)
+			local function auto_config_slime()
+				vim.b.slime_config = {
+					socket_name = "default",
+					target_pane = ":.2",
+				}
+				vim.notify("Slime configured to target pane :.2", vim.log.levels.INFO)
 			end
 
-			vim.keymap.set("n", "<leader>cr", function()
-				new_terminal("R --no-save")
-			end, { desc = "new [R] terminal" })
+			-- Send test message to verify connection
+			local function test_slime()
+				local config = vim.b.slime_config
+				if config then
+					vim.notify("Slime config: " .. vim.inspect(config), vim.log.levels.INFO)
+					vim.fn["slime#send"]("# Test from Neovim\n")
+				else
+					vim.notify("No slime config set. Press <leader>ca to auto-configure.", vim.log.levels.WARN)
+				end
+			end
 
-			vim.keymap.set("n", "<leader>cp", function()
-				new_terminal("ipython --no-confirm-exit")
-			end, { desc = "new [p]ython/ipython terminal" })
-
-			vim.keymap.set("n", "<leader>cj", function()
-				new_terminal("julia")
-			end, { desc = "new [j]ulia terminal" })
-
-			vim.keymap.set("n", "<leader>cn", function()
-				new_terminal(vim.env.SHELL or "zsh")
-			end, { desc = "[n]ew terminal" })
+			-- Keybindings
+			vim.keymap.set("n", "<leader>ca", auto_config_slime, { desc = "[a]uto-configure slime to right pane" })
+			vim.keymap.set("n", "<leader>cs", set_slime_target_manual, { desc = "[s]et slime target manually" })
+			vim.keymap.set("n", "<leader>ct", test_slime, { desc = "[t]est slime connection" })
 		end,
 	},
 }
