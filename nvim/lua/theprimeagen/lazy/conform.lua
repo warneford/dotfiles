@@ -25,6 +25,8 @@ return {
 					command = "air",
 					args = { "format", "$FILENAME" },
 					stdin = false,
+					-- Air modifies files in place, so we need to tell conform to read the file back
+					require_cwd = false,
 				},
 			},
 		})
