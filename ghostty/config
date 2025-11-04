@@ -21,6 +21,7 @@ foreground = cdd6f4
 cursor-color = f5e0dc
 cursor-style = block
 cursor-style-blink = true
+adjust-cursor-thickness = 30
 
 # Selection
 selection-background = 585b70
@@ -115,7 +116,7 @@ unfocused-split-opacity = 0.9
 custom-shader = shaders/bloom.glsl
 
 # Cursor Blaze (glowing yellow/orange trail when cursor moves)
-# custom-shader = shaders/cursor_blaze.glsl
+custom-shader = shaders/cursor_blaze.glsl
 
 # Starfield (subtle moving stars in background)
 # custom-shader = shaders/starfield.glsl
