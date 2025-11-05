@@ -31,11 +31,6 @@ source ~/dotfiles/zsh/completion.zsh
 export EDITOR='nvim'
 export VISUAL='nvim'
 
-# Aliases
-alias vim='nvim'
-alias v='nvim'
-alias lg='lazygit'
-
 # Add any custom paths here
 # Add Quarto to PATH if it exists (macOS cask install)
 if [ -d "/Applications/quarto/bin" ]; then
@@ -47,3 +42,6 @@ export PATH="$HOME/Library/Python/3.9/bin:$PATH"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Created by `pipx` on 2025-11-05 15:37:06
+export PATH="$PATH:/Users/rwarne/.local/bin"

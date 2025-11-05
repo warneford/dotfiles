@@ -4,6 +4,21 @@ set -e
 
 echo "🚀 Starting dotfiles installation..."
 
+# Detect OS and SSH session
+OS="$(uname -s)"
+IS_MAC=false
+IS_LINUX=false
+IS_SSH=false
+
+case "$OS" in
+    Darwin*) IS_MAC=true ;;
+    Linux*)  IS_LINUX=true ;;
+esac
+
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+    IS_SSH=true
+fi
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -26,34 +41,51 @@ print_info() {
 # Get the directory where the script is located
 DOTFILES_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Check for Homebrew and install dependencies
-if ! command -v brew &> /dev/null; then
-    print_error "Homebrew not found. Please install Homebrew first:"
-    echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-    exit 1
-fi
-
-print_info "Installing dependencies via Homebrew..."
-
-# Install required dependencies for LSP servers and nvim plugins
-DEPENDENCIES=(
-    "node"          # Required for pyright and ts_ls (JavaScript/TypeScript LSP)
-    "python"        # Python and pip
-    "r"             # R language
-    "ripgrep"       # Required for Telescope fuzzy finder
-    "neovim"        # Neovim editor
-    "air"           # R code formatter (Posit/tidyverse)
-)
-
-for dep in "${DEPENDENCIES[@]}"; do
-    if brew list "$dep" &> /dev/null; then
-        print_success "$dep already installed"
-    else
-        print_info "Installing $dep..."
-        brew install "$dep"
-        print_success "$dep installed"
+# macOS: Install dependencies via Homebrew
+if $IS_MAC; then
+    if ! command -v brew &> /dev/null; then
+        print_error "Homebrew not found. Please install Homebrew first:"
+        echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        exit 1
     fi
-done
+
+    print_info "Installing dependencies via Homebrew..."
+
+    # Install required dependencies for LSP servers and nvim plugins
+    DEPENDENCIES=(
+        "node"          # Required for pyright and ts_ls (JavaScript/TypeScript LSP)
+        "python"        # Python and pip
+        "ripgrep"       # Required for Telescope fuzzy finder
+        "neovim"        # Neovim editor
+        "air"           # R code formatter (Posit/tidyverse)
+    )
+    # Note: We use CRAN R (not Homebrew R) for better package compatibility
+    # Download from: https://cloud.r-project.org/bin/macosx/
+
+    for dep in "${DEPENDENCIES[@]}"; do
+        if brew list "$dep" &> /dev/null; then
+            print_success "$dep already installed"
+        else
+            print_info "Installing $dep..."
+            brew install "$dep"
+            print_success "$dep installed"
+        fi
+    done
+else
+    # Linux: Print manual installation instructions
+    print_info "Linux detected - please ensure these dependencies are installed:"
+    echo "  - node (for LSP servers)"
+    echo "  - python3"
+    echo "  - ripgrep"
+    echo "  - neovim (>= 0.9)"
+    echo ""
+    print_info "R installation options for Linux without root:"
+    echo "  1. Use system R if available: which R"
+    echo "  2. Compile from source to ~/.local/R (see CRAN docs)"
+    echo "  3. Use conda: conda install -c conda-forge r-base"
+    echo ""
+    print_info "Continuing with configuration setup..."
+fi
 
 # Install oh-my-zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -119,40 +151,56 @@ print_success "Linked nvim config"
 ln -sf "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 print_success "Linked tmux config"
 
-# Setup Ghostty config (only if Ghostty is installed)
-if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
-    print_info "Setting up Ghostty configuration..."
+# Setup Ghostty config (only on local machines, not SSH sessions)
+if ! $IS_SSH; then
+    if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
+        print_info "Setting up Ghostty configuration..."
 
-    # Remove Application Support config if it exists (to avoid conflicts)
-    if [ -d "$HOME/Library/Application Support/com.mitchellh.ghostty" ]; then
-        rm -f "$HOME/Library/Application Support/com.mitchellh.ghostty/config"*
-        print_info "Removed Application Support config (using ~/.config/ghostty instead)"
+        # Remove Application Support config if it exists (to avoid conflicts)
+        if [ -d "$HOME/Library/Application Support/com.mitchellh.ghostty" ]; then
+            rm -f "$HOME/Library/Application Support/com.mitchellh.ghostty/config"*
+            print_info "Removed Application Support config (using ~/.config/ghostty instead)"
+        fi
+
+        # Backup existing ghostty config if it exists and is not a symlink
+        if [ -e "$HOME/.config/ghostty" ] && [ ! -L "$HOME/.config/ghostty" ]; then
+            mv "$HOME/.config/ghostty" "$HOME/.config/ghostty.backup.$(date +%Y%m%d_%H%M%S)"
+            print_success "Backed up existing ghostty config"
+        fi
+
+        # Remove existing symlink if present, then create new one
+        rm -rf "$HOME/.config/ghostty"
+        ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
+        print_success "Linked Ghostty directory to ~/.config/ghostty"
+    else
+        print_info "Ghostty not found - skipping Ghostty configuration"
+        if $IS_MAC; then
+            print_info "Install with: brew install --cask ghostty"
+        fi
     fi
-
-    # Backup existing ghostty config if it exists and is not a symlink
-    if [ -e "$HOME/.config/ghostty" ] && [ ! -L "$HOME/.config/ghostty" ]; then
-        mv "$HOME/.config/ghostty" "$HOME/.config/ghostty.backup.$(date +%Y%m%d_%H%M%S)"
-        print_success "Backed up existing ghostty config"
-    fi
-
-    # Remove existing symlink if present, then create new one
-    rm -rf "$HOME/.config/ghostty"
-    ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
-    print_success "Linked Ghostty directory to ~/.config/ghostty"
 else
-    print_info "Ghostty not found - skipping Ghostty configuration"
-    print_info "Install with: brew install --cask ghostty"
+    print_info "SSH session detected - skipping Ghostty configuration (terminal emulator not needed)"
 fi
 
 echo ""
 print_success "Installation complete!"
 echo ""
-print_info "Installing Quarto CLI (requires password)..."
-if ! command -v quarto &> /dev/null; then
-    brew install --cask quarto
-    print_success "Quarto CLI installed"
+
+# Install Quarto (macOS only - Linux users should install manually)
+if $IS_MAC; then
+    print_info "Installing Quarto CLI..."
+    if ! command -v quarto &> /dev/null; then
+        brew install --cask quarto
+        print_success "Quarto CLI installed"
+    else
+        print_success "Quarto CLI already installed"
+    fi
 else
-    print_success "Quarto CLI already installed"
+    print_info "Quarto installation on Linux:"
+    echo "  1. Download from: https://quarto.org/docs/get-started/"
+    echo "  2. Extract to ~/.local/quarto"
+    echo "  3. Add to PATH: export PATH=\"\$HOME/.local/quarto/bin:\$PATH\""
+    echo ""
 fi
 
 # Install Python packages for Molten
@@ -160,10 +208,35 @@ print_info "Installing Python packages for Molten..."
 python3 -m pip install --user pynvim jupyter_client cairosvg pillow plotly kaleido pnglatex pyperclip nbformat
 print_success "Python packages installed"
 
-# Install R packages for nvim-r
-print_info "Installing R packages for nvim-r..."
-Rscript -e 'if (!require("languageserver")) install.packages("languageserver", repos="https://cloud.r-project.org")'
-print_success "R languageserver package installed"
+# Install R packages for nvim-r (if R is available)
+if command -v Rscript &> /dev/null; then
+    print_info "Installing R packages for nvim-r..."
+    Rscript -e 'if (!require("languageserver")) install.packages("languageserver", repos="https://cloud.r-project.org")'
+    print_success "R languageserver package installed"
+else
+    print_info "R not found - skipping R package installation"
+    print_info "After installing R, run: Rscript -e 'install.packages(\"languageserver\")'"
+fi
+
+# Install pipx (portable Python CLI tool installer - works on macOS and Linux)
+print_info "Installing pipx..."
+if ! command -v pipx &> /dev/null; then
+    python3 -m pip install --user pipx
+    python3 -m pipx ensurepath
+    export PATH="$PATH:$HOME/.local/bin"
+    print_success "pipx installed"
+else
+    print_success "pipx already installed"
+fi
+
+# Install radian (enhanced R console with RStudio-like features)
+print_info "Installing radian via pipx..."
+if pipx list 2>/dev/null | grep -q "radian"; then
+    print_success "radian already installed"
+else
+    pipx install radian
+    print_success "radian installed"
+fi
 
 echo ""
 print_success "Installation complete!"
@@ -172,9 +245,18 @@ print_info "Next steps:"
 echo "  1. Restart your terminal or run: source ~/.zshrc"
 echo "  2. Run 'p10k configure' to configure your Powerlevel10k theme"
 echo "  3. Open nvim - lazy.nvim will auto-install and plugins will be loaded"
-echo "  4. In an R file, press ,rf to start R REPL"
-echo "  5. In a Quarto file (.qmd), press ,qp to preview"
-if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
+if command -v radian &> /dev/null; then
+    echo "  4. Start tmux, open R file in nvim, run 'radian' in right pane"
+    echo "     Send code with <C-c><C-c> or <leader>ca to auto-configure vim-slime"
+else
+    echo "  4. Install R and radian, then restart this script for R packages"
+fi
+if command -v quarto &> /dev/null; then
+    echo "  5. In a Quarto file (.qmd), press ,qp to preview"
+else
+    echo "  5. Install Quarto (see instructions above) for .qmd file support"
+fi
+if ! $IS_SSH && (command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]); then
     echo "  6. Restart Ghostty to load the configuration"
 fi
 echo ""
