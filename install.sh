@@ -151,6 +151,10 @@ print_success "Linked nvim config"
 ln -sf "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 print_success "Linked tmux config"
 
+# Symlink aliases
+ln -sf "$DOTFILES_DIR/zsh/aliases.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/aliases.zsh"
+print_success "Linked aliases"
+
 # Setup Ghostty config (only on local machines, not SSH sessions)
 if ! $IS_SSH; then
     if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
