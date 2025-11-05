@@ -52,8 +52,8 @@ return {
 		vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle!<CR>", { desc = "[o]utline toggle" })
 		vim.keymap.set("n", "<leader>oo", "<cmd>AerialOpen<CR>", { desc = "[o]utline [o]pen" })
 		vim.keymap.set("n", "<leader>oc", "<cmd>AerialClose<CR>", { desc = "[o]utline [c]lose" })
-		vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { desc = "Previous symbol" })
-		vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { desc = "Next symbol" })
+		vim.keymap.set("n", "[s", "<cmd>AerialPrev<CR>", { desc = "Previous symbol" })
+		vim.keymap.set("n", "]s", "<cmd>AerialNext<CR>", { desc = "Next symbol" })
 		vim.keymap.set("n", "[[", "<cmd>AerialPrevUp<CR>", { desc = "Previous symbol (up level)" })
 		vim.keymap.set("n", "]]", "<cmd>AerialNextUp<CR>", { desc = "Next symbol (up level)" })
 	end,
