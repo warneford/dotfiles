@@ -26,9 +26,9 @@ cursor-style = block
 cursor-style-blink = true
 adjust-cursor-thickness = 30
 
-# Selection - High contrast for visibility with shaders
-selection-background = 94e2d5
-selection-foreground = 1e1e2e
+# Selection - Match tmux mode-style colors
+selection-background = 3a3a3a
+selection-foreground = fab387
 selection-invert-fg-bg = false
 
 # Normal colors

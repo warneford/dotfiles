@@ -44,7 +44,7 @@ return {
             ensure_installed = {
                 "lua_ls",        -- Lua (for Neovim config)
                 "pyright",       -- Python
-                -- "r_language_server",  -- R (installed globally via R package manager)
+                "r_language_server",  -- R (installed globally via R package manager)
                 "ts_ls",         -- JavaScript/TypeScript
             },
             handlers = {
