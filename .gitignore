@@ -10,3 +10,4 @@ zsh/.zsh_history
 
 # Local customizations (optional - uncomment if you want to keep local changes private)
 # zsh/.zshrc.local
+aerc/accounts.conf

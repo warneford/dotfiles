@@ -1,0 +1,9 @@
+# Copy this to accounts.conf and fill in your password
+# The actual accounts.conf is gitignored for security
+
+[Octant email]
+source        = imaps://robert%40octant.bio:YOUR_APP_PASSWORD_HERE@imap.gmail.com:993
+outgoing      = smtp://robert%40octant.bio:YOUR_APP_PASSWORD_HERE@smtp.google.com:587
+default       = INBOX
+from          = Robert Warneford-Thomson <robert@octant.bio>
+cache-headers = true
