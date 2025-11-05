@@ -66,6 +66,11 @@ return {
 
 			-- Keybindings
 			vim.keymap.set("n", "<leader>ca", auto_config_slime, { desc = "[a]uto-configure slime to right pane" })
+			vim.keymap.set("n", "<leader>cr", function()
+				-- Open tmux pane on the right and start R (remains open)
+				vim.fn.system("tmux split-window -h -p 40 radian")
+				auto_config_slime()
+			end, { desc = "open [r] console and configure slime" })
 			vim.keymap.set("n", "<leader>cs", set_slime_target_manual, { desc = "[s]et slime target manually" })
 			vim.keymap.set("n", "<leader>ct", test_slime, { desc = "[t]est slime connection" })
 		end,
