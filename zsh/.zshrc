@@ -27,6 +27,9 @@ source ~/dotfiles/zsh/completion.zsh
 
 # User configuration
 
+# XDG Base Directory Specification
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # Export preferred editor
 export EDITOR='nvim'
 export VISUAL='nvim'
