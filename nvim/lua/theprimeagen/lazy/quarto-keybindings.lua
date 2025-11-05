@@ -2,16 +2,56 @@
 -- Loaded after quarto.nvim and vim-slime are set up
 
 -- Global function for send_cell so it can be called from keybindings
--- Uses vim-slime's send_cell which relies on b:slime_cell_delimiter
--- After sending, moves cursor to the next code chunk
+-- Filters out comment lines before sending to REPL
+-- After sending, moves cursor to the first line of the next code chunk
+-- If not in a code chunk, just moves to the next chunk
 _G.send_cell = function()
-	vim.fn["slime#send_cell"]()
+	local current_line = vim.fn.line(".")
+
+	-- Find the start of the current code cell (search backwards for ```)
+	local start_line = vim.fn.search("^```{", "bnW")
+
+	-- If not inside a code chunk, just move to the next chunk
+	if start_line == 0 then
+		local next_chunk = vim.fn.search("^```{", "W")
+		if next_chunk > 0 then
+			vim.cmd("normal! j")
+		else
+			vim.notify("No more code chunks below", vim.log.levels.INFO)
+		end
+		return
+	end
+
+	-- Find the end of the current code cell (search forwards for ```)
+	local end_line = vim.fn.search("^```$", "nW")
+	if end_line == 0 then
+		vim.notify("Could not find end of code chunk", vim.log.levels.WARN)
+		return
+	end
+
+	-- Get all lines in the cell (excluding the ``` delimiters)
+	local lines = vim.api.nvim_buf_get_lines(0, start_line, end_line - 1, false)
+
+	-- Filter out comment lines (lines that start with # after whitespace)
+	local filtered_lines = {}
+	for _, line in ipairs(lines) do
+		-- Keep line if it's not purely a comment (allow inline comments)
+		if not line:match("^%s*#") then
+			table.insert(filtered_lines, line)
+		end
+	end
+
+	-- Send the filtered code to slime
+	if #filtered_lines > 0 then
+		local code = table.concat(filtered_lines, "\n")
+		vim.fn["slime#send"](code .. "\r")
+	end
 
 	-- Move to the next code chunk (search for next ```)
 	-- The 'W' flag means don't wrap around, 'c' means accept match at cursor
-	local next_chunk = vim.fn.search("^```", "W")
+	local next_chunk = vim.fn.search("^```{", "W")
 	if next_chunk > 0 then
-		-- Move one line down to get inside the chunk
+		-- Move one line down to get to the first line inside the chunk
 		vim.cmd("normal! j")
 	end
 end
