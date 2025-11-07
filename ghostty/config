@@ -190,7 +190,7 @@ custom-shader = shaders/cursor_blaze.glsl
 # custom-shader = shaders/bettercrt.glsl
 
 # In-Game CRT (gaming CRT style)
-custom-shader = shaders/in-game-crt.glsl
+# custom-shader = shaders/in-game-crt.glsl
 
 # Retro Terminal (vintage terminal)
 # custom-shader = shaders/retro-terminal.glsl
@@ -213,7 +213,7 @@ custom-shader = shaders/in-game-crt.glsl
 # custom-shader = shaders/sin-interference.glsl
 
 # Noise (noise effect)
-# custom-shader = shaders/mnoise.glsl
+custom-shader = shaders/mnoise.glsl
 
 # Negative (inverted colors)
 # custom-shader = shaders/negative.glsl
