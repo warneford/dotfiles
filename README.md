@@ -135,6 +135,12 @@ return {
 
 Edit `zsh/.zshrc` to add your own aliases, paths, or configurations.
 
+## Troubleshooting
+
+### Slow conda activate on Linux
+
+The install script automatically removes `R CMD javareconf` from the conda activation script to prevent hangs. If you installed before this fix, the command runs on every `conda activate r-base` and can be very slow. This has been fixed in the installation script - future environments will activate instantly.
+
 ## Updating
 
 To pull the latest changes:

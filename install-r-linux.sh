@@ -84,6 +84,14 @@ ${CONDA_CMD} create -n "${CONDA_ENV_NAME}" -c conda-forge --override-channels -y
     r-jsonlite \
     r-rlang
 
+# Remove slow Java reconfiguration from activation script
+ACTIVATION_SCRIPT="$HOME/.local/miniforge3/envs/${CONDA_ENV_NAME}/etc/conda/activate.d/activate-r-base.sh"
+if [ -f "$ACTIVATION_SCRIPT" ]; then
+    print_info "Removing slow 'R CMD javareconf' from activation script..."
+    sed -i.bak '/R CMD javareconf/d' "$ACTIVATION_SCRIPT"
+    print_success "Activation script optimized (conda activate will be instant)"
+fi
+
 print_success "R ${R_VERSION} installed via ${CONDA_CMD}"
 
 echo ""
