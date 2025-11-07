@@ -27,35 +27,64 @@ print_info() {
 R_VERSION="4.5.1"
 CONDA_ENV_NAME="r-base"
 
-# Check if conda is installed
-if ! command -v conda &> /dev/null; then
-    print_error "conda not found - please install miniconda or anaconda first"
-    echo ""
-    echo "To install miniconda:"
-    echo "  curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-    echo "  bash Miniconda3-latest-Linux-x86_64.sh"
-    echo ""
-    exit 1
+# Install miniforge (includes mamba) if conda/mamba not present
+if ! command -v mamba &> /dev/null && ! command -v conda &> /dev/null; then
+    print_info "conda/mamba not found - installing miniforge (conda + mamba)..."
+
+    MINIFORGE_INSTALLER="$HOME/tmp/Miniforge3-Linux-x86_64.sh"
+    mkdir -p "$HOME/tmp"
+
+    # Download miniforge installer (includes mamba and uses conda-forge by default)
+    curl -L https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o "$MINIFORGE_INSTALLER"
+
+    # Install miniforge to ~/.local/miniforge3
+    bash "$MINIFORGE_INSTALLER" -b -p "$HOME/.local/miniforge3"
+
+    # Initialize conda/mamba
+    "$HOME/.local/miniforge3/bin/conda" init zsh bash
+    "$HOME/.local/miniforge3/bin/mamba" init zsh bash
+
+    # Add to current PATH
+    export PATH="$HOME/.local/miniforge3/bin:$PATH"
+
+    # Cleanup installer
+    rm -f "$MINIFORGE_INSTALLER"
+
+    print_success "miniforge installed to ~/.local/miniforge3"
+    print_info "Mamba and conda have been initialized. You may need to restart your shell."
+else
+    if command -v mamba &> /dev/null; then
+        print_success "mamba found ($(mamba --version | head -1))"
+        CONDA_CMD="mamba"
+    else
+        print_success "conda found ($(conda --version))"
+        CONDA_CMD="conda"
+    fi
 fi
 
-print_success "conda found ($(conda --version))"
+# Use mamba if available, otherwise conda
+if command -v mamba &> /dev/null; then
+    CONDA_CMD="mamba"
+else
+    CONDA_CMD="conda"
+fi
 
 # Check if R environment already exists
-if conda env list | grep -q "^${CONDA_ENV_NAME} "; then
-    print_success "R conda environment already exists"
-    print_info "To reinstall, run: conda env remove -n ${CONDA_ENV_NAME}"
+if ${CONDA_CMD} env list | grep -q "^${CONDA_ENV_NAME} "; then
+    print_success "R ${CONDA_CMD} environment already exists"
+    print_info "To reinstall, run: ${CONDA_CMD} env remove -n ${CONDA_ENV_NAME}"
     exit 0
 fi
 
-# Create conda environment with R
-print_info "Creating conda environment '${CONDA_ENV_NAME}' with R ${R_VERSION}..."
-conda create -n "${CONDA_ENV_NAME}" -c conda-forge -y \
+# Create environment with R using mamba (faster) or conda
+print_info "Creating ${CONDA_CMD} environment '${CONDA_ENV_NAME}' with R ${R_VERSION}..."
+${CONDA_CMD} create -n "${CONDA_ENV_NAME}" -c conda-forge -y \
     r-base=${R_VERSION} \
     r-languageserver \
     r-jsonlite \
     r-rlang
 
-print_success "R ${R_VERSION} installed via conda"
+print_success "R ${R_VERSION} installed via ${CONDA_CMD}"
 
 echo ""
 print_success "Installation complete!"
