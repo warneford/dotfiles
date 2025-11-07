@@ -189,20 +189,41 @@ else
         fi
     fi
 
-    # Install tmux-256color terminfo for true color support
-    if [ ! -f "$HOME/.terminfo/t/tmux-256color" ]; then
-        print_info "Installing tmux-256color terminfo..."
-        mkdir -p "$HOME/.terminfo"
+    # Install terminfo files for tmux (conda tmux looks in its own share directory)
+    CONDA_TERMINFO="$HOME/.local/miniforge3/envs/r-base/share/terminfo"
+    if [ ! -f "$CONDA_TERMINFO/74/tmux-256color" ]; then
+        print_info "Installing tmux-256color terminfo for conda tmux..."
+        mkdir -p "$CONDA_TERMINFO"
         # Create minimal tmux-256color terminfo with true color support
+        cat > /tmp/tmux-256color.ti << 'EOF'
+tmux-256color|tmux with 256 colors,
+	use=screen-256color, Tc,
+EOF
+        tic -x -o "$CONDA_TERMINFO" /tmp/tmux-256color.ti
+        rm /tmp/tmux-256color.ti
+        print_success "tmux-256color terminfo installed"
+    else
+        print_success "tmux-256color terminfo already installed"
+    fi
+
+    # Also install to ~/.terminfo as fallback for other tools
+    if [ ! -f "$HOME/.terminfo/t/tmux-256color" ]; then
+        mkdir -p "$HOME/.terminfo"
         cat > /tmp/tmux-256color.ti << 'EOF'
 tmux-256color|tmux with 256 colors,
 	use=screen-256color, Tc,
 EOF
         tic -x -o "$HOME/.terminfo" /tmp/tmux-256color.ti
         rm /tmp/tmux-256color.ti
-        print_success "tmux-256color terminfo installed"
-    else
-        print_success "tmux-256color terminfo already installed"
+    fi
+
+    # Copy xterm-ghostty terminfo to conda if it exists in ~/.terminfo
+    # This is needed when SSH'ing from Ghostty terminal
+    if [ -f "$HOME/.terminfo/x/xterm-ghostty" ] && [ ! -f "$CONDA_TERMINFO/78/xterm-ghostty" ]; then
+        print_info "Copying xterm-ghostty terminfo for conda tmux..."
+        mkdir -p "$CONDA_TERMINFO/78"
+        cp "$HOME/.terminfo/x/xterm-ghostty" "$CONDA_TERMINFO/78/"
+        print_success "xterm-ghostty terminfo copied"
     fi
 
     print_info "Continuing with configuration setup..."
