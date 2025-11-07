@@ -72,24 +72,52 @@ if $IS_MAC; then
         fi
     done
 else
-    # Linux: Install bob-nvim (neovim version manager) and other dependencies
-    print_info "Linux detected - setting up dependencies..."
+    # Linux: Install all dependencies without root access (batteries included!)
+    print_info "Linux detected - setting up dependencies (no root required)..."
 
-    # Check for required system dependencies
-    print_info "Please ensure these dependencies are available:"
-    echo "  - node (for LSP servers)"
-    echo "  - python3"
-    echo "  - ripgrep"
-    echo ""
-
-    # Install Rust (required for bob-nvim) if not already installed
+    # Install Rust (required for bob-nvim and ripgrep) if not already installed
     if ! command -v cargo &> /dev/null; then
-        print_info "Installing Rust (required for bob-nvim)..."
+        print_info "Installing Rust..."
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         source "$HOME/.cargo/env"
         print_success "Rust installed"
     else
         print_success "Rust already installed"
+    fi
+
+    # Source cargo env to ensure cargo is available
+    export PATH="$HOME/.cargo/bin:$PATH"
+
+    # Install ripgrep via cargo (no root needed)
+    if ! command -v rg &> /dev/null; then
+        print_info "Installing ripgrep..."
+        cargo install ripgrep
+        print_success "ripgrep installed"
+    else
+        print_success "ripgrep already installed"
+    fi
+
+    # Install nvm (Node Version Manager) if not already installed
+    if [ ! -d "$HOME/.nvm" ]; then
+        print_info "Installing nvm (Node Version Manager)..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        print_success "nvm installed"
+    else
+        print_success "nvm already installed"
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    fi
+
+    # Install Node.js LTS via nvm (includes npm)
+    if ! command -v node &> /dev/null; then
+        print_info "Installing Node.js LTS via nvm..."
+        nvm install --lts
+        nvm use --lts
+        print_success "Node.js and npm installed"
+    else
+        print_success "Node.js already installed ($(node --version))"
     fi
 
     # Install bob-nvim (neovim version manager)
@@ -110,6 +138,13 @@ else
         print_success "bob-nvim already installed"
         # Ensure we're using stable
         bob use stable 2>/dev/null || true
+    fi
+
+    # Check for Python3
+    if command -v python3 &> /dev/null; then
+        print_success "Python3 found ($(python3 --version))"
+    else
+        print_info "Python3 not found - please install manually or use your package manager"
     fi
 
     print_info "R installation options for Linux without root:"

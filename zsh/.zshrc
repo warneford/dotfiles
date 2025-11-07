@@ -51,6 +51,11 @@ export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 # Add Rust/Cargo to PATH
 export PATH="$HOME/.cargo/bin:$PATH"
 
+# Load nvm (Node Version Manager)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 # Add Python user bin to PATH
 export PATH="$HOME/Library/Python/3.9/bin:$PATH"
 

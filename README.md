@@ -39,9 +39,17 @@ Based on [ThePrimeagen's init.lua](https://github.com/ThePrimeagen/init.lua) con
 - Zsh
 - A [Nerd Font](https://www.nerdfonts.com/) (for Powerlevel10k icons)
 
-**Note:** Neovim will be installed automatically:
-- **macOS**: Installed via Homebrew
-- **Linux**: Installed via bob-nvim (neovim version manager) - no root required
+**Everything else is installed automatically - no root access required!**
+
+The install script will automatically install:
+- **macOS**: Dependencies via Homebrew (node, python, ripgrep, neovim)
+- **Linux** (no root needed):
+  - Rust (for building tools)
+  - ripgrep (via cargo)
+  - nvm + Node.js LTS (for LSP servers)
+  - bob-nvim + neovim stable
+  - Quarto CLI (latest version)
+  - Python packages for plugins
 
 ### Installation
 
@@ -73,17 +81,25 @@ nvim
 
 ## What the Install Script Does
 
-1. **macOS**: Installs dependencies via Homebrew (node, python, ripgrep, neovim)
-2. **Linux**: Installs Rust, bob-nvim, and neovim stable (no root required)
-3. Installs oh-my-zsh (if not present)
-4. Installs Powerlevel10k theme
-5. Installs zsh plugins (autosuggestions, syntax-highlighting)
-6. Backs up existing `.zshrc` and nvim config
-7. Creates symlinks from `~/.zshrc` → `~/dotfiles/zsh/.zshrc`
-8. Creates symlinks from `~/.config/nvim` → `~/dotfiles/nvim`
-9. Installs Python packages for image.nvim
-10. Installs pipx and radian (enhanced R console)
-11. Installs R languageserver package (if R is available)
+### macOS (via Homebrew)
+1. Installs dependencies: node, python, ripgrep, neovim, quarto
+
+### Linux (no root required!)
+1. Installs Rust toolchain
+2. Installs ripgrep (via cargo)
+3. Installs nvm (Node Version Manager)
+4. Installs Node.js LTS (includes npm)
+5. Installs bob-nvim (neovim version manager)
+6. Installs neovim stable (via bob)
+7. Installs Quarto CLI (auto-fetches latest version)
+
+### Both Platforms
+1. Installs oh-my-zsh, Powerlevel10k theme, zsh plugins
+2. Backs up existing configs (`.zshrc`, nvim)
+3. Creates symlinks for all dotfiles
+4. Installs Python packages (pynvim, cairosvg, pillow)
+5. Installs pipx and radian (enhanced R console)
+6. Installs R languageserver package (if R is available)
 
 ## Key Bindings (Neovim)
 
