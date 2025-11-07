@@ -48,6 +48,19 @@ R_VERSION="4.5.1"
 R_INSTALL_DIR="$HOME/.local/R/${R_VERSION}"
 R_CURRENT_LINK="$HOME/.local/R/current"
 
+# Check if already installed
+if [ -d "$R_INSTALL_DIR/bin" ]; then
+    print_success "R ${R_VERSION} already installed at ${R_INSTALL_DIR}"
+    rm -f "$R_CURRENT_LINK"
+    ln -sf "$R_INSTALL_DIR" "$R_CURRENT_LINK"
+    print_success "Updated symlink at ${R_CURRENT_LINK}"
+    echo ""
+    echo "R is ready to use!"
+    echo "Run: source ~/.zshrc"
+    echo "Then: R --version"
+    exit 0
+fi
+
 # Download pre-compiled R from Posit Public Package Manager
 print_info "Downloading R ${R_VERSION} binary from Posit..."
 
@@ -78,7 +91,8 @@ case $DISTRO in
         ar x R.deb
         tar -xzf data.tar.gz
 
-        # Move to installation directory
+        # Move to installation directory (remove if exists)
+        rm -rf "$R_INSTALL_DIR"
         mv "$HOME/tmp/opt/R/${R_VERSION}" "$R_INSTALL_DIR"
 
         # Cleanup
@@ -95,7 +109,8 @@ case $DISTRO in
         cd "$HOME/tmp"
         rpm2cpio R.rpm | cpio -idmv
 
-        # Move to installation directory
+        # Move to installation directory (remove if exists)
+        rm -rf "$R_INSTALL_DIR"
         mv "$HOME/tmp/opt/R/${R_VERSION}" "$R_INSTALL_DIR"
 
         # Cleanup

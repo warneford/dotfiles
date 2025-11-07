@@ -54,6 +54,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Add R to PATH (if installed via install-r-linux.sh)
 if [ -d "$HOME/.local/R/current/bin" ]; then
     export PATH="$HOME/.local/R/current/bin:$PATH"
+    export R_HOME="$HOME/.local/R/current/lib/R"
 fi
 
 # Load nvm (Node Version Manager) - check both common locations
