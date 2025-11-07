@@ -51,8 +51,12 @@ export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 # Add Rust/Cargo to PATH
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# Load nvm (Node Version Manager)
-export NVM_DIR="$HOME/.nvm"
+# Load nvm (Node Version Manager) - check both common locations
+if [ -d "$HOME/.config/nvm" ]; then
+    export NVM_DIR="$HOME/.config/nvm"
+elif [ -d "$HOME/.nvm" ]; then
+    export NVM_DIR="$HOME/.nvm"
+fi
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 

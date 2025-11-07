@@ -98,17 +98,22 @@ else
     fi
 
     # Install nvm (Node Version Manager) if not already installed
-    if [ ! -d "$HOME/.nvm" ]; then
+    # Check both common nvm installation locations
+    if [ ! -d "$HOME/.nvm" ] && [ ! -d "$HOME/.config/nvm" ]; then
         print_info "Installing nvm (Node Version Manager)..."
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
         print_success "nvm installed"
     else
         print_success "nvm already installed"
-        export NVM_DIR="$HOME/.nvm"
-        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     fi
+
+    # Load nvm from whichever location it's installed
+    if [ -d "$HOME/.config/nvm" ]; then
+        export NVM_DIR="$HOME/.config/nvm"
+    else
+        export NVM_DIR="$HOME/.nvm"
+    fi
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
     # Install Node.js LTS via nvm (includes npm)
     if ! command -v node &> /dev/null; then
