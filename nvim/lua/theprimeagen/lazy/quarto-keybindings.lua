@@ -127,20 +127,17 @@ _G.load_quarto_params = function()
 		return
 	end
 
-	-- Use knitr::knit_params() to extract params from YAML header
-	-- Then extract the values into a params list (like RStudio does)
+	-- Use rmarkdown::yaml_front_matter() to extract params from YAML header
+	-- This works better for Quarto files than knitr::knit_params()
 	local cmd = string.format(
 		[[
-params_list <- tryCatch({
-  p <- knitr::knit_params('%s')
-  if (length(p) > 0) {
-    # Extract values from param objects
-    params <- lapply(p, function(x) x$value)
-    names(params) <- sapply(p, function(x) x$name)
+params <- tryCatch({
+  yaml <- rmarkdown::yaml_front_matter('%s')
+  if (!is.null(yaml$params) && length(yaml$params) > 0) {
     cat("\nLoaded params:\n")
-    str(params)
+    str(yaml$params)
     cat("\n")
-    params
+    yaml$params
   } else {
     cat("No params defined in YAML header\n")
     list()
@@ -149,8 +146,6 @@ params_list <- tryCatch({
   cat("Error reading params:", e$message, "\n")
   list()
 })
-params <- params_list
-rm(params_list)
 ]],
 		current_file:gsub("\\", "\\\\"):gsub("'", "\\'")
 	)
