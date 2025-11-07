@@ -42,12 +42,13 @@ Based on [ThePrimeagen's init.lua](https://github.com/ThePrimeagen/init.lua) con
 **Everything else is installed automatically - no root access required!**
 
 The install script will automatically install:
-- **macOS**: Dependencies via Homebrew (node, python, ripgrep, neovim)
+- **macOS**: Dependencies via Homebrew (node, python, ripgrep, neovim, lazygit)
 - **Linux** (no root needed):
   - Rust (for building tools)
   - ripgrep (via cargo)
   - nvm + Node.js LTS (for LSP servers)
   - bob-nvim + neovim stable
+  - lazygit (Git TUI)
   - Quarto CLI (latest version)
   - Python packages for plugins
 

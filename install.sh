@@ -58,6 +58,7 @@ if $IS_MAC; then
         "ripgrep"       # Required for Telescope fuzzy finder
         "neovim"        # Neovim editor
         "air"           # R code formatter (Posit/tidyverse)
+        "lazygit"       # Git TUI for nvim
     )
     # Note: We use CRAN R (not Homebrew R) for better package compatibility
     # Download from: https://cloud.r-project.org/bin/macosx/
@@ -150,6 +151,19 @@ else
         print_success "Python3 found ($(python3 --version))"
     else
         print_info "Python3 not found - please install manually or use your package manager"
+    fi
+
+    # Install lazygit (Git TUI)
+    if ! command -v lazygit &> /dev/null; then
+        print_info "Installing lazygit..."
+        LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+        curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+        tar xf /tmp/lazygit.tar.gz -C /tmp lazygit
+        install /tmp/lazygit "$HOME/.local/bin"
+        rm /tmp/lazygit.tar.gz /tmp/lazygit
+        print_success "lazygit installed"
+    else
+        print_success "lazygit already installed ($(lazygit --version | head -1))"
     fi
 
     # Install R if not already present
