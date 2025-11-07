@@ -224,6 +224,39 @@ return {
 			vim.keymap.set("n", "<leader>re", _G.show_r_env, { desc = "show [e]nvironment" })
 			vim.keymap.set("n", "<leader>rp", _G.load_quarto_params, { desc = "load [p]arams from YAML" })
 
+			-- Quarto rendering
+			vim.keymap.set("n", "<leader>qp", function()
+				local current_file = vim.fn.expand("%:p")
+				if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
+					vim.notify("Rendering and previewing Quarto document...", vim.log.levels.INFO)
+					-- Run quarto preview in background (opens browser automatically)
+					vim.fn.jobstart({ "quarto", "preview", current_file }, {
+						detach = true,
+						on_stdout = function(_, data)
+							if data then
+								for _, line in ipairs(data) do
+									if line:match("Browse at") then
+										vim.notify("Preview: " .. line, vim.log.levels.INFO)
+									end
+								end
+							end
+						end,
+					})
+				else
+					vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
+				end
+			end, { desc = "[q]uarto [p]review in browser" })
+
+			vim.keymap.set("n", "<leader>qr", function()
+				local current_file = vim.fn.expand("%:p")
+				if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
+					vim.notify("Rendering Quarto document...", vim.log.levels.INFO)
+					vim.cmd("!" .. "quarto render " .. vim.fn.shellescape(current_file))
+				else
+					vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
+				end
+			end, { desc = "[q]uarto [r]ender (no preview)" })
+
 			-- Otter keybindings
 			vim.keymap.set("n", "<leader>oa", function()
 				require("otter").activate()
