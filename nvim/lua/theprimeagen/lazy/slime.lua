@@ -70,6 +70,16 @@ return {
 				-- Open tmux pane on the right and start R (remains open)
 				vim.fn.system("tmux split-window -h -p 40 radian")
 				auto_config_slime()
+
+				-- Wait a moment for R to start, then load params if in a .qmd/.Rmd file
+				vim.defer_fn(function()
+					local current_file = vim.fn.expand("%:p")
+					if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
+						if _G.load_quarto_params then
+							_G.load_quarto_params()
+						end
+					end
+				end, 1500) -- Wait 1.5 seconds for R to start
 			end, { desc = "open [r] console and configure slime" })
 			vim.keymap.set("n", "<leader>cs", set_slime_target_manual, { desc = "[s]et slime target manually" })
 			vim.keymap.set("n", "<leader>ct", test_slime, { desc = "[t]est slime connection" })

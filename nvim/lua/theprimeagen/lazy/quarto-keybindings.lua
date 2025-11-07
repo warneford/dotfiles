@@ -117,6 +117,27 @@ if (length(ls()) == 0) {
 	vim.fn["slime#send"](cmd .. "\r")
 end
 
+-- Load YAML params into R environment (like RStudio does)
+_G.load_quarto_params = function()
+	local current_file = vim.fn.expand("%:p")
+
+	-- Check if current file is a .qmd or .Rmd file
+	if not (current_file:match("%.qmd$") or current_file:match("%.Rmd$")) then
+		vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
+		return
+	end
+
+	-- Use knitr::knit_params() to extract params from YAML header
+	-- This replicates RStudio's behavior
+	local cmd = string.format(
+		[[params <- tryCatch(knitr::knit_params('%s'), error = function(e) { cat("No params found or error reading YAML\n"); list() }); if (length(params) > 0) { cat("\nLoaded params:\n"); print(str(params)); cat("\n") } else { cat("No params defined in YAML header\n") }]],
+		current_file:gsub("\\", "\\\\"):gsub("'", "\\'")
+	)
+
+	vim.fn["slime#send"](cmd .. "\r")
+	vim.notify("Params loaded from YAML", vim.log.levels.INFO)
+end
+
 return {
 	{
 		"quarto-dev/quarto-nvim",
@@ -185,6 +206,7 @@ return {
 			-- R object/variable viewing
 			vim.keymap.set("n", "<leader>rv", _G.view_r_object, { desc = "[v]iew object/dataframe" })
 			vim.keymap.set("n", "<leader>re", _G.show_r_env, { desc = "show [e]nvironment" })
+			vim.keymap.set("n", "<leader>rp", _G.load_quarto_params, { desc = "load [p]arams from YAML" })
 
 			-- Otter keybindings
 			vim.keymap.set("n", "<leader>oa", function()
