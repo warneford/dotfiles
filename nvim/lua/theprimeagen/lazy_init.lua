@@ -22,5 +22,9 @@ require("lazy").setup({
         -- Load all other plugins from theprimeagen.lazy directory
         { import = "theprimeagen.lazy" },
     },
-    change_detection = { notify = false }
+    change_detection = { notify = false },
+    -- Disable lazy.nvim's built-in rocks support to avoid conflicts with luarocks.nvim
+    rocks = {
+        enabled = false,
+    },
 })
