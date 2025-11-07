@@ -78,7 +78,7 @@ fi
 
 # Create environment with R using mamba (faster) or conda
 print_info "Creating ${CONDA_CMD} environment '${CONDA_ENV_NAME}' with R ${R_VERSION}..."
-${CONDA_CMD} create -n "${CONDA_ENV_NAME}" -c conda-forge -y \
+${CONDA_CMD} create -n "${CONDA_ENV_NAME}" -c conda-forge --override-channels -y \
     r-base=${R_VERSION} \
     r-languageserver \
     r-jsonlite \
