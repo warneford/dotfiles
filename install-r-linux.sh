@@ -48,51 +48,58 @@ R_VERSION="4.5.1"
 R_INSTALL_DIR="$HOME/.local/R/${R_VERSION}"
 R_CURRENT_LINK="$HOME/.local/R/current"
 
-# Download pre-compiled R based on distribution
+# Download pre-compiled R from Posit Public Package Manager
+print_info "Downloading R ${R_VERSION} binary from Posit..."
+
+mkdir -p "$HOME/tmp" "$HOME/.local/R"
+
 case $DISTRO in
     ubuntu|debian)
-        print_info "Downloading R ${R_VERSION} for Ubuntu/Debian..."
-        # Use rig (R installation manager) for easy binary install
-        if ! command -v rig &> /dev/null; then
-            print_info "Installing rig (R installation manager)..."
-            curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-latest.tar.gz | \
-                tar xz -C /tmp
-            mkdir -p "$HOME/.local/bin"
-            mv /tmp/rig "$HOME/.local/bin/"
-            export PATH="$HOME/.local/bin:$PATH"
-            print_success "rig installed"
+        # Determine Ubuntu version for correct binary
+        UBUNTU_VERSION=$(echo $VERSION_ID | sed 's/\..*//')
+
+        if [ "$UBUNTU_VERSION" = "22" ] || [ "$UBUNTU_VERSION" = "24" ]; then
+            BINARY_BASE="ubuntu-${UBUNTU_VERSION}04"
+        elif [ "$UBUNTU_VERSION" = "20" ]; then
+            BINARY_BASE="ubuntu-2004"
+        else
+            print_error "Unsupported Ubuntu version: $VERSION_ID"
+            print_info "Try using conda: conda install -c conda-forge r-base"
+            exit 1
         fi
 
-        print_info "Installing R ${R_VERSION} via rig..."
-        rig add ${R_VERSION} --without-pak
+        DOWNLOAD_URL="https://cdn.posit.co/r/${BINARY_BASE}/pkgs/r-${R_VERSION}_1_amd64.deb"
+        print_info "Downloading from: ${DOWNLOAD_URL}"
 
-        # rig installs to ~/.local/share/rig, create our symlink structure
-        mkdir -p "$HOME/.local/R"
-        ln -sf "$HOME/.local/share/rig/${R_VERSION}" "$R_INSTALL_DIR"
-        rm -f "$R_CURRENT_LINK"
-        ln -sf "$R_INSTALL_DIR" "$R_CURRENT_LINK"
+        curl -L "${DOWNLOAD_URL}" -o "$HOME/tmp/R.deb"
+
+        # Extract DEB without installing
+        cd "$HOME/tmp"
+        ar x R.deb
+        tar -xzf data.tar.gz
+
+        # Move to installation directory
+        mv "$HOME/tmp/opt/R/${R_VERSION}" "$R_INSTALL_DIR"
+
+        # Cleanup
+        rm -rf "$HOME/tmp/R.deb" "$HOME/tmp/control.tar.gz" "$HOME/tmp/data.tar.gz" "$HOME/tmp/debian-binary" "$HOME/tmp/opt"
         ;;
 
     centos|rhel|fedora)
-        print_info "Downloading R ${R_VERSION} tarball..."
-        mkdir -p "$HOME/tmp" "$HOME/.local/R"
+        print_info "Downloading R ${R_VERSION} for RHEL/CentOS..."
 
-        # Download generic Linux binary
-        curl -L "https://cdn.posit.co/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm" -o "$HOME/tmp/R.rpm"
+        DOWNLOAD_URL="https://cdn.posit.co/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm"
+        curl -L "${DOWNLOAD_URL}" -o "$HOME/tmp/R.rpm"
 
         # Extract RPM without installing
         cd "$HOME/tmp"
         rpm2cpio R.rpm | cpio -idmv
 
         # Move to installation directory
-        mv "$HOME/tmp/usr/lib64/R" "$R_INSTALL_DIR"
-
-        # Create symlink
-        rm -f "$R_CURRENT_LINK"
-        ln -sf "$R_INSTALL_DIR" "$R_CURRENT_LINK"
+        mv "$HOME/tmp/opt/R/${R_VERSION}" "$R_INSTALL_DIR"
 
         # Cleanup
-        rm -rf "$HOME/tmp/R.rpm" "$HOME/tmp/usr"
+        rm -rf "$HOME/tmp/R.rpm" "$HOME/tmp/opt"
         ;;
 
     *)
@@ -101,6 +108,10 @@ case $DISTRO in
         exit 1
         ;;
 esac
+
+# Create symlink
+rm -f "$R_CURRENT_LINK"
+ln -sf "$R_INSTALL_DIR" "$R_CURRENT_LINK"
 
 print_success "R ${R_VERSION} installed to ${R_INSTALL_DIR}"
 
