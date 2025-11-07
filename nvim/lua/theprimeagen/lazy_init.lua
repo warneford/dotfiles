@@ -12,6 +12,15 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    spec = "theprimeagen.lazy",
+    spec = {
+        -- Install luarocks.nvim first (required for plugins that need luarocks)
+        {
+            "vhyrro/luarocks.nvim",
+            priority = 1000, -- Very high priority to load before other plugins
+            config = true,
+        },
+        -- Load all other plugins from theprimeagen.lazy directory
+        { import = "theprimeagen.lazy" },
+    },
     change_detection = { notify = false }
 })
