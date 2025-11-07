@@ -34,26 +34,30 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export EDITOR='nvim'
 export VISUAL='nvim'
 
-# Add any custom paths here
-# Add Quarto to PATH (macOS cask install)
-if [ -d "/Applications/quarto/bin" ]; then
-    export PATH="/Applications/quarto/bin:$PATH"
-fi
+# Custom PATH management - add directories only if not already in PATH
+# This function prevents PATH pollution when .zshrc is sourced multiple times
+add_to_path() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        export PATH="$1:$PATH"
+    fi
+}
 
-# Add Quarto to PATH (Linux install to ~/.local)
-if [ -d "$HOME/.local/quarto/bin" ]; then
-    export PATH="$HOME/.local/quarto/bin:$PATH"
+# Add Quarto to PATH (platform-specific)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    add_to_path "/Applications/quarto/bin"  # macOS Homebrew install
+else
+    add_to_path "$HOME/.local/quarto/bin"   # Linux manual install
 fi
 
 # Add bob-nvim (neovim version manager) to PATH
-export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+add_to_path "$HOME/.local/share/bob/nvim-bin"
 
 # Add Rust/Cargo to PATH
-export PATH="$HOME/.cargo/bin:$PATH"
+add_to_path "$HOME/.cargo/bin"
 
 # Add R to PATH (if installed via install-r-linux.sh)
 if [ -d "$HOME/.local/R/current/bin" ]; then
-    export PATH="$HOME/.local/R/current/bin:$PATH"
+    add_to_path "$HOME/.local/R/current/bin"
     export R_HOME="$HOME/.local/R/current/lib/R"
 fi
 
@@ -66,11 +70,14 @@ fi
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Add Python user bin to PATH
-export PATH="$HOME/Library/Python/3.9/bin:$PATH"
+# Add Python user bin to PATH (platform-specific)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    add_to_path "$HOME/Library/Python/3.9/bin"
+    add_to_path "$HOME/.local/bin"
+else
+    # Linux
+    add_to_path "$HOME/.local/bin"
+fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# Created by `pipx` on 2025-11-05 15:37:06
-export PATH="$PATH:/Users/rwarne/.local/bin"
