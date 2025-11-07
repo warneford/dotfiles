@@ -51,6 +51,11 @@ export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 # Add Rust/Cargo to PATH
 export PATH="$HOME/.cargo/bin:$PATH"
 
+# Add R to PATH (if installed via install-r-linux.sh)
+if [ -d "$HOME/.local/R/current/bin" ]; then
+    export PATH="$HOME/.local/R/current/bin:$PATH"
+fi
+
 # Load nvm (Node Version Manager) - check both common locations
 if [ -d "$HOME/.config/nvm" ]; then
     export NVM_DIR="$HOME/.config/nvm"
