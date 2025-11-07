@@ -190,23 +190,17 @@ else
     fi
 
     # Install tmux-256color terminfo for true color support
-    if [ ! -d "$HOME/.terminfo/t/tmux-256color" ]; then
+    if [ ! -f "$HOME/.terminfo/t/tmux-256color" ]; then
         print_info "Installing tmux-256color terminfo..."
         mkdir -p "$HOME/.terminfo"
-        # Create tmux-256color terminfo from tmux (installed via conda)
-        if command -v tmux &> /dev/null; then
-            /usr/bin/infocmp -x tmux-256color > /tmp/tmux-256color.ti 2>/dev/null || \
-            "$HOME/.local/miniforge3/envs/r-base/bin/infocmp" -x tmux-256color > /tmp/tmux-256color.ti 2>/dev/null || \
-            cat > /tmp/tmux-256color.ti << 'EOF'
+        # Create minimal tmux-256color terminfo with true color support
+        cat > /tmp/tmux-256color.ti << 'EOF'
 tmux-256color|tmux with 256 colors,
 	use=screen-256color, Tc,
 EOF
-            tic -x -o "$HOME/.terminfo" /tmp/tmux-256color.ti
-            rm /tmp/tmux-256color.ti
-            print_success "tmux-256color terminfo installed"
-        else
-            print_info "tmux not found, skipping terminfo installation"
-        fi
+        tic -x -o "$HOME/.terminfo" /tmp/tmux-256color.ti
+        rm /tmp/tmux-256color.ti
+        print_success "tmux-256color terminfo installed"
     else
         print_success "tmux-256color terminfo already installed"
     fi
