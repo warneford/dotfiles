@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Install R pre-compiled binary on Linux without root access
-# This script installs R to ~/.local/R
+# Install R via conda on Linux without root access
+# This script installs R using conda-forge
 
 set -e
 
@@ -23,120 +23,50 @@ print_info() {
     echo -e "${YELLOW}→${NC} $1"
 }
 
-# Detect Linux distribution and architecture
-print_info "Detecting system..."
-ARCH=$(uname -m)
-if [ "$ARCH" != "x86_64" ]; then
-    print_error "Only x86_64 architecture is supported by this script"
-    exit 1
-fi
-
-# Detect distribution
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    DISTRO=$ID
-    VERSION=$VERSION_ID
-else
-    print_error "Cannot detect Linux distribution"
-    exit 1
-fi
-
-print_info "Detected: $DISTRO $VERSION ($ARCH)"
-
 # Set R version
 R_VERSION="4.5.1"
-R_INSTALL_DIR="$HOME/.local/R/${R_VERSION}"
-R_CURRENT_LINK="$HOME/.local/R/current"
+CONDA_ENV_NAME="r-base"
 
-# Check if already installed
-if [ -d "$R_INSTALL_DIR/bin" ]; then
-    print_success "R ${R_VERSION} already installed at ${R_INSTALL_DIR}"
-    rm -f "$R_CURRENT_LINK"
-    ln -sf "$R_INSTALL_DIR" "$R_CURRENT_LINK"
-    print_success "Updated symlink at ${R_CURRENT_LINK}"
+# Check if conda is installed
+if ! command -v conda &> /dev/null; then
+    print_error "conda not found - please install miniconda or anaconda first"
     echo ""
-    echo "R is ready to use!"
-    echo "Run: source ~/.zshrc"
-    echo "Then: R --version"
+    echo "To install miniconda:"
+    echo "  curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    echo "  bash Miniconda3-latest-Linux-x86_64.sh"
+    echo ""
+    exit 1
+fi
+
+print_success "conda found ($(conda --version))"
+
+# Check if R environment already exists
+if conda env list | grep -q "^${CONDA_ENV_NAME} "; then
+    print_success "R conda environment already exists"
+    print_info "To reinstall, run: conda env remove -n ${CONDA_ENV_NAME}"
     exit 0
 fi
 
-# Download pre-compiled R from Posit Public Package Manager
-print_info "Downloading R ${R_VERSION} binary from Posit..."
+# Create conda environment with R
+print_info "Creating conda environment '${CONDA_ENV_NAME}' with R ${R_VERSION}..."
+conda create -n "${CONDA_ENV_NAME}" -c conda-forge -y \
+    r-base=${R_VERSION} \
+    r-languageserver \
+    r-jsonlite \
+    r-rlang
 
-mkdir -p "$HOME/tmp" "$HOME/.local/R"
-
-case $DISTRO in
-    ubuntu|debian)
-        # Determine Ubuntu version for correct binary
-        UBUNTU_VERSION=$(echo $VERSION_ID | sed 's/\..*//')
-
-        if [ "$UBUNTU_VERSION" = "22" ] || [ "$UBUNTU_VERSION" = "24" ]; then
-            BINARY_BASE="ubuntu-${UBUNTU_VERSION}04"
-        elif [ "$UBUNTU_VERSION" = "20" ]; then
-            BINARY_BASE="ubuntu-2004"
-        else
-            print_error "Unsupported Ubuntu version: $VERSION_ID"
-            print_info "Try using conda: conda install -c conda-forge r-base"
-            exit 1
-        fi
-
-        DOWNLOAD_URL="https://cdn.posit.co/r/${BINARY_BASE}/pkgs/r-${R_VERSION}_1_amd64.deb"
-        print_info "Downloading from: ${DOWNLOAD_URL}"
-
-        curl -L "${DOWNLOAD_URL}" -o "$HOME/tmp/R.deb"
-
-        # Extract DEB without installing
-        cd "$HOME/tmp"
-        ar x R.deb
-        tar -xzf data.tar.gz
-
-        # Move to installation directory (remove if exists)
-        rm -rf "$R_INSTALL_DIR"
-        mv "$HOME/tmp/opt/R/${R_VERSION}" "$R_INSTALL_DIR"
-
-        # Cleanup
-        rm -rf "$HOME/tmp/R.deb" "$HOME/tmp/control.tar.gz" "$HOME/tmp/data.tar.gz" "$HOME/tmp/debian-binary" "$HOME/tmp/opt"
-        ;;
-
-    centos|rhel|fedora)
-        print_info "Downloading R ${R_VERSION} for RHEL/CentOS..."
-
-        DOWNLOAD_URL="https://cdn.posit.co/r/centos-7/pkgs/R-${R_VERSION}-1-1.x86_64.rpm"
-        curl -L "${DOWNLOAD_URL}" -o "$HOME/tmp/R.rpm"
-
-        # Extract RPM without installing
-        cd "$HOME/tmp"
-        rpm2cpio R.rpm | cpio -idmv
-
-        # Move to installation directory (remove if exists)
-        rm -rf "$R_INSTALL_DIR"
-        mv "$HOME/tmp/opt/R/${R_VERSION}" "$R_INSTALL_DIR"
-
-        # Cleanup
-        rm -rf "$HOME/tmp/R.rpm" "$HOME/tmp/opt"
-        ;;
-
-    *)
-        print_error "Unsupported distribution: $DISTRO"
-        print_info "Try using conda: conda install -c conda-forge r-base"
-        exit 1
-        ;;
-esac
-
-# Create symlink
-rm -f "$R_CURRENT_LINK"
-ln -sf "$R_INSTALL_DIR" "$R_CURRENT_LINK"
-
-print_success "R ${R_VERSION} installed to ${R_INSTALL_DIR}"
+print_success "R ${R_VERSION} installed via conda"
 
 echo ""
 print_success "Installation complete!"
 echo ""
-echo "Add to your .zshrc:"
-echo '  export PATH="$HOME/.local/R/current/bin:$PATH"'
+echo "To use R, activate the conda environment:"
+echo "  conda activate ${CONDA_ENV_NAME}"
 echo ""
 echo "Then run:"
-echo "  source ~/.zshrc"
 echo "  R --version"
+echo "  Rscript -e 'print(\"hello\")'"
+echo ""
+echo "To make this the default R, add to your .zshrc:"
+echo "  conda activate ${CONDA_ENV_NAME}"
 echo ""

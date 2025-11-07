@@ -55,10 +55,12 @@ add_to_path "$HOME/.local/share/bob/nvim-bin"
 # Add Rust/Cargo to PATH
 add_to_path "$HOME/.cargo/bin"
 
-# Add R to PATH (if installed via install-r-linux.sh)
-if [ -d "$HOME/.local/R/current/bin" ]; then
-    add_to_path "$HOME/.local/R/current/bin"
-    export R_HOME="$HOME/.local/R/current/lib/R"
+# Activate R conda environment if it exists (installed via install-r-linux.sh)
+if command -v conda &> /dev/null; then
+    # Check if r-base environment exists
+    if conda env list 2>/dev/null | grep -q "^r-base "; then
+        conda activate r-base 2>/dev/null || true
+    fi
 fi
 
 # Load nvm (Node Version Manager) - check both common locations
