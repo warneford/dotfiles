@@ -32,18 +32,20 @@ return {
 
 		require("r").setup(opts)
 
-		-- Prevent R.nvim from processing special buffers (neo-tree, harpoon menu, etc.)
-		-- This prevents "Parser could not be created" errors
-		vim.api.nvim_create_autocmd("BufEnter", {
-			callback = function()
-				local buftype = vim.bo.buftype
-				local filetype = vim.bo.filetype
-				-- Disable R.nvim features for special buffers
-				if buftype ~= "" or filetype == "neo-tree" or filetype == "harpoon" then
-					vim.b.disable_r_ftplugin = 1
-				end
-			end,
-		})
+		-- Wrap R.nvim's hl_code_bg function to prevent errors with special buffers
+		-- This prevents "Parser could not be created" errors when switching to neo-tree/harpoon
+		local quarto_module = require("r.quarto")
+		local original_hl_code_bg = quarto_module.hl_code_bg
+		quarto_module.hl_code_bg = function()
+			local buftype = vim.bo.buftype
+			local filetype = vim.bo.filetype
+			-- Skip highlighting for special buffers
+			if buftype ~= "" or filetype == "neo-tree" or filetype == "harpoon" or filetype == "" then
+				return
+			end
+			-- Call original function for normal buffers
+			pcall(original_hl_code_bg)
+		end
 
 		-- Keybindings
 		vim.keymap.set("n", "<localleader>rf", "<Plug>RStart", { desc = "Start R" })
