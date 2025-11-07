@@ -207,9 +207,9 @@ else
     echo ""
 fi
 
-# Install Python packages for Molten
-print_info "Installing Python packages for Molten..."
-python3 -m pip install --user pynvim jupyter_client cairosvg pillow plotly kaleido pnglatex pyperclip nbformat
+# Install Python packages for image.nvim
+print_info "Installing Python packages for image.nvim..."
+python3 -m pip install --user pynvim cairosvg pillow
 print_success "Python packages installed"
 
 # Install R packages for nvim-r (if R is available)

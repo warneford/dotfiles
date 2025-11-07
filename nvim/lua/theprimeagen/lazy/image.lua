@@ -1,13 +1,4 @@
 return {
-	-- Molten disabled in favor of vim-slime for simpler workflow
-	-- Can be re-enabled by setting enabled = true
-	{
-		"benlubas/molten-nvim",
-		enabled = false,
-		version = "^1.0.0",
-		dependencies = { "3rd/image.nvim" },
-		build = ":UpdateRemotePlugins",
-	},
 	{
 		"3rd/image.nvim",
 		opts = {
