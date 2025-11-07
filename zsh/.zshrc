@@ -55,14 +55,6 @@ add_to_path "$HOME/.local/share/bob/nvim-bin"
 # Add Rust/Cargo to PATH
 add_to_path "$HOME/.cargo/bin"
 
-# Activate R conda environment if it exists (installed via install-r-linux.sh)
-if command -v conda &> /dev/null; then
-    # Check if r-base environment exists
-    if conda env list 2>/dev/null | grep -q "^r-base "; then
-        conda activate r-base 2>/dev/null || true
-    fi
-fi
-
 # Load nvm (Node Version Manager) - check both common locations
 if [ -d "$HOME/.config/nvm" ]; then
     export NVM_DIR="$HOME/.config/nvm"
@@ -83,3 +75,16 @@ fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# NOTE: conda/mamba initialization blocks will be added below by 'conda init' and 'mamba init'
+# These blocks must come AFTER all other configuration so conda is properly initialized
+# before any conda activate commands are run.
+
+# After conda/mamba init blocks are added (by running install-r-linux.sh),
+# add this at the very end to auto-activate the r-base environment:
+#
+# if command -v conda &> /dev/null; then
+#     if conda env list 2>/dev/null | grep -q "^r-base "; then
+#         conda activate r-base 2>/dev/null || true
+#     fi
+# fi
