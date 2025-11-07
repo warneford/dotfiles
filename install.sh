@@ -157,6 +157,9 @@ else
         print_info "R not found - installing R 4.5.1..."
         if [ -f "$DOTFILES_DIR/install-r-linux.sh" ]; then
             bash "$DOTFILES_DIR/install-r-linux.sh"
+            # Add R to PATH for the remainder of this script
+            export PATH="$HOME/.local/R/current/bin:$PATH"
+            export R_HOME="$HOME/.local/R/current/lib/R"
         else
             print_info "R installation options for Linux without root:"
             echo "  1. Run: ./install-r-linux.sh (in dotfiles directory)"
@@ -164,6 +167,11 @@ else
         fi
     else
         print_success "R already installed"
+        # Ensure R is in PATH for this script
+        if [ -d "$HOME/.local/R/current/bin" ]; then
+            export PATH="$HOME/.local/R/current/bin:$PATH"
+            export R_HOME="$HOME/.local/R/current/lib/R"
+        fi
     fi
 
     print_info "Continuing with configuration setup..."
