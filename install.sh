@@ -152,11 +152,20 @@ else
         print_info "Python3 not found - please install manually or use your package manager"
     fi
 
-    print_info "R installation options for Linux without root:"
-    echo "  1. Use system R if available: which R"
-    echo "  2. Compile from source to ~/.local/R (see CRAN docs)"
-    echo "  3. Use conda: conda install -c conda-forge r-base"
-    echo ""
+    # Install R if not already present
+    if ! command -v R &> /dev/null && [ ! -d "$HOME/.local/R/current/bin" ]; then
+        print_info "R not found - installing R 4.5.1..."
+        if [ -f "$DOTFILES_DIR/install-r-linux.sh" ]; then
+            bash "$DOTFILES_DIR/install-r-linux.sh"
+        else
+            print_info "R installation options for Linux without root:"
+            echo "  1. Run: ./install-r-linux.sh (in dotfiles directory)"
+            echo "  2. Use conda: conda install -c conda-forge r-base"
+        fi
+    else
+        print_success "R already installed"
+    fi
+
     print_info "Continuing with configuration setup..."
 fi
 
