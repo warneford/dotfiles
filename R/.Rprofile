@@ -1,11 +1,14 @@
 # R Profile - loaded on R startup
 # This file is symlinked to ~/.Rprofile
 
+# Save reference to base install.packages before overwriting
+.base_install_packages <- utils::install.packages
+
 # Wrapper for install.packages() that tries conda first, then falls back to CRAN
 # Only active on Linux - macOS uses CRAN validated binaries for reliability
 install.packages <- function(pkgs, ...) {
-  # Save reference to base install.packages
-  base_install <- base::install.packages
+  # Use saved reference to base install.packages
+  base_install <- .base_install_packages
 
   # Only use conda on Linux (macOS should use CRAN validated binaries)
   is_linux <- Sys.info()["sysname"] == "Linux"
