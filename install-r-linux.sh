@@ -29,29 +29,44 @@ CONDA_ENV_NAME="r-base"
 
 # Install miniforge (includes mamba) if conda/mamba not present
 if ! command -v mamba &> /dev/null && ! command -v conda &> /dev/null; then
-    print_info "conda/mamba not found - installing miniforge (conda + mamba)..."
+    # Check if miniforge3 directory exists but is not initialized
+    if [ -d "$HOME/.local/miniforge3" ]; then
+        print_info "miniforge directory found but not initialized - initializing..."
 
-    MINIFORGE_INSTALLER="$HOME/tmp/Miniforge3-Linux-x86_64.sh"
-    mkdir -p "$HOME/tmp"
+        # Initialize conda/mamba for current shell
+        "$HOME/.local/miniforge3/bin/conda" init zsh bash
+        "$HOME/.local/miniforge3/bin/mamba" init zsh bash
 
-    # Download miniforge installer (includes mamba and uses conda-forge by default)
-    curl -L https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o "$MINIFORGE_INSTALLER"
+        # Add to current PATH
+        export PATH="$HOME/.local/miniforge3/bin:$PATH"
 
-    # Install miniforge to ~/.local/miniforge3
-    bash "$MINIFORGE_INSTALLER" -b -p "$HOME/.local/miniforge3"
+        print_success "miniforge initialized"
+        print_info "Conda/mamba have been initialized. Restart your shell or run: source ~/.zshrc"
+    else
+        print_info "conda/mamba not found - installing miniforge (conda + mamba)..."
 
-    # Initialize conda/mamba
-    "$HOME/.local/miniforge3/bin/conda" init zsh bash
-    "$HOME/.local/miniforge3/bin/mamba" init zsh bash
+        MINIFORGE_INSTALLER="$HOME/tmp/Miniforge3-Linux-x86_64.sh"
+        mkdir -p "$HOME/tmp"
 
-    # Add to current PATH
-    export PATH="$HOME/.local/miniforge3/bin:$PATH"
+        # Download miniforge installer (includes mamba and uses conda-forge by default)
+        curl -L https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o "$MINIFORGE_INSTALLER"
 
-    # Cleanup installer
-    rm -f "$MINIFORGE_INSTALLER"
+        # Install miniforge to ~/.local/miniforge3
+        bash "$MINIFORGE_INSTALLER" -b -p "$HOME/.local/miniforge3"
 
-    print_success "miniforge installed to ~/.local/miniforge3"
-    print_info "Mamba and conda have been initialized. You may need to restart your shell."
+        # Initialize conda/mamba
+        "$HOME/.local/miniforge3/bin/conda" init zsh bash
+        "$HOME/.local/miniforge3/bin/mamba" init zsh bash
+
+        # Add to current PATH
+        export PATH="$HOME/.local/miniforge3/bin:$PATH"
+
+        # Cleanup installer
+        rm -f "$MINIFORGE_INSTALLER"
+
+        print_success "miniforge installed to ~/.local/miniforge3"
+        print_info "Mamba and conda have been initialized. You may need to restart your shell."
+    fi
 else
     if command -v mamba &> /dev/null; then
         print_success "mamba found ($(mamba --version | head -1))"
