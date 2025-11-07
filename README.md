@@ -36,9 +36,12 @@ Based on [ThePrimeagen's init.lua](https://github.com/ThePrimeagen/init.lua) con
 
 ### Prerequisites
 - Git
-- Neovim (>= 0.9.0 recommended)
 - Zsh
 - A [Nerd Font](https://www.nerdfonts.com/) (for Powerlevel10k icons)
+
+**Note:** Neovim will be installed automatically:
+- **macOS**: Installed via Homebrew
+- **Linux**: Installed via bob-nvim (neovim version manager) - no root required
 
 ### Installation
 
@@ -70,12 +73,17 @@ nvim
 
 ## What the Install Script Does
 
-1. Installs oh-my-zsh (if not present)
-2. Installs Powerlevel10k theme
-3. Installs zsh plugins (autosuggestions, syntax-highlighting)
-4. Backs up existing `.zshrc` and nvim config
-5. Creates symlinks from `~/.zshrc` → `~/dotfiles/zsh/.zshrc`
-6. Creates symlinks from `~/.config/nvim` → `~/dotfiles/nvim`
+1. **macOS**: Installs dependencies via Homebrew (node, python, ripgrep, neovim)
+2. **Linux**: Installs Rust, bob-nvim, and neovim stable (no root required)
+3. Installs oh-my-zsh (if not present)
+4. Installs Powerlevel10k theme
+5. Installs zsh plugins (autosuggestions, syntax-highlighting)
+6. Backs up existing `.zshrc` and nvim config
+7. Creates symlinks from `~/.zshrc` → `~/dotfiles/zsh/.zshrc`
+8. Creates symlinks from `~/.config/nvim` → `~/dotfiles/nvim`
+9. Installs Python packages for image.nvim
+10. Installs pipx and radian (enhanced R console)
+11. Installs R languageserver package (if R is available)
 
 ## Key Bindings (Neovim)
 

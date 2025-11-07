@@ -15,3 +15,9 @@ alias r='radian'
 # Convenience aliases
 alias down='cd ~/Downloads'
 alias new_alias='vim ~/dotfiles/zsh/aliases.zsh'
+
+# tmux aliases
+alias ta='tmux attach'
+alias tn='tmux new-session -s'
+alias tl='tmux list-sessions'
+alias tk='tmux kill-session'

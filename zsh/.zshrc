@@ -35,10 +35,21 @@ export EDITOR='nvim'
 export VISUAL='nvim'
 
 # Add any custom paths here
-# Add Quarto to PATH if it exists (macOS cask install)
+# Add Quarto to PATH (macOS cask install)
 if [ -d "/Applications/quarto/bin" ]; then
     export PATH="/Applications/quarto/bin:$PATH"
 fi
+
+# Add Quarto to PATH (Linux install to ~/.local)
+if [ -d "$HOME/.local/quarto/bin" ]; then
+    export PATH="$HOME/.local/quarto/bin:$PATH"
+fi
+
+# Add bob-nvim (neovim version manager) to PATH
+export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+
+# Add Rust/Cargo to PATH
+export PATH="$HOME/.cargo/bin:$PATH"
 
 # Add Python user bin to PATH
 export PATH="$HOME/Library/Python/3.9/bin:$PATH"

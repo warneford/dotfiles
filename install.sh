@@ -72,13 +72,46 @@ if $IS_MAC; then
         fi
     done
 else
-    # Linux: Print manual installation instructions
-    print_info "Linux detected - please ensure these dependencies are installed:"
+    # Linux: Install bob-nvim (neovim version manager) and other dependencies
+    print_info "Linux detected - setting up dependencies..."
+
+    # Check for required system dependencies
+    print_info "Please ensure these dependencies are available:"
     echo "  - node (for LSP servers)"
     echo "  - python3"
     echo "  - ripgrep"
-    echo "  - neovim (>= 0.9)"
     echo ""
+
+    # Install Rust (required for bob-nvim) if not already installed
+    if ! command -v cargo &> /dev/null; then
+        print_info "Installing Rust (required for bob-nvim)..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source "$HOME/.cargo/env"
+        print_success "Rust installed"
+    else
+        print_success "Rust already installed"
+    fi
+
+    # Install bob-nvim (neovim version manager)
+    if ! command -v bob &> /dev/null; then
+        print_info "Installing bob-nvim (neovim version manager)..."
+        cargo install bob-nvim
+        print_success "bob-nvim installed"
+
+        # Add bob's nvim to PATH
+        export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+
+        # Install latest stable neovim
+        print_info "Installing neovim stable via bob..."
+        bob install stable
+        bob use stable
+        print_success "Neovim installed via bob"
+    else
+        print_success "bob-nvim already installed"
+        # Ensure we're using stable
+        bob use stable 2>/dev/null || true
+    fi
+
     print_info "R installation options for Linux without root:"
     echo "  1. Use system R if available: which R"
     echo "  2. Compile from source to ~/.local/R (see CRAN docs)"
@@ -190,21 +223,37 @@ echo ""
 print_success "Installation complete!"
 echo ""
 
-# Install Quarto (macOS only - Linux users should install manually)
-if $IS_MAC; then
-    print_info "Installing Quarto CLI..."
-    if ! command -v quarto &> /dev/null; then
+# Install Quarto
+print_info "Installing Quarto CLI..."
+if ! command -v quarto &> /dev/null; then
+    if $IS_MAC; then
         brew install --cask quarto
         print_success "Quarto CLI installed"
     else
-        print_success "Quarto CLI already installed"
+        # Linux: Install to ~/.local/quarto (no root required)
+        print_info "Fetching latest Quarto version..."
+        QUARTO_VERSION=$(curl -s https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+
+        if [ -z "$QUARTO_VERSION" ]; then
+            print_error "Failed to fetch latest Quarto version"
+            print_info "Manual installation: https://quarto.org/docs/get-started/"
+        else
+            QUARTO_URL="https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.tar.gz"
+
+            print_info "Downloading Quarto ${QUARTO_VERSION}..."
+            mkdir -p ~/.local
+            curl -L "$QUARTO_URL" -o /tmp/quarto.tar.gz
+            tar -xzf /tmp/quarto.tar.gz -C ~/.local
+            mv ~/.local/quarto-${QUARTO_VERSION} ~/.local/quarto
+            rm /tmp/quarto.tar.gz
+
+            # Add to PATH
+            export PATH="$HOME/.local/quarto/bin:$PATH"
+            print_success "Quarto CLI ${QUARTO_VERSION} installed to ~/.local/quarto"
+        fi
     fi
 else
-    print_info "Quarto installation on Linux:"
-    echo "  1. Download from: https://quarto.org/docs/get-started/"
-    echo "  2. Extract to ~/.local/quarto"
-    echo "  3. Add to PATH: export PATH=\"\$HOME/.local/quarto/bin:\$PATH\""
-    echo ""
+    print_success "Quarto CLI already installed"
 fi
 
 # Install Python packages for image.nvim
