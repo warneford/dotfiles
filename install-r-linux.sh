@@ -33,11 +33,9 @@ if ! command -v mamba &> /dev/null && ! command -v conda &> /dev/null; then
     if [ -d "$HOME/.local/miniforge3" ]; then
         print_info "miniforge directory found but not initialized - initializing..."
 
-        # Initialize conda/mamba for current shell
+        # Initialize conda for current shell (mamba uses conda's initialization)
         "$HOME/.local/miniforge3/bin/conda" init zsh
         "$HOME/.local/miniforge3/bin/conda" init bash
-        "$HOME/.local/miniforge3/bin/mamba" init zsh
-        "$HOME/.local/miniforge3/bin/mamba" init bash
 
         # Add to current PATH
         export PATH="$HOME/.local/miniforge3/bin:$PATH"
@@ -56,11 +54,9 @@ if ! command -v mamba &> /dev/null && ! command -v conda &> /dev/null; then
         # Install miniforge to ~/.local/miniforge3
         bash "$MINIFORGE_INSTALLER" -b -p "$HOME/.local/miniforge3"
 
-        # Initialize conda/mamba
+        # Initialize conda (mamba uses conda's initialization)
         "$HOME/.local/miniforge3/bin/conda" init zsh
         "$HOME/.local/miniforge3/bin/conda" init bash
-        "$HOME/.local/miniforge3/bin/mamba" init zsh
-        "$HOME/.local/miniforge3/bin/mamba" init bash
 
         # Add to current PATH
         export PATH="$HOME/.local/miniforge3/bin:$PATH"
