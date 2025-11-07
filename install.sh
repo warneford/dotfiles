@@ -297,6 +297,10 @@ print_success "Linked tmux config"
 ln -sf "$DOTFILES_DIR/zsh/aliases.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/aliases.zsh"
 print_success "Linked aliases"
 
+# Symlink .Rprofile
+ln -sf "$DOTFILES_DIR/R/.Rprofile" "$HOME/.Rprofile"
+print_success "Linked .Rprofile"
+
 # Setup Ghostty config (only on local machines, not SSH sessions)
 if ! $IS_SSH; then
     if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
