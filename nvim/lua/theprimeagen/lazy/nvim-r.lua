@@ -18,6 +18,8 @@ return {
 				"RSPlot",
 				"RSaveClose",
 			},
+			-- Disable Quarto code chunk highlighting to prevent errors with special buffers
+			hl_term = false,
 		}
 
 		-- Check if the environment variable "R_AUTO_START" exists.
@@ -29,6 +31,19 @@ return {
 		end
 
 		require("r").setup(opts)
+
+		-- Prevent R.nvim from processing special buffers (neo-tree, harpoon menu, etc.)
+		-- This prevents "Parser could not be created" errors
+		vim.api.nvim_create_autocmd("BufEnter", {
+			callback = function()
+				local buftype = vim.bo.buftype
+				local filetype = vim.bo.filetype
+				-- Disable R.nvim features for special buffers
+				if buftype ~= "" or filetype == "neo-tree" or filetype == "harpoon" then
+					vim.b.disable_r_ftplugin = 1
+				end
+			end,
+		})
 
 		-- Keybindings
 		vim.keymap.set("n", "<localleader>rf", "<Plug>RStart", { desc = "Start R" })
