@@ -82,7 +82,8 @@ ${CONDA_CMD} create -n "${CONDA_ENV_NAME}" -c conda-forge --override-channels -y
     r-base=${R_VERSION} \
     r-languageserver \
     r-jsonlite \
-    r-rlang
+    r-rlang \
+    tmux
 
 # Remove slow Java reconfiguration from activation script
 ACTIVATION_SCRIPT="$HOME/.local/miniforge3/envs/${CONDA_ENV_NAME}/etc/conda/activate.d/activate-r-base.sh"

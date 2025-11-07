@@ -59,6 +59,7 @@ if $IS_MAC; then
         "neovim"        # Neovim editor
         "air"           # R code formatter (Posit/tidyverse)
         "lazygit"       # Git TUI for nvim
+        "tmux"          # Terminal multiplexer
     )
     # Note: We use CRAN R (not Homebrew R) for better package compatibility
     # Download from: https://cloud.r-project.org/bin/macosx/
