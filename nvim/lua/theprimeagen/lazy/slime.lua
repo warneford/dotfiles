@@ -67,19 +67,41 @@ return {
 			-- Keybindings
 			vim.keymap.set("n", "<leader>ca", auto_config_slime, { desc = "[a]uto-configure slime to right pane" })
 			vim.keymap.set("n", "<leader>cr", function()
-				-- Open tmux pane on the right and start R (remains open)
-				vim.fn.system("tmux split-window -h -p 40 radian")
-				auto_config_slime()
+				-- Check if target pane .2 exists and what's running in it
+				local check_cmd = "tmux display-message -p -t ':.2' '#{pane_current_command}' 2>/dev/null"
+				local result = vim.fn.system(check_cmd):gsub("%s+$", "") -- trim whitespace
+				local pane_exists = vim.v.shell_error == 0
+				-- radian runs as 'python', regular R runs as 'R'
+				local is_r_pane = pane_exists and (result == "python" or result == "R")
 
-				-- Wait a moment for R to start, then load params if in a .qmd/.Rmd file
-				vim.defer_fn(function()
+				if pane_exists and is_r_pane then
+					-- Pane exists and is running R, just configure slime to use it
+					vim.notify("R pane already exists, configuring slime", vim.log.levels.INFO)
+					auto_config_slime()
+
+					-- Load params immediately since R is already running
 					local current_file = vim.fn.expand("%:p")
 					if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
 						if _G.load_quarto_params then
 							_G.load_quarto_params()
 						end
 					end
-				end, 1500) -- Wait 1.5 seconds for R to start
+				else
+					-- No R pane to the right, create one
+					vim.notify("Creating new R pane", vim.log.levels.INFO)
+					vim.fn.system("tmux split-window -h -p 40 radian")
+					auto_config_slime()
+
+					-- Wait a moment for R to start, then load params if in a .qmd/.Rmd file
+					vim.defer_fn(function()
+						local current_file = vim.fn.expand("%:p")
+						if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
+							if _G.load_quarto_params then
+								_G.load_quarto_params()
+							end
+						end
+					end, 1500) -- Wait 1.5 seconds for R to start
+				end
 			end, { desc = "open [r] console and configure slime" })
 			vim.keymap.set("n", "<leader>cs", set_slime_target_manual, { desc = "[s]et slime target manually" })
 			vim.keymap.set("n", "<leader>ct", test_slime, { desc = "[t]est slime connection" })
