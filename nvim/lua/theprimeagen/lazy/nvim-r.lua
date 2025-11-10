@@ -57,20 +57,23 @@ return {
 			pcall(original_hl_code_bg)
 		end
 
-		-- Keybindings
-		vim.keymap.set("n", "<localleader>rf", "<Plug>RStart", { desc = "Start R" })
-		vim.keymap.set("n", "<localleader>rq", "<Plug>RClose", { desc = "Quit R" })
-
-		-- Send line/statement to R
-		-- TODO: Add cursor advancement to next non-comment line after sending
-		-- Currently cursor stays in place after ,l
-		vim.keymap.set("n", "<localleader>l", "<Plug>RDSendLine", { desc = "Send line to R" })
-
-		vim.keymap.set("v", "<localleader>l", "<Plug>RSendSelection", { desc = "Send selection to R" })
-		vim.keymap.set("n", "<localleader>rr", "<Plug>RDSendFile", { desc = "Send file to R" })
-		vim.keymap.set("n", "<localleader>p", "<Plug>RPlot", { desc = "Show R plot" })
-		vim.keymap.set("n", "<localleader>o", "<Plug>ROBToggle", { desc = "Toggle object browser" })
-		vim.keymap.set("n", "<localleader>h", "<Plug>RHelp", { desc = "R help for word under cursor" })
-		vim.keymap.set("n", "<localleader>v", "<Plug>RViewDF", { desc = "View dataframe" })
+		-- R.nvim sets all keybindings automatically
+		-- See :RMapsDesc for the full list of available keybindings
+		--
+		-- Common keybindings (with LocalLeader = ,):
+		-- ,rf - Start R
+		-- ,rq - Quit R
+		-- ,d  - Send line/statement and move down (RDSendLine) - with parenblock, sends complete statements! ⭐
+		-- ,l  - Send line/statement, cursor stays (RSendLine)
+		-- ,cd - Send chunk and move to next chunk
+		-- ,cc - Send current chunk, cursor stays
+		-- ,ro - Toggle object browser
+		-- ,rv - View dataframe
+		-- ,o  - Insert line output
+		-- ,sc - Send piped chain
+		--
+		-- Pattern: Commands with "D" (like RDSendLine) move cursor Down after sending
+		--
+		-- Only add custom keybindings here if you want to override defaults
 	end,
 }
