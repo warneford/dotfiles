@@ -1,5 +1,15 @@
 -- Additional keybindings for Quarto workflow
--- Loaded after quarto.nvim and vim-slime are set up
+-- Loaded after quarto.nvim and R.nvim are set up
+
+-- Helper function to send code to R (works with R.nvim)
+local function send_to_r(code)
+	-- R.nvim provides vim.fn.SendCmdToR for sending commands
+	if vim.fn.exists("*SendCmdToR") == 1 then
+		vim.fn.SendCmdToR(code)
+	else
+		vim.notify("R.nvim not loaded or R console not running", vim.log.levels.WARN)
+	end
+end
 
 -- Global function for send_cell so it can be called from keybindings
 -- Filters out comment lines before sending to REPL
@@ -41,10 +51,10 @@ _G.send_cell = function()
 		end
 	end
 
-	-- Send the filtered code to slime
+	-- Send the filtered code to R
 	if #filtered_lines > 0 then
 		local code = table.concat(filtered_lines, "\n")
-		vim.fn["slime#send"](code .. "\r")
+		send_to_r(code)
 	end
 
 	-- Move to the next code chunk (search for next ```)
@@ -56,13 +66,8 @@ _G.send_cell = function()
 	end
 end
 
--- Send just the current line
-_G.send_line = function()
-	local line = vim.api.nvim_get_current_line()
-	vim.fn["slime#send"](line .. "\r")
-	-- Move to next line
-	vim.cmd("normal! j")
-end
+-- Note: send_code_block functionality is now handled by R.nvim's <Plug>RDSendLine
+-- which uses tree-sitter to intelligently send complete statements
 
 -- View R object/dataframe (multiple options)
 _G.view_r_object = function()
@@ -82,7 +87,7 @@ _G.view_r_object = function()
 		var,
 		var
 	)
-	vim.fn["slime#send"](cmd .. "\r")
+	send_to_r(cmd)
 end
 
 -- View R object in browser (for when you want the full interactive table)
@@ -100,7 +105,7 @@ _G.view_r_object_browser = function()
 		var,
 		var
 	)
-	vim.fn["slime#send"](cmd .. "\r")
+	send_to_r(cmd)
 end
 
 -- Show R environment variables (like RStudio's Environment pane)
@@ -114,7 +119,7 @@ if (length(ls()) == 0) {
   ls.str()
 }
 ]]
-	vim.fn["slime#send"](cmd .. "\r")
+	send_to_r(cmd)
 end
 
 -- Load YAML params into R environment (like RStudio does)
@@ -150,7 +155,7 @@ params <- tryCatch({
 		current_file:gsub("\\", "\\\\"):gsub("'", "\\'")
 	)
 
-	vim.fn["slime#send"](cmd .. "\r")
+	send_to_r(cmd)
 	vim.notify("Params loaded from YAML", vim.log.levels.INFO)
 end
 
@@ -172,16 +177,12 @@ return {
 				_G.send_cell()
 			end, { desc = "run code cell from insert mode" })
 
-			-- Run single line
-			vim.keymap.set("n", "<leader>l", _G.send_line, { desc = "run [l]ine" })
-			vim.keymap.set("i", "<M-CR>", function()
-				vim.cmd("stopinsert")
-				_G.send_line()
-			end, { desc = "run line from insert mode" })
+			-- Note: <leader>l for sending lines/statements is now handled by R.nvim
+			-- See rnvim.lua for R-specific keybindings
 
-			-- R-specific insert mode shortcuts
-			vim.keymap.set("i", "<M-->", " <- ", { desc = "insert R assignment operator" })
-			vim.keymap.set("i", "<M-m>", " |> ", { desc = "insert R pipe operator" })
+			-- R-specific insert mode shortcuts (these override R.nvim defaults for consistency)
+			vim.keymap.set("i", "<M-->", " <- ", { desc = "insert R assignment operator", buffer = true })
+			vim.keymap.set("i", "<M-m>", " |> ", { desc = "insert R pipe operator", buffer = true })
 
 			-- Insert code chunk with Ctrl+Shift+I (also provide Alt+i as fallback)
 			vim.keymap.set("n", "<C-S-i>", function()
@@ -215,9 +216,8 @@ return {
 				end
 			end, { desc = "insert code chunk (Alt+i)" })
 
-			-- Run visual selection
-			vim.keymap.set("v", "<CR>", ":<C-u>call slime#send_op(visualmode(), 1)<CR>", { desc = "run code region" })
-			vim.keymap.set("v", "<S-CR>", ":<C-u>call slime#send_op(visualmode(), 1)<CR>", { desc = "run code region" })
+			-- Note: Visual selection sending is handled by R.nvim's <Plug>RSendSelection
+			-- See rnvim.lua for configuration
 
 			-- R object/variable viewing
 			vim.keymap.set("n", "<leader>rv", _G.view_r_object, { desc = "[v]iew object/dataframe" })
