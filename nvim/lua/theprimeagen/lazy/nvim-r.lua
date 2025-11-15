@@ -74,6 +74,11 @@ return {
 		--
 		-- Pattern: Commands with "D" (like RDSendLine) move cursor Down after sending
 		--
-		-- Only add custom keybindings here if you want to override defaults
+		-- Custom keybindings
+		vim.keymap.set("n", "<leader>cr", function()
+			-- Open standalone tmux pane with radian (not managed by R.nvim/vim)
+			-- This creates a pure tmux pane where Ctrl+hjkl navigation works
+			vim.fn.system("tmux split-window -h -p 40 radian")
+		end, { desc = "open standalone [r] console in tmux pane" })
 	end,
 }
