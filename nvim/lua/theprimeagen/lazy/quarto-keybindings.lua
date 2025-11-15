@@ -1,20 +1,19 @@
 -- Additional keybindings for Quarto workflow
--- Loaded after quarto.nvim and R.nvim are set up
+-- Loaded after quarto.nvim, R.nvim, and vim-slime are set up
 
--- Helper function to send code to R (works with R.nvim)
-local function send_to_r(code)
-	-- R.nvim provides vim.fn.SendCmdToR for sending commands
-	if vim.fn.exists("*SendCmdToR") == 1 then
-		vim.fn.SendCmdToR(code)
+-- Helper function to send code using vim-slime (works with any REPL: R, Python, Julia, etc.)
+local function send_to_repl(code)
+	-- vim-slime provides slime#send for sending text to tmux panes
+	if vim.fn.exists("*slime#send") == 1 then
+		vim.fn["slime#send"](code .. "\r")
 	else
-		vim.notify("R.nvim not loaded or R console not running", vim.log.levels.WARN)
+		vim.notify("vim-slime not loaded", vim.log.levels.WARN)
 	end
 end
 
--- Global function for send_cell so it can be called from keybindings
+-- Global function for send_cell - works with ANY language (R, Python, Julia)
 -- Filters out comment lines before sending to REPL
 -- After sending, moves cursor to the first line of the next code chunk
--- If not in a code chunk, just moves to the next chunk
 _G.send_cell = function()
 	local current_line = vim.fn.line(".")
 
@@ -51,10 +50,10 @@ _G.send_cell = function()
 		end
 	end
 
-	-- Send the filtered code to R
+	-- Send the filtered code via vim-slime (works with R, Python, Julia, etc.)
 	if #filtered_lines > 0 then
 		local code = table.concat(filtered_lines, "\n")
-		send_to_r(code)
+		send_to_repl(code)
 	end
 
 	-- Move to the next code chunk (search for next ```)
@@ -66,98 +65,15 @@ _G.send_cell = function()
 	end
 end
 
--- Note: send_code_block functionality is now handled by R.nvim's <Plug>RDSendLine
--- which uses tree-sitter to intelligently send complete statements
-
--- View R object/dataframe (multiple options)
-_G.view_r_object = function()
-	-- Get the word under cursor (the variable name)
-	local var = vim.fn.expand("<cword>")
-	if var == "" then
-		vim.notify("No variable under cursor", vim.log.levels.WARN)
-		return
-	end
-
-	-- Display in console with nice formatting using tibble's print or head
-	local cmd = string.format(
-		'if (is.data.frame(%s)) { cat("\\n"); print(%s); cat("\\nDimensions:", nrow(%s), "rows x", ncol(%s), "columns\\n") } else { print(%s) }',
-		var,
-		var,
-		var,
-		var,
-		var
-	)
-	send_to_r(cmd)
-end
-
--- View R object in browser (for when you want the full interactive table)
-_G.view_r_object_browser = function()
-	local var = vim.fn.expand("<cword>")
-	if var == "" then
-		vim.notify("No variable under cursor", vim.log.levels.WARN)
-		return
-	end
-
-	-- Open in default browser with DT for interactive viewing
-	local cmd = string.format(
-		'if (is.data.frame(%s)) { DT::datatable(%s) } else { print(%s) }',
-		var,
-		var,
-		var
-	)
-	send_to_r(cmd)
-end
-
--- Show R environment variables (like RStudio's Environment pane)
-_G.show_r_env = function()
-	-- Show all objects in the environment with their type and size
-	local cmd = [[
-cat("\n=== R Environment ===\n")
-if (length(ls()) == 0) {
-  cat("No objects in environment\n")
-} else {
-  ls.str()
-}
-]]
-	send_to_r(cmd)
-end
-
--- Load YAML params into R environment (like RStudio does)
-_G.load_quarto_params = function()
-	local current_file = vim.fn.expand("%:p")
-
-	-- Check if current file is a .qmd or .Rmd file
-	if not (current_file:match("%.qmd$") or current_file:match("%.Rmd$")) then
-		vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
-		return
-	end
-
-	-- Use rmarkdown::yaml_front_matter() to extract params from YAML header
-	-- This works better for Quarto files than knitr::knit_params()
-	local cmd = string.format(
-		[[
-params <- tryCatch({
-  yaml <- rmarkdown::yaml_front_matter('%s')
-  if (!is.null(yaml$params) && length(yaml$params) > 0) {
-    cat("\nLoaded params:\n")
-    str(yaml$params)
-    cat("\n")
-    yaml$params
-  } else {
-    cat("No params defined in YAML header\n")
-    list()
-  }
-}, error = function(e) {
-  cat("Error reading params:", e$message, "\n")
-  list()
-})
-]],
-		current_file:gsub("\\", "\\\\"):gsub("'", "\\'")
-	)
-
-	send_to_r(cmd)
-	vim.notify("Params loaded from YAML", vim.log.levels.INFO)
-end
+-- Note: For R-specific functionality, use R.nvim's native keybindings:
+-- ,rf - Start R console
+-- ,ro - Object browser
+-- ,rv - Dataframe viewer
+-- ,d  - Send line/statement and move down
+-- ,cc - Send current chunk
+-- ,cd - Send chunk and move to next
+--
+-- This file provides language-agnostic Quarto keybindings that work with any REPL
 
 return {
 	{
@@ -219,10 +135,8 @@ return {
 			-- Note: Visual selection sending is handled by R.nvim's <Plug>RSendSelection
 			-- See rnvim.lua for configuration
 
-			-- R object/variable viewing
-			vim.keymap.set("n", "<leader>rv", _G.view_r_object, { desc = "[v]iew object/dataframe" })
-			vim.keymap.set("n", "<leader>re", _G.show_r_env, { desc = "show [e]nvironment" })
-			vim.keymap.set("n", "<leader>rp", _G.load_quarto_params, { desc = "load [p]arams from YAML" })
+			-- Note: R-specific keybindings are provided by R.nvim
+			-- Use ,ro for object browser, ,rv for dataframe viewer, etc.
 
 			-- Quarto rendering
 			vim.keymap.set("n", "<leader>qp", function()
