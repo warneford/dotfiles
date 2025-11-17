@@ -18,6 +18,7 @@ return {
 			-- Enable sending complete statements (parenthesis blocks)
 			parenblock = true,  -- Send all lines from opening to closing parenthesis
 			bracketed_paste = true,  -- Use bracketed paste mode for multi-line code
+			source_args = "echo=TRUE, print.eval=TRUE",  -- Show code when sourcing chunks
 			objbr_mappings = { -- Object browser keymap
 				c = "class", -- Call R command `class()`
 				["<localleader>gg"] = "head({object}, n = 15)", -- Use {object} notation to write arbitrary R code.
