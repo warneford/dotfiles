@@ -71,6 +71,15 @@ install.packages <- function(pkgs, ...) {
 # Set default CRAN mirror
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 
+# Google authentication settings for gargle/googledrive/googlesheets4
+options(
+  gargle_oauth_cache = file.path(Sys.getenv("HOME"), ".secrets"),
+  gargle_oauth_email = "robert@octant.bio",
+  browser = function(url) {
+    message("Please open this URL in your browser:\n", url)
+  }
+)
+
 # Disable automatic package loading messages for cleaner startup
 options(defaultPackages = c(getOption("defaultPackages"), "stats", "graphics", "grDevices", "utils", "datasets", "methods", "base"))
 
