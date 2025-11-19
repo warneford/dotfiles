@@ -30,5 +30,13 @@ options(
 # Disable automatic package loading messages for cleaner startup
 options(defaultPackages = c(getOption("defaultPackages"), "stats", "graphics", "grDevices", "utils", "datasets", "methods", "base"))
 
+# Auto-start httpgd for interactive sessions (web-based graphics viewer)
+# Access plots at http://localhost:35211 (requires SSH port forwarding)
+if (interactive() && requireNamespace("httpgd", quietly = TRUE)) {
+  options(device = function(...) {
+    httpgd::hgd(port = 35211, silent = TRUE)
+  })
+}
+
 cat("R profile loaded from dotfiles\n")
 cat("→ Using Posit Package Manager for fast binary installations\n")
