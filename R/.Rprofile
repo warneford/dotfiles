@@ -39,12 +39,17 @@ options(defaultPackages = c(getOption("defaultPackages"), "stats", "graphics", "
 
 # Auto-start httpgd for interactive sessions (web-based graphics viewer)
 # Access plots at http://localhost:35211 (requires SSH port forwarding)
+# Token disabled since we're behind VPN
 if (interactive()) {
   tryCatch({
     loadNamespace("httpgd")
-    options(device = function(...) {
-      httpgd::hgd(port = 35211, silent = TRUE)
-    })
+    options(
+      httpgd.port = 35211,
+      httpgd.token = FALSE,
+      device = function(...) {
+        httpgd::hgd()
+      }
+    )
   }, error = function(e) {
     # httpgd not available, skip graphics device setup
   })
