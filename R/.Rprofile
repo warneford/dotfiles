@@ -45,11 +45,10 @@ if (interactive()) {
     loadNamespace("httpgd")
     options(
       httpgd.port = 35211,
-      httpgd.token = FALSE,
-      device = function(...) {
-        httpgd::hgd()
-      }
+      httpgd.token = FALSE
     )
+    # Start httpgd immediately
+    httpgd::hgd()
   }, error = function(e) {
     # httpgd not available, skip graphics device setup
   })
