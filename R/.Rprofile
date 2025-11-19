@@ -68,8 +68,19 @@ install.packages <- function(pkgs, ...) {
   invisible(NULL)
 }
 
-# Set default CRAN mirror
-options(repos = c(CRAN = "https://cloud.r-project.org"))
+# Set default CRAN mirror - use Posit Package Manager for Linux binaries
+# PPM provides pre-compiled binaries for Ubuntu, avoiding lengthy compilation times
+if (Sys.info()["sysname"] == "Linux") {
+  # Posit Public Package Manager with binaries for Ubuntu 22.04 (Jammy)
+  # Setting HTTPUserAgent ensures R requests binary packages instead of source
+  options(
+    repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/jammy/latest"),
+    HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
+  )
+} else {
+  # macOS and Windows use standard CRAN mirror
+  options(repos = c(CRAN = "https://cloud.r-project.org"))
+}
 
 # Google authentication settings for gargle/googledrive/googlesheets4
 options(
