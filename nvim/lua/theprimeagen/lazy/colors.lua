@@ -4,6 +4,7 @@ function ColorMyPencils(color)
 
 	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
 end
 
 return {
@@ -78,6 +79,7 @@ return {
         config = function()
             require('rose-pine').setup({
                 disable_background = true,
+                dim_inactive_windows = false,
                 styles = {
                     italic = false,
                 },

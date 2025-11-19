@@ -54,6 +54,10 @@ autocmd('BufEnter', {
         else
             pcall(vim.cmd.colorscheme, "rose-pine-moon")
         end
+        -- Reapply highlight settings to prevent inactive window dimming
+        vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+        vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+        vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
     end
 })
 
