@@ -47,8 +47,10 @@ if (interactive()) {
       httpgd.port = 35211,
       httpgd.token = FALSE
     )
-    # Start httpgd immediately
-    httpgd::hgd()
+    # Only start httpgd if not already running
+    if (!httpgd::hgd_active()) {
+      httpgd::hgd()
+    }
   }, error = function(e) {
     # httpgd not available, skip graphics device setup
   })
