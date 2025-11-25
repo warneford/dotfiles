@@ -8,8 +8,10 @@ alias v='nvim'
 # Git aliases
 alias lg='lazygit'
 
-# R aliases - use radian for enhanced console with RStudio-like features
-alias R='radian'
+# R aliases
+# R (uppercase) = system R for CMD operations like R CMD INSTALL
+# r (lowercase) = radian for enhanced console with RStudio-like features
+alias R='/Library/Frameworks/R.framework/Resources/bin/R'
 alias r='radian'
 
 # Convenience aliases
