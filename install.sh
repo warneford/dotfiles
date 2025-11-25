@@ -283,6 +283,12 @@ print_info "Creating symlinks..."
 ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
 print_success "Linked .zshrc"
 
+# Symlink p10k config (if exists)
+if [ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]; then
+    ln -sf "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+    print_success "Linked .p10k.zsh"
+fi
+
 # Symlink nvim config
 mkdir -p "$HOME/.config"
 ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"

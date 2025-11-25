@@ -1,0 +1,43 @@
+services:
+  r-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.r-dev
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+        USERNAME: ${USER:-dev}
+    image: r-dev:local
+    container_name: rwt-mind-palace
+    hostname: rwt-mind-palace
+    stdin_open: true
+    tty: true
+    ports:
+      - "9012:35211"  # httpgd
+    volumes:
+      # Mount dotfiles (install.sh creates symlinks to these)
+      - ~/dotfiles:/home/${USER:-dev}/dotfiles
+      # Mount projects directory
+      - ~/projects:/home/${USER:-dev}/projects
+      # Git/SSH config (read-only)
+      - ~/.ssh:/home/${USER:-dev}/.ssh:ro
+      - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
+      - ~/.git-credentials:/home/${USER:-dev}/.git-credentials
+      # Persist tmux sessions across container restarts
+      - r-dev-tmp:/tmp
+    environment:
+      - TERM=xterm-256color
+
+  rstudio:
+    image: rocker/tidyverse:4.5.2
+    container_name: rstudio
+    environment:
+      - PASSWORD=${RSTUDIO_PASSWORD:-rstudio}
+    ports:
+      - "9010:8787"  # RStudio Server
+    volumes:
+      - ~/projects:/home/rstudio/projects
+    restart: unless-stopped
+
+volumes:
+  r-dev-tmp:
