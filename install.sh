@@ -315,6 +315,17 @@ if [ -f "$HOME/.radian_profile" ] && [ ! -L "$HOME/.radian_profile" ]; then
 fi
 print_success "Linked radian config"
 
+# Add git config include (preserves machine-specific settings in ~/.gitconfig)
+if [ -f "$DOTFILES_DIR/git/config" ]; then
+    INCLUDE_PATH="$DOTFILES_DIR/git/config"
+    if ! grep -q "path = $INCLUDE_PATH" "$HOME/.gitconfig" 2>/dev/null; then
+        git config --global include.path "$INCLUDE_PATH"
+        print_success "Added git config include"
+    else
+        print_success "Git config include already present"
+    fi
+fi
+
 # Symlink custom scripts from bin/
 mkdir -p "$HOME/.local/bin"
 if [ -d "$DOTFILES_DIR/bin" ]; then

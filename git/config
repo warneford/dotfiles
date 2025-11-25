@@ -1,0 +1,11 @@
+# Portable git settings (included from ~/.gitconfig)
+# Machine-specific settings (user, credential) stay in ~/.gitconfig
+
+[push]
+	autoSetupRemote = true
+
+[pull]
+	rebase = false
+
+[init]
+	defaultBranch = main
