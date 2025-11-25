@@ -73,9 +73,18 @@ vim.keymap.set(
     "oif err != nil {<CR>}<Esc>O.logger.Error(\"error\", \"error\", err)<Esc>F.;i"
 )
 
-vim.keymap.set("n", "<leader>ca", function()
+-- Cellular Automaton animations
+vim.keymap.set("n", "<leader>zr", function()
     require("cellular-automaton").start_animation("make_it_rain")
-end)
+end, { desc = "Make it rain animation" })
+
+vim.keymap.set("n", "<leader>zg", function()
+    require("cellular-automaton").start_animation("game_of_life")
+end, { desc = "Game of life animation" })
+
+vim.keymap.set("n", "<leader>zs", function()
+    require("cellular-automaton").start_animation("scramble")
+end, { desc = "Scramble animation" })
 
 -- Reload current file if it's a vim config, otherwise reload init.lua
 vim.keymap.set("n", "<leader><leader>", function()

@@ -19,6 +19,10 @@ return {
 			{ "<leader>qr", group = "[r]un" },
 			{ "<leader>r", group = "[r] R specific" },
 			{ "<leader>v", group = "[v]im" },
+			{ "<leader>z", group = "[z] animations" },
+			{ "<leader>zr", desc = "Make it rain animation" },
+			{ "<leader>zg", desc = "Game of life animation" },
+			{ "<leader>zs", desc = "Scramble animation" },
 		})
 	end,
 }
