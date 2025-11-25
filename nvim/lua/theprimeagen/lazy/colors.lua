@@ -5,6 +5,15 @@ function ColorMyPencils(color)
 	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 	vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
+	vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
+
+	-- Colorcolumn: subtle vertical line at 80 chars
+	-- Options to try:
+	-- Subtle dark gray: { bg = "#1c1c1c" }
+	-- Very subtle: { bg = "#0a0a0a" }
+	-- Rose-pine inspired muted: { bg = "#26233a" }
+	-- Just a thin line (no bg): { fg = "#6e6a86" }
+	vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#6e6a86" })
 end
 
 return {
