@@ -302,6 +302,10 @@ print_success "Linked tmux config"
 ln -sf "$DOTFILES_DIR/zsh/aliases.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/aliases.zsh"
 print_success "Linked aliases"
 
+# Symlink functions
+ln -sf "$DOTFILES_DIR/zsh/functions.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/functions.zsh"
+print_success "Linked functions"
+
 # Symlink .Rprofile
 ln -sf "$DOTFILES_DIR/R/.Rprofile" "$HOME/.Rprofile"
 print_success "Linked .Rprofile"

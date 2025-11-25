@@ -1,0 +1,17 @@
+[project]
+name = "PROJECT_NAME"
+version = "0.1.0"
+description = "Python dependencies for R project"
+requires-python = ">=3.10"
+
+dependencies = [
+    # R console with reticulate compatibility
+    "radian",
+
+    # Common dependencies (uncomment as needed)
+    # "numpy>=1.20.0",
+    # "pulp>=2.0",
+    # "highspy",
+    # "rdkit",
+    # "pillow",
+]
