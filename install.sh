@@ -328,6 +328,16 @@ mkdir -p "$HOME/.config/direnv"
 ln -sf "$DOTFILES_DIR/direnv/direnvrc" "$HOME/.config/direnv/direnvrc"
 print_success "Linked direnv config"
 
+# Symlink radian config
+mkdir -p "$HOME/.config/radian"
+ln -sf "$DOTFILES_DIR/radian/profile" "$HOME/.config/radian/profile"
+# Remove old .radian_profile if it exists and isn't a symlink
+if [ -f "$HOME/.radian_profile" ] && [ ! -L "$HOME/.radian_profile" ]; then
+    rm "$HOME/.radian_profile"
+    print_info "Removed old ~/.radian_profile (now using ~/.config/radian/profile)"
+fi
+print_success "Linked radian config"
+
 # Symlink custom scripts from bin/
 mkdir -p "$HOME/.local/bin"
 if [ -d "$DOTFILES_DIR/bin" ]; then

@@ -1,0 +1,58 @@
+# Radian profile - symlinked to ~/.config/radian/profile
+# See https://github.com/randy3k/radian for all options
+
+# Fix macOS fork() issue with Python multiprocessing
+Sys.setenv(PYTHONMULTIPROCESSING_START_METHOD = "spawn")
+
+options(
+    # Editing mode - vi to match nvim
+    radian.editing_mode = "vi",
+    radian.show_vi_mode_prompt = TRUE,
+    radian.vi_mode_prompt = "\033[0;34m[{}]\033[0m ",
+
+    # Indentation - match nvim settings (4 spaces)
+    radian.tab_size = 4,
+    radian.auto_indentation = TRUE,
+    radian.indent_lines = TRUE,
+
+    # Brackets and matching
+    radian.auto_match = TRUE,
+    radian.highlight_matching_bracket = TRUE,
+
+    # Completion
+    radian.complete_while_typing = TRUE,
+    radian.completion_prefix_length = 2,
+    radian.completion_timeout = 0.05,
+    radian.completion_adding_spaces_around_equals = TRUE,
+
+    # History
+    radian.history_size = 20000,
+    radian.global_history_file = "~/.radian_history",
+    radian.history_search_no_duplicates = TRUE,
+    radian.history_search_ignore_case = TRUE,
+
+    # Display
+    radian.color_scheme = "native",
+    radian.insert_new_line = TRUE,
+    radian.auto_width = TRUE,
+
+    # Python REPL via reticulate (~ to toggle)
+    radian.enable_reticulate_prompt = TRUE,
+
+    # Key bindings
+    # Alt/Escape + - inserts assignment operator
+    # Alt/Escape + m inserts pipe operator (m for "then/pipe")
+    radian.escape_key_map = list(
+        list(key = "-", value = " <- "),
+        list(key = "m", value = " |> ")
+    ),
+
+    # Reduce vi mode escape delay (default is 0.5s which feels laggy)
+    radian.on_load_hooks = list(function() {
+        getOption("rchitect.py_tools")$attach()
+        radian <- import("radian")
+        app <- radian$get_app()$session$app
+        app$ttimeoutlen <- 0.05  # 50ms instead of 500ms
+        app$timeoutlen <- 0.25
+    })
+)
