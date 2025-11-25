@@ -29,3 +29,7 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 
 vim.opt.colorcolumn = "80"
+
+-- Python provider for neovim plugins (pynvim, image.nvim, etc.)
+-- Uses dedicated venv to avoid conflicts with project venvs
+vim.g.python3_host_prog = os.getenv("HOME") .. "/.local/share/nvim/python-env/bin/python"

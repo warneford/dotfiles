@@ -395,11 +395,16 @@ else
     print_success "Quarto CLI already installed"
 fi
 
-# Install Python packages for image.nvim
-print_info "Installing Python packages for image.nvim..."
-uv pip install --system --break-system-packages pynvim cairosvg pillow 2>/dev/null || \
-uv pip install --python "$(which python3)" pynvim cairosvg pillow
-print_success "Python packages installed via uv"
+# Install Python packages for neovim plugins (image.nvim, etc.)
+# Use a dedicated venv to avoid conflicts with project venvs
+NVIM_PYTHON_ENV="$HOME/.local/share/nvim/python-env"
+print_info "Setting up Python environment for neovim..."
+if [ ! -d "$NVIM_PYTHON_ENV" ]; then
+    uv venv "$NVIM_PYTHON_ENV"
+    print_success "Created neovim Python venv"
+fi
+uv pip install --python "$NVIM_PYTHON_ENV/bin/python" pynvim cairosvg pillow
+print_success "Python packages installed to nvim venv"
 
 # Install R packages for nvim-r (if R is available)
 if command -v Rscript &> /dev/null; then
