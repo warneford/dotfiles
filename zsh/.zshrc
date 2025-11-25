@@ -77,35 +77,11 @@ fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# NOTE: conda/mamba initialization blocks will be added below by 'conda init' and 'mamba init'
-# These blocks must come AFTER all other configuration so conda is properly initialized
-# before any conda activate commands are run.
-
-# After conda/mamba init blocks are added (by running install-r-linux.sh),
-# add this at the very end to auto-activate the r-base environment:
-#
-# if command -v conda &> /dev/null; then
-#     if conda env list 2>/dev/null | grep -q "^r-base "; then
-#         conda activate r-base 2>/dev/null || true
-#     fi
-# fi
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/data/home/robert/.local/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/data/home/robert/.local/miniforge3/etc/profile.d/conda.sh" ]; then
-        . "/data/home/robert/.local/miniforge3/etc/profile.d/conda.sh"
-    else
-        export PATH="/data/home/robert/.local/miniforge3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
+# Add user-local R to PATH (from install-r-linux.sh)
+add_to_path "$HOME/.local/R/current/bin"
 
 # Alias for safely reloading .zshrc (skips instant prompt on reload)
 alias reload='ZSHRC_RELOADING=1 source ~/.zshrc && unset ZSHRC_RELOADING'
 
+# direnv hook for uv + per-project Python environments
 eval "$(direnv hook zsh)"
