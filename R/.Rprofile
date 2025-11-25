@@ -15,11 +15,12 @@ if (Sys.info()["sysname"] == "Linux") {
     HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
   )
 } else {
-  # macOS and Windows: Use PPM latest (serves CRAN binaries), fall back to CRAN
+  # macOS and Windows: Use CRAN official binaries (better R 4.5+ compatibility)
+  # PPM binaries have linking issues with R 4.5+ and radian
   options(
     repos = c(
-      PPM = "https://packagemanager.posit.co/cran/latest",
-      CRAN = "https://cloud.r-project.org"
+      CRAN = "https://cloud.r-project.org",
+      PPM = "https://packagemanager.posit.co/cran/latest"
     ),
     HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
   )
@@ -41,7 +42,7 @@ options(defaultPackages = c(getOption("defaultPackages"), "stats", "graphics", "
 # Access plots at http://localhost:35211 (requires SSH port forwarding)
 # Token disabled since we're behind VPN
 if (interactive()) {
-  tryCatch({
+  invisible(tryCatch({
     loadNamespace("httpgd")
     options(
       httpgd.port = 35211,
@@ -53,8 +54,9 @@ if (interactive()) {
     }
   }, error = function(e) {
     # httpgd not available, skip graphics device setup
-  })
+    invisible(NULL)
+  }))
 }
 
 cat("R profile loaded from dotfiles\n")
-cat("→ Using Posit Package Manager for fast binary installations\n")
+cat("→ Using CRAN official binaries (PPM fallback)\n")

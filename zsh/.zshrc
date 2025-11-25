@@ -108,3 +108,4 @@ unset __conda_setup
 # Alias for safely reloading .zshrc (skips instant prompt on reload)
 alias reload='ZSHRC_RELOADING=1 source ~/.zshrc && unset ZSHRC_RELOADING'
 
+eval "$(direnv hook zsh)"

@@ -1,0 +1,11 @@
+#!/bin/bash
+# Wrapper script for radian that loads direnv environment first
+# This ensures VIRTUAL_ENV is set for reticulate/platbiotools integration
+
+# Load direnv environment if available
+if command -v direnv &> /dev/null; then
+    eval "$(direnv export bash 2>/dev/null)"
+fi
+
+# Run radian with all passed arguments
+exec radian "$@"

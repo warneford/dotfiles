@@ -60,6 +60,8 @@ if $IS_MAC; then
         "air"           # R code formatter (Posit/tidyverse)
         "lazygit"       # Git TUI for nvim
         "tmux"          # Terminal multiplexer
+        "uv"            # Fast Python package/environment manager
+        "direnv"        # Directory-based environment management
     )
     # Note: We use CRAN R (not Homebrew R) for better package compatibility
     # Download from: https://cloud.r-project.org/bin/macosx/
@@ -165,6 +167,26 @@ else
         print_success "lazygit installed"
     else
         print_success "lazygit already installed ($(lazygit --version | head -1))"
+    fi
+
+    # Install uv (fast Python package/environment manager)
+    if ! command -v uv &> /dev/null; then
+        print_info "Installing uv..."
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        # Add to PATH for current session
+        export PATH="$HOME/.local/bin:$PATH"
+        print_success "uv installed"
+    else
+        print_success "uv already installed ($(uv --version))"
+    fi
+
+    # Install direnv (directory-based environment management)
+    if ! command -v direnv &> /dev/null; then
+        print_info "Installing direnv..."
+        curl -sfL https://direnv.net/install.sh | bash
+        print_success "direnv installed"
+    else
+        print_success "direnv already installed ($(direnv --version))"
     fi
 
     # Install R if not already present
@@ -301,6 +323,23 @@ print_success "Linked aliases"
 ln -sf "$DOTFILES_DIR/R/.Rprofile" "$HOME/.Rprofile"
 print_success "Linked .Rprofile"
 
+# Symlink direnv config
+mkdir -p "$HOME/.config/direnv"
+ln -sf "$DOTFILES_DIR/direnv/direnvrc" "$HOME/.config/direnv/direnvrc"
+print_success "Linked direnv config"
+
+# Symlink custom scripts from bin/
+mkdir -p "$HOME/.local/bin"
+if [ -d "$DOTFILES_DIR/bin" ]; then
+    for script in "$DOTFILES_DIR/bin"/*; do
+        if [ -f "$script" ]; then
+            script_name=$(basename "$script")
+            ln -sf "$script" "$HOME/.local/bin/$script_name"
+            print_success "Linked $script_name"
+        fi
+    done
+fi
+
 # Setup Ghostty config (only on local machines, not SSH sessions)
 if ! $IS_SSH; then
     if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
@@ -371,8 +410,13 @@ fi
 
 # Install Python packages for image.nvim
 print_info "Installing Python packages for image.nvim..."
-python3 -m pip install --user pynvim cairosvg pillow
-print_success "Python packages installed"
+if command -v conda &> /dev/null; then
+    conda install -y -c conda-forge pynvim cairosvg pillow
+    print_success "Python packages installed via conda"
+else
+    python3 -m pip install --user --break-system-packages pynvim cairosvg pillow
+    print_success "Python packages installed via pip"
+fi
 
 # Install R packages for nvim-r (if R is available)
 if command -v Rscript &> /dev/null; then
@@ -384,30 +428,7 @@ else
     print_info "After installing R, run: Rscript -e 'install.packages(\"languageserver\")'"
 fi
 
-# Install pipx (portable Python CLI tool installer - works on macOS and Linux)
-print_info "Installing pipx..."
-if ! command -v pipx &> /dev/null; then
-    python3 -m pip install --user pipx
-    python3 -m pipx ensurepath
-    export PATH="$PATH:$HOME/.local/bin"
-    print_success "pipx installed"
-else
-    print_success "pipx already installed"
-fi
-
-# Install radian (enhanced R console with RStudio-like features)
-print_info "Installing radian via pipx..."
-if pipx list 2>/dev/null | grep -q "radian"; then
-    print_success "radian already installed"
-else
-    pipx install radian
-    print_success "radian installed"
-fi
-
-echo ""
-print_success "Installation complete!"
-echo ""
-print_info "Next steps:"
+rint_info "Next steps:"
 echo "  1. Restart your terminal or run: source ~/.zshrc"
 echo "  2. Run 'p10k configure' to configure your Powerlevel10k theme"
 echo "  3. Open nvim - lazy.nvim will auto-install and plugins will be loaded"

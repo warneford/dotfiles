@@ -1,0 +1,90 @@
+# direnvrc - Custom direnv functions
+# Symlinked to ~/.config/direnv/direnvrc by install.sh
+
+# use_uv: Create and activate a Python virtual environment using uv
+#
+# This function integrates uv with direnv for automatic environment activation.
+# It will:
+#   1. Create a .venv if it doesn't exist
+#   2. Respect .python-version file if present
+#   3. Install dependencies from pyproject.toml or requirements.txt
+#   4. Activate the environment (set PATH and VIRTUAL_ENV)
+#
+# Usage in .envrc:
+#   use_uv
+#
+# Optional: specify a different venv directory:
+#   use_uv .venv-custom
+#
+use_uv() {
+    local venv_dir="${1:-.venv}"
+
+    # Check if uv is available
+    if ! has uv; then
+        log_error "uv is not installed. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"
+        return 1
+    fi
+
+    # Create venv if it doesn't exist
+    if [[ ! -d "$venv_dir" ]]; then
+        log_status "creating venv in $venv_dir"
+
+        # Check for .python-version file
+        if [[ -f .python-version ]]; then
+            local python_version
+            python_version=$(cat .python-version)
+            log_status "using Python $python_version from .python-version"
+            uv venv "$venv_dir" --python "$python_version"
+        else
+            uv venv "$venv_dir"
+        fi
+    fi
+
+    # Activate the virtual environment
+    export VIRTUAL_ENV="$PWD/$venv_dir"
+    PATH_add "$venv_dir/bin"
+
+    # Install/sync dependencies if pyproject.toml or requirements.txt exists
+    if [[ -f pyproject.toml ]]; then
+        # Check if uv.lock exists and is newer than pyproject.toml
+        if [[ ! -f uv.lock ]] || [[ pyproject.toml -nt uv.lock ]]; then
+            log_status "syncing dependencies from pyproject.toml"
+            uv sync --quiet
+        fi
+    elif [[ -f requirements.txt ]]; then
+        # For requirements.txt, use a marker file to track installs
+        local marker="$venv_dir/.requirements.txt.installed"
+        if [[ ! -f "$marker" ]] || [[ requirements.txt -nt "$marker" ]]; then
+            log_status "installing dependencies from requirements.txt"
+            uv pip install -r requirements.txt --quiet
+            touch "$marker"
+        fi
+    fi
+}
+
+# use_uv_tool: Ensure a uv-managed tool is available globally
+#
+# Tools are installed to ~/.local/bin via uv tool.
+# Useful for linters/formatters that don't need project-specific Python.
+#
+# WARNING: Do NOT use this for radian! Radian must be installed in the
+# project venv (via pyproject.toml) so that reticulate uses the same
+# Python environment as your project dependencies.
+#
+# Usage in .envrc:
+#   use_uv_tool ruff
+#   use_uv_tool black
+#
+use_uv_tool() {
+    local tool="$1"
+
+    if ! has uv; then
+        log_error "uv is not installed"
+        return 1
+    fi
+
+    if ! uv tool list 2>/dev/null | grep -q "^$tool "; then
+        log_status "installing $tool via uv tool"
+        uv tool install "$tool"
+    fi
+}

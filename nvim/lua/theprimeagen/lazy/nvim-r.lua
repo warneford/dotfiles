@@ -4,8 +4,9 @@ return {
 	config = function()
 		-- Create a table with the options to be passed to setup()
 		local opts = {
-			-- Use radian instead of base R
-			R_app = "radian",
+			-- Use radian-direnv wrapper to ensure VIRTUAL_ENV is loaded
+			-- This is needed because tmux split-window doesn't inherit direnv env
+			R_app = "radian-direnv",
 			R_cmd = "R",
 
 			-- Use external tmux terminal instead of built-in (avoids TCP issues)

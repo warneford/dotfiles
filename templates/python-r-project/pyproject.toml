@@ -1,0 +1,35 @@
+[project]
+name = "my-project"
+version = "0.1.0"
+description = "Project description"
+requires-python = ">=3.10"
+
+# Core dependencies - radian MUST be here (not global) for reticulate compatibility
+dependencies = [
+    "radian",           # Enhanced R console - must be in project venv for reticulate
+    "numpy>=1.20.0",    # Numerical computing
+    "pandas",           # Data manipulation
+]
+
+# Optional: R/reticulate-specific dependencies
+# Add packages here that you use via reticulate::import()
+[project.optional-dependencies]
+chem = [
+    "rdkit",            # Cheminformatics
+    "pillow",           # Image processing
+]
+ml = [
+    "scikit-learn",
+    "scipy",
+]
+
+# Optional: development dependencies
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.uv]
+# uv-specific settings (optional)
+# dev-dependencies = ["pytest"]
