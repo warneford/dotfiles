@@ -397,16 +397,9 @@ fi
 
 # Install Python packages for image.nvim
 print_info "Installing Python packages for image.nvim..."
-if command -v uv &> /dev/null; then
-    # Use uv pip with --break-system-packages for system python installs
-    uv pip install --system --break-system-packages pynvim cairosvg pillow 2>/dev/null || \
-    uv pip install --python "$(which python3)" pynvim cairosvg pillow 2>/dev/null || \
-    python3 -m pip install --user --break-system-packages pynvim cairosvg pillow
-    print_success "Python packages installed"
-else
-    python3 -m pip install --user --break-system-packages pynvim cairosvg pillow
-    print_success "Python packages installed via pip"
-fi
+uv pip install --system --break-system-packages pynvim cairosvg pillow 2>/dev/null || \
+uv pip install --python "$(which python3)" pynvim cairosvg pillow
+print_success "Python packages installed via uv"
 
 # Install R packages for nvim-r (if R is available)
 if command -v Rscript &> /dev/null; then
