@@ -398,8 +398,11 @@ fi
 # Install Python packages for image.nvim
 print_info "Installing Python packages for image.nvim..."
 if command -v uv &> /dev/null; then
-    uv pip install --system pynvim cairosvg pillow
-    print_success "Python packages installed via uv"
+    # Use uv pip with --break-system-packages for system python installs
+    uv pip install --system --break-system-packages pynvim cairosvg pillow 2>/dev/null || \
+    uv pip install --python "$(which python3)" pynvim cairosvg pillow 2>/dev/null || \
+    python3 -m pip install --user --break-system-packages pynvim cairosvg pillow
+    print_success "Python packages installed"
 else
     python3 -m pip install --user --break-system-packages pynvim cairosvg pillow
     print_success "Python packages installed via pip"
@@ -415,7 +418,7 @@ else
     print_info "After installing R, run: Rscript -e 'install.packages(\"languageserver\")'"
 fi
 
-rint_info "Next steps:"
+print_info "Next steps:"
 echo "  1. Restart your terminal or run: source ~/.zshrc"
 echo "  2. Run 'p10k configure' to configure your Powerlevel10k theme"
 echo "  3. Open nvim - lazy.nvim will auto-install and plugins will be loaded"
