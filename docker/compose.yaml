@@ -27,6 +27,8 @@ services:
       - ~/.ssh:/home/${USER:-dev}/.ssh:ro
       - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
       - ~/.git-credentials:/home/${USER:-dev}/.git-credentials
+      # Google auth tokens for gargle/googlesheets4/googledrive
+      - ~/.secrets:/home/${USER:-dev}/.secrets
       # Persist tmux sessions across container restarts
       - r-dev-tmp:/tmp
     environment:

@@ -21,10 +21,23 @@ local({
 # Fall back to CRAN source packages if binaries aren't available
 # Setting HTTPUserAgent ensures R requests binary packages instead of source
 if (Sys.info()["sysname"] == "Linux") {
-  # Linux: Use PPM with Ubuntu 22.04 (Jammy) binaries, fall back to CRAN source
+  # Linux: Use PPM binaries matching the current distro
+  # Detect Ubuntu codename from /etc/os-release
+  distro_codename <- tryCatch({
+    os_release <- readLines("/etc/os-release", warn = FALSE)
+    codename_line <- grep("^VERSION_CODENAME=", os_release, value = TRUE)
+    if (length(codename_line) > 0) {
+      sub("^VERSION_CODENAME=", "", codename_line)
+    } else {
+      "jammy"  # fallback
+    }
+  }, error = function(e) "jammy")
+
+  ppm_url <- paste0("https://packagemanager.posit.co/cran/__linux__/", distro_codename, "/latest")
+
   options(
     repos = c(
-      PPM = "https://packagemanager.posit.co/cran/__linux__/jammy/latest",
+      PPM = ppm_url,
       CRAN = "https://cloud.r-project.org"
     ),
     HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
