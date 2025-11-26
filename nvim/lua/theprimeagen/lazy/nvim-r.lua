@@ -10,7 +10,8 @@ return {
 			R_cmd = "R",
 
 			-- Use external tmux terminal instead of built-in (avoids TCP issues)
-			external_term = "tmux split-window -h -p 40",
+			-- -l 80: fixed width (percentage -p doesn't work in all contexts)
+			external_term = "tmux split-window -h -l 80",
 
 			R_args = {},  -- radian doesn't need --quiet --no-save
 			min_editor_width = 72,

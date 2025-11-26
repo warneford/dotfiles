@@ -1,0 +1,11 @@
+#!/bin/bash
+# Start or attach to R development container (rwt-mind-palace)
+
+if docker ps -q -f name=rwt-mind-palace | grep -q .; then
+    # Container running - attach
+    docker exec -it rwt-mind-palace zsh -l
+else
+    # Start container
+    docker compose -f ~/dotfiles/docker/compose.yaml up -d r-dev
+    docker exec -it rwt-mind-palace zsh -l
+fi

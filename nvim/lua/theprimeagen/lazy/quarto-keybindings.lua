@@ -142,9 +142,9 @@ return {
 			vim.keymap.set("n", "<leader>qp", function()
 				local current_file = vim.fn.expand("%:p")
 				if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
-					vim.notify("Starting Quarto preview on port 4200...", vim.log.levels.INFO)
-					-- Run quarto preview with fixed port 4200 (for SSH port forwarding)
-					vim.fn.jobstart({ "quarto", "preview", current_file, "--port", "4200" }, {
+					vim.notify("Starting Quarto preview on port 9013...", vim.log.levels.INFO)
+					-- Run quarto preview with fixed port 9013 and host 0.0.0.0 (for container/SSH access)
+					vim.fn.jobstart({ "quarto", "preview", current_file, "--port", "9013", "--host", "0.0.0.0" }, {
 						detach = true,
 						on_stdout = function(_, data)
 							if data then
@@ -156,7 +156,7 @@ return {
 							end
 						end,
 					})
-					vim.notify("Preview starting at http://localhost:4200", vim.log.levels.INFO)
+					vim.notify("Preview starting at http://localhost:9013", vim.log.levels.INFO)
 				else
 					vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
 				end

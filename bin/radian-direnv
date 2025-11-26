@@ -7,5 +7,24 @@ if command -v direnv &> /dev/null; then
     eval "$(direnv export bash 2>/dev/null)"
 fi
 
-# Run radian with all passed arguments
-exec radian "$@"
+# If radian is in PATH (from direnv/venv), use it
+if command -v radian &> /dev/null; then
+    exec radian "$@"
+fi
+
+# Fallback: look for radian in local .venv
+if [ -x ".venv/bin/radian" ]; then
+    exec .venv/bin/radian "$@"
+fi
+
+# Fallback: search upward for .venv directory
+dir="$PWD"
+while [ "$dir" != "/" ]; do
+    if [ -x "$dir/.venv/bin/radian" ]; then
+        exec "$dir/.venv/bin/radian" "$@"
+    fi
+    dir="$(dirname "$dir")"
+done
+
+echo "Error: radian not found. Run 'uv sync' in a project with radian in pyproject.toml"
+exit 1

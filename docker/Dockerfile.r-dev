@@ -1,0 +1,93 @@
+FROM rocker/tidyverse:4.5.2
+
+# System dependencies for R packages and dev tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build tools (gfortran included in rocker base)
+    build-essential \
+    # Terminal/editor (neovim installed later via bob for latest version)
+    tmux \
+    zsh \
+    # Utils
+    curl \
+    git \
+    fd-find \
+    ripgrep \
+    fzf \
+    unzip \
+    direnv \
+    # Python for radian and reticulate
+    python3 \
+    python3-pip \
+    python3-venv \
+    libpython3-dev \
+    # R package system dependencies
+    libglpk-dev \
+    # Cleanup
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js (pre-built binary, avoids nvm compiling from source)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install deno (needed for peek.nvim markdown preview) - install to /usr/local/bin for all users
+RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
+
+# Install neovim (latest stable via GitHub release)
+RUN NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/') && \
+    curl -LO "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz" && \
+    tar -xzf nvim-linux-x86_64.tar.gz && \
+    mv nvim-linux-x86_64 /opt/nvim && \
+    ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim && \
+    rm nvim-linux-x86_64.tar.gz
+
+# Install R packages for LSP and development
+# Note: radian is installed per-project via direnv/uv to share Python with reticulate
+# httpgd installed from GitHub as CRAN version is temporarily archived
+RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes'))" && \
+    R -e "remotes::install_github('nx10/httpgd')"
+
+# Copy entrypoint script (as root, before user switch)
+COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Create non-root user matching host UID (configurable at build time)
+# Rocker images have rstudio user with UID/GID 1000, so we rename if conflict exists
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+ARG USERNAME=dev
+RUN if getent passwd ${USER_ID} > /dev/null; then \
+        existing_user=$(getent passwd ${USER_ID} | cut -d: -f1); \
+        usermod -l ${USERNAME} -d /home/${USERNAME} -m -s /bin/zsh ${existing_user}; \
+        groupmod -n ${USERNAME} $(getent group ${GROUP_ID} | cut -d: -f1); \
+    else \
+        groupadd -g ${GROUP_ID} ${USERNAME} && \
+        useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/zsh ${USERNAME}; \
+    fi
+
+USER ${USERNAME}
+WORKDIR /home/${USERNAME}
+
+# Install uv for the user (used to manage per-project Python/radian)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create bootstrap .zshrc that runs dotfiles install on first login
+# After install, ~/.zshrc is replaced with the actual config
+RUN echo '# Bootstrap: run dotfiles install on first container login\n\
+if [[ ! -f "/var/tmp/.dotfiles-installed" && -f "$HOME/dotfiles/install.sh" ]]; then\n\
+    echo "First login - setting up dotfiles..."\n\
+    sleep 2\n\
+    if cd "$HOME/dotfiles" && bash install.sh; then\n\
+        touch "/var/tmp/.dotfiles-installed"\n\
+        echo "Dotfiles setup complete! Restarting shell..."\n\
+        exec zsh\n\
+    else\n\
+        echo "Dotfiles install failed! Run manually: cd ~/dotfiles && bash install.sh"\n\
+    fi\n\
+fi\n\
+[[ -f "$HOME/dotfiles/zsh/.zshrc" ]] && source "$HOME/dotfiles/zsh/.zshrc"' > ~/.zshrc
+
+# Expose httpgd port
+EXPOSE 35211
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["zsh"]

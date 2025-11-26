@@ -80,8 +80,14 @@ fi
 # Add user-local R to PATH (from install-r-linux.sh)
 add_to_path "$HOME/.local/R/current/bin"
 
+# Add dotfiles bin to PATH (r-dev, radian-direnv, etc.)
+add_to_path "$HOME/dotfiles/bin"
+
 # Alias for safely reloading .zshrc (skips instant prompt on reload)
 alias reload='ZSHRC_RELOADING=1 source ~/.zshrc && unset ZSHRC_RELOADING'
 
 # direnv hook for uv + per-project Python environments
 eval "$(direnv hook zsh)"
+
+# Show MOTD for container login
+[[ -f ~/dotfiles/zsh/motd.zsh ]] && source ~/dotfiles/zsh/motd.zsh
