@@ -1,6 +1,21 @@
 # R Profile - loaded on R startup
 # This file is symlinked to ~/.Rprofile
 
+# Ensure personal library exists and is used by default
+# This avoids the "Would you like to use a personal library?" prompt
+local({
+  lib_path <- Sys.getenv("R_LIBS_USER")
+  if (lib_path == "") {
+    lib_path <- file.path(Sys.getenv("HOME"), "R",
+      paste(R.version$platform, "library", R.version$major, sep = "-"),
+      paste0(R.version$major, ".", strsplit(R.version$minor, "\\.")[[1]][1]))
+  }
+  if (!dir.exists(lib_path)) {
+    dir.create(lib_path, recursive = TRUE)
+  }
+  .libPaths(c(lib_path, .libPaths()))
+})
+
 # Set default CRAN mirror - use Posit Package Manager for all platforms
 # PPM provides pre-compiled binaries and fast CDN delivery
 # Fall back to CRAN source packages if binaries aren't available
