@@ -67,6 +67,22 @@ WORKDIR /home/${USERNAME}
 # Install uv for the user (used to manage per-project Python/radian)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
+# Create bootstrap .zshrc that runs dotfiles install on first login
+# After install, ~/.zshrc is replaced with the actual config
+RUN echo '# Bootstrap: run dotfiles install on first container login\n\
+if [[ ! -f "/var/tmp/.dotfiles-installed" && -f "$HOME/dotfiles/install.sh" ]]; then\n\
+    echo "First login - setting up dotfiles..."\n\
+    sleep 2\n\
+    if cd "$HOME/dotfiles" && bash install.sh; then\n\
+        touch "/var/tmp/.dotfiles-installed"\n\
+        echo "Dotfiles setup complete! Restarting shell..."\n\
+        exec zsh\n\
+    else\n\
+        echo "Dotfiles install failed! Run manually: cd ~/dotfiles && bash install.sh"\n\
+    fi\n\
+fi\n\
+[[ -f "$HOME/dotfiles/zsh/.zshrc" ]] && source "$HOME/dotfiles/zsh/.zshrc"' > ~/.zshrc
+
 # Expose httpgd port
 EXPOSE 35211
 

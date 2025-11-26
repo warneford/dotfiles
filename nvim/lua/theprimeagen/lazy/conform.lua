@@ -16,17 +16,21 @@ return {
 				typescript = { "prettier" },
 				elixir = { "mix" },
 				r = { "air" },
+			rmd = { "injected" },
+			quarto = { "injected" },
 			},
 			formatters = {
 				["clang-format"] = {
 					prepend_args = { "-style=file", "-fallback-style=LLVM" },
 				},
-				air = {
-					command = "air",
-					args = { "format", "$FILENAME" },
-					stdin = false,
-					-- Air modifies files in place, so we need to tell conform to read the file back
-					require_cwd = false,
+				injected = {
+					options = {
+						ignore_errors = true,
+						lang_to_formatters = {
+							r = { "air" },
+							yaml = {},
+						},
+					},
 				},
 			},
 		})

@@ -4,11 +4,12 @@ set -e
 
 echo "🚀 Starting dotfiles installation..."
 
-# Detect OS and SSH session
+# Detect OS, SSH session, and container environment
 OS="$(uname -s)"
 IS_MAC=false
 IS_LINUX=false
 IS_SSH=false
+IS_CONTAINER=false
 
 case "$OS" in
     Darwin*) IS_MAC=true ;;
@@ -17,6 +18,10 @@ esac
 
 if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
     IS_SSH=true
+fi
+
+if [ -f "/.dockerenv" ]; then
+    IS_CONTAINER=true
 fi
 
 # Colors for output
@@ -79,74 +84,93 @@ else
     # Linux: Install all dependencies without root access (batteries included!)
     print_info "Linux detected - setting up dependencies (no root required)..."
 
-    # Install Rust (required for bob-nvim and ripgrep) if not already installed
-    if ! command -v cargo &> /dev/null; then
-        print_info "Installing Rust..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source "$HOME/.cargo/env"
-        print_success "Rust installed"
+    # In containers, most tools are pre-installed via Dockerfile - skip version managers
+    if $IS_CONTAINER; then
+        print_info "Container detected - skipping version manager installs (using system packages)"
+
+        # Just verify tools exist
+        command -v rg &> /dev/null && print_success "ripgrep available" || print_info "ripgrep not found"
+        command -v node &> /dev/null && print_success "Node.js available ($(node --version))" || print_info "Node.js not found"
+        command -v nvim &> /dev/null && print_success "Neovim available ($(nvim --version | head -1))" || print_info "Neovim not found"
     else
-        print_success "Rust already installed"
-    fi
+        # Host Linux: Install tools via version managers (no root required)
 
-    # Source cargo env to ensure cargo is available
-    export PATH="$HOME/.cargo/bin:$PATH"
+        # Install Rust (required for bob-nvim and ripgrep) if not already installed
+        if ! command -v cargo &> /dev/null; then
+            print_info "Installing Rust..."
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            source "$HOME/.cargo/env"
+            print_success "Rust installed"
+        else
+            print_success "Rust already installed"
+        fi
 
-    # Install ripgrep via cargo (no root needed)
-    if ! command -v rg &> /dev/null; then
-        print_info "Installing ripgrep..."
-        cargo install ripgrep
-        print_success "ripgrep installed"
-    else
-        print_success "ripgrep already installed"
-    fi
+        # Source cargo env to ensure cargo is available
+        export PATH="$HOME/.cargo/bin:$PATH"
 
-    # Install nvm (Node Version Manager) if not already installed
-    # Check both common nvm installation locations
-    if [ ! -d "$HOME/.nvm" ] && [ ! -d "$HOME/.config/nvm" ]; then
-        print_info "Installing nvm (Node Version Manager)..."
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-        print_success "nvm installed"
-    else
-        print_success "nvm already installed"
-    fi
+        # Ensure a default toolchain is set (fixes "no default is configured" error)
+        if command -v rustup &> /dev/null && ! rustup default &> /dev/null; then
+            print_info "Setting default Rust toolchain..."
+            rustup default stable
+            print_success "Rust default toolchain set"
+        fi
 
-    # Load nvm from whichever location it's installed
-    if [ -d "$HOME/.config/nvm" ]; then
-        export NVM_DIR="$HOME/.config/nvm"
-    else
-        export NVM_DIR="$HOME/.nvm"
-    fi
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        # Install ripgrep via cargo (no root needed)
+        if ! command -v rg &> /dev/null; then
+            print_info "Installing ripgrep..."
+            cargo install ripgrep
+            print_success "ripgrep installed"
+        else
+            print_success "ripgrep already installed"
+        fi
 
-    # Install Node.js LTS via nvm (includes npm)
-    if ! command -v node &> /dev/null; then
-        print_info "Installing Node.js LTS via nvm..."
-        nvm install --lts
-        nvm use --lts
-        print_success "Node.js and npm installed"
-    else
-        print_success "Node.js already installed ($(node --version))"
-    fi
+        # Install nvm (Node Version Manager) if not already installed
+        # Check both common nvm installation locations
+        if [ ! -d "$HOME/.nvm" ] && [ ! -d "$HOME/.config/nvm" ]; then
+            print_info "Installing nvm (Node Version Manager)..."
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+            print_success "nvm installed"
+        else
+            print_success "nvm already installed"
+        fi
 
-    # Install bob-nvim (neovim version manager)
-    if ! command -v bob &> /dev/null; then
-        print_info "Installing bob-nvim (neovim version manager)..."
-        cargo install bob-nvim
-        print_success "bob-nvim installed"
+        # Load nvm from whichever location it's installed
+        if [ -d "$HOME/.config/nvm" ]; then
+            export NVM_DIR="$HOME/.config/nvm"
+        else
+            export NVM_DIR="$HOME/.nvm"
+        fi
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-        # Add bob's nvim to PATH
-        export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+        # Install Node.js LTS via nvm (includes npm)
+        if ! command -v node &> /dev/null; then
+            print_info "Installing Node.js LTS via nvm..."
+            nvm install --lts
+            nvm use --lts
+            print_success "Node.js and npm installed"
+        else
+            print_success "Node.js already installed ($(node --version))"
+        fi
 
-        # Install latest stable neovim
-        print_info "Installing neovim stable via bob..."
-        bob install stable
-        bob use stable
-        print_success "Neovim installed via bob"
-    else
-        print_success "bob-nvim already installed"
-        # Ensure we're using stable
-        bob use stable 2>/dev/null || true
+        # Install bob-nvim (neovim version manager)
+        if ! command -v bob &> /dev/null; then
+            print_info "Installing bob-nvim (neovim version manager)..."
+            cargo install bob-nvim
+            print_success "bob-nvim installed"
+
+            # Add bob's nvim to PATH
+            export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+
+            # Install latest stable neovim
+            print_info "Installing neovim stable via bob..."
+            bob install stable
+            bob use stable
+            print_success "Neovim installed via bob"
+        else
+            print_success "bob-nvim already installed"
+            # Ensure we're using stable
+            bob use stable 2>/dev/null || true
+        fi
     fi
 
     # Check for Python3
@@ -279,9 +303,14 @@ fi
 # Create symlinks
 print_info "Creating symlinks..."
 
-# Symlink .zshrc
-ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
-print_success "Linked .zshrc"
+# .zshrc: Copy in containers (so nvm etc can modify it), symlink on host
+if $IS_CONTAINER; then
+    cp "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+    print_success "Copied .zshrc (container mode - editable)"
+else
+    ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+    print_success "Linked .zshrc"
+fi
 
 # Symlink p10k config (if exists)
 if [ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]; then
@@ -424,6 +453,13 @@ if command -v Rscript &> /dev/null; then
 else
     print_info "R not found - skipping R package installation"
     print_info "After installing R, run: Rscript -e 'install.packages(\"languageserver\")'"
+fi
+
+# Install Mason packages for neovim (LSP servers, formatters, etc.)
+if command -v nvim &> /dev/null; then
+    print_info "Installing Mason packages (air formatter)..."
+    nvim --headless "+MasonInstall air" "+qa"
+    print_success "Mason packages installed"
 fi
 
 print_info "Next steps:"

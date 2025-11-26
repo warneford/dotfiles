@@ -12,13 +12,17 @@ services:
     hostname: rwt-mind-palace
     stdin_open: true
     tty: true
+    restart: unless-stopped
     ports:
       - "9012:35211"  # httpgd
+      - "9013:9013"   # quarto preview
     volumes:
       # Mount dotfiles (install.sh creates symlinks to these)
       - ~/dotfiles:/home/${USER:-dev}/dotfiles
       # Mount projects directory
       - ~/projects:/home/${USER:-dev}/projects
+      # Mount ArgoAPI
+      - /data/home/scott/projects/argoAPI:/home/${USER:-dev}/argoAPI:ro
       # Git/SSH config (read-only)
       - ~/.ssh:/home/${USER:-dev}/.ssh:ro
       - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
@@ -27,6 +31,7 @@ services:
       - r-dev-tmp:/tmp
     environment:
       - TERM=xterm-256color
+      - TZ=America/Los_Angeles
 
   rstudio:
     image: rocker/tidyverse:4.5.2
