@@ -142,25 +142,17 @@ return {
 			vim.keymap.set("n", "<leader>qp", function()
 				local current_file = vim.fn.expand("%:p")
 				if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
-					vim.notify("Starting Quarto preview on port 9013...", vim.log.levels.INFO)
-					-- Run quarto preview with fixed port 9013 and host 0.0.0.0 (for container/SSH access)
-					vim.fn.jobstart({ "quarto", "preview", current_file, "--port", "9013", "--host", "0.0.0.0" }, {
-						detach = true,
-						on_stdout = function(_, data)
-							if data then
-								for _, line in ipairs(data) do
-									if line:match("Browse at") or line:match("Listening") then
-										vim.notify(line, vim.log.levels.INFO)
-									end
-								end
-							end
-						end,
-					})
-					vim.notify("Preview starting at http://localhost:9013", vim.log.levels.INFO)
+					-- Send quarto preview command to R console (tmux pane)
+					-- Kill any existing process on port 9013 first, then start preview
+					local cmd = "system('fuser -k 9013/tcp 2>/dev/null; quarto preview "
+						.. current_file
+						.. " --port 9013 --host 0.0.0.0')"
+					require("r.send").cmd(cmd)
+					vim.notify("Quarto preview sent to R console", vim.log.levels.INFO)
 				else
 					vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
 				end
-			end, { desc = "[q]uarto [p]review in browser" })
+			end, { desc = "[q]uarto [p]review in R console" })
 
 			vim.keymap.set("n", "<leader>qr", function()
 				local current_file = vim.fn.expand("%:p")
