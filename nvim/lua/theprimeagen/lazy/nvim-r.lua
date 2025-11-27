@@ -33,6 +33,14 @@ return {
 			},
 			-- Disable Quarto code chunk highlighting to prevent errors with special buffers
 			hl_term = false,
+
+			-- Disable R.nvim's built-in LSP to prevent "Failed to send message to r_ls" errors
+			-- You still get completions from r_language_server via Mason
+			r_ls = {
+				completion = false,
+				hover = false,
+				signature = false,
+			},
 		}
 
 		-- Check if the environment variable "R_AUTO_START" exists.

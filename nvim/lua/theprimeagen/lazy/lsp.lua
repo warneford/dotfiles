@@ -59,6 +59,7 @@ return {
                     local lspconfig = require("lspconfig")
                     lspconfig.r_language_server.setup({
                         capabilities = capabilities,
+                        cmd = { vim.fn.stdpath("data") .. "/mason/bin/r-languageserver" },
                         filetypes = { "r", "rmd", "rmarkdown", "quarto" },
                         settings = {
                             r = {
@@ -140,12 +141,12 @@ return {
                 ["<C-Space>"] = cmp.mapping.complete(),
             }),
             sources = cmp.config.sources({
-                { name = "copilot", group_index = 2 },
-                { name = 'nvim_lsp' },
-                { name = 'luasnip' }, -- For luasnip users.
-                { name = 'path' },    -- File path completion
+                { name = 'nvim_lsp', group_index = 1 },  -- LSP first priority
+                { name = 'luasnip', group_index = 1 },
+                { name = 'path', group_index = 1 },
             }, {
-                { name = 'buffer' },
+                { name = "copilot", group_index = 2 },  -- AI suggestions second
+                { name = 'buffer', group_index = 2 },
             })
         })
 
