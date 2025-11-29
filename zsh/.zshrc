@@ -89,5 +89,10 @@ alias reload='ZSHRC_RELOADING=1 source ~/.zshrc && unset ZSHRC_RELOADING'
 # direnv hook for uv + per-project Python environments
 eval "$(direnv hook zsh)"
 
+# Source all function files from ~/dotfiles/zsh/functions/
+for func_file in ~/dotfiles/zsh/functions/*.zsh(N); do
+    source "$func_file"
+done
+
 # Show MOTD for container login
 [[ -f ~/dotfiles/zsh/motd.zsh ]] && source ~/dotfiles/zsh/motd.zsh

@@ -67,6 +67,12 @@ if $IS_MAC; then
         "tmux"          # Terminal multiplexer
         "uv"            # Fast Python package/environment manager
         "direnv"        # Directory-based environment management
+        "fzf"           # Fuzzy finder for shell
+    )
+
+    # macOS GUI apps (casks)
+    CASK_DEPENDENCIES=(
+        "karabiner-elements"  # Keyboard customization
     )
     # Note: We use CRAN R (not Homebrew R) for better package compatibility
     # Download from: https://cloud.r-project.org/bin/macosx/
@@ -80,6 +86,23 @@ if $IS_MAC; then
             print_success "$dep installed"
         fi
     done
+
+    # Install cask dependencies (GUI apps)
+    for cask in "${CASK_DEPENDENCIES[@]}"; do
+        if brew list --cask "$cask" &> /dev/null; then
+            print_success "$cask already installed"
+        else
+            print_info "Installing $cask..."
+            brew install --cask "$cask"
+            print_success "$cask installed"
+        fi
+    done
+
+    # Start Karabiner-Elements on login (it manages its own login item)
+    if [ -d "/Applications/Karabiner-Elements.app" ]; then
+        open -a "Karabiner-Elements"
+        print_success "Karabiner-Elements started (will auto-start on login)"
+    fi
 else
     # Linux: Install all dependencies without root access (batteries included!)
     print_info "Linux detected - setting up dependencies (no root required)..."
@@ -406,6 +429,68 @@ if ! $IS_SSH; then
     fi
 else
     print_info "SSH session detected - skipping Ghostty configuration (terminal emulator not needed)"
+fi
+
+# Setup AeroSpace tiling window manager (macOS only, not in SSH sessions)
+if $IS_MAC && ! $IS_SSH; then
+    if command -v aerospace &> /dev/null || [ -d "/Applications/AeroSpace.app" ]; then
+        print_info "Setting up AeroSpace configuration..."
+
+        # Backup existing aerospace config if it exists and is not a symlink
+        if [ -e "$HOME/.config/aerospace" ] && [ ! -L "$HOME/.config/aerospace" ]; then
+            mv "$HOME/.config/aerospace" "$HOME/.config/aerospace.backup.$(date +%Y%m%d_%H%M%S)"
+            print_success "Backed up existing aerospace config"
+        fi
+
+        # Remove existing symlink if present, then create new one
+        rm -rf "$HOME/.config/aerospace"
+        ln -sf "$DOTFILES_DIR/aerospace" "$HOME/.config/aerospace"
+        print_success "Linked AeroSpace directory to ~/.config/aerospace"
+    else
+        print_info "AeroSpace not found - skipping AeroSpace configuration"
+        print_info "Install with: brew install --cask nikitabobko/tap/aerospace"
+    fi
+
+    # Setup Karabiner-Elements (keyboard customization)
+    if [ -d "/Applications/Karabiner-Elements.app" ]; then
+        print_info "Setting up Karabiner-Elements configuration..."
+
+        # Backup existing karabiner config if it exists and is not a symlink
+        if [ -e "$HOME/.config/karabiner" ] && [ ! -L "$HOME/.config/karabiner" ]; then
+            mv "$HOME/.config/karabiner" "$HOME/.config/karabiner.backup.$(date +%Y%m%d_%H%M%S)"
+            print_success "Backed up existing karabiner config"
+        fi
+
+        # Remove existing symlink if present, then create new one
+        rm -rf "$HOME/.config/karabiner"
+        ln -sf "$DOTFILES_DIR/karabiner" "$HOME/.config/karabiner"
+        print_success "Linked Karabiner directory to ~/.config/karabiner"
+    else
+        print_info "Karabiner-Elements not found - skipping Karabiner configuration"
+        print_info "Install with: brew install --cask karabiner-elements"
+    fi
+
+    # Setup SketchyBar (status bar for aerospace workspaces)
+    if command -v sketchybar &> /dev/null; then
+        print_info "Setting up SketchyBar configuration..."
+
+        # Backup existing sketchybar config if it exists and is not a symlink
+        if [ -e "$HOME/.config/sketchybar" ] && [ ! -L "$HOME/.config/sketchybar" ]; then
+            mv "$HOME/.config/sketchybar" "$HOME/.config/sketchybar.backup.$(date +%Y%m%d_%H%M%S)"
+            print_success "Backed up existing sketchybar config"
+        fi
+
+        # Remove existing symlink if present, then create new one
+        rm -rf "$HOME/.config/sketchybar"
+        ln -sf "$DOTFILES_DIR/sketchybar" "$HOME/.config/sketchybar"
+        print_success "Linked SketchyBar directory to ~/.config/sketchybar"
+
+        # Restart sketchybar to apply config
+        brew services restart sketchybar 2>/dev/null || true
+    else
+        print_info "SketchyBar not found - skipping SketchyBar configuration"
+        print_info "Install with: brew tap FelixKratz/formulae && brew install sketchybar"
+    fi
 fi
 
 echo ""
