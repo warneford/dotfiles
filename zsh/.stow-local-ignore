@@ -1,0 +1,7 @@
+# Files that should NOT be stowed to $HOME
+# These are manually symlinked to ${ZSH_CUSTOM} directory instead
+aliases.zsh
+functions.zsh
+completion.zsh
+motd.zsh
+functions

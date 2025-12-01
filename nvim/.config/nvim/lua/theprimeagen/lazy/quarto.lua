@@ -34,14 +34,18 @@ return {
 		"jmbuhr/otter.nvim",
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter",
+			"hrsh7th/nvim-cmp",
 		},
 		ft = { "quarto", "markdown" },
-		opts = {
-			buffers = {
-				set_filetype = true,
-			},
-		},
 		config = function()
+			require("otter").setup({
+				buffers = {
+					set_filetype = true,
+					write_to_disk = false,
+				},
+				handle_leading_whitespace = true,
+			})
+
 			-- Automatically activate otter for code blocks in quarto files
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = { "quarto", "markdown" },

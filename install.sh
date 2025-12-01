@@ -68,6 +68,7 @@ if $IS_MAC; then
         "uv"            # Fast Python package/environment manager
         "direnv"        # Directory-based environment management
         "fzf"           # Fuzzy finder for shell
+        "stow"          # Symlink farm manager for dotfiles
     )
 
     # macOS GUI apps (casks)
@@ -253,6 +254,22 @@ else
         print_success "direnv already installed ($(direnv --version))"
     fi
 
+    # Install GNU Stow (symlink farm manager for dotfiles)
+    if ! command -v stow &> /dev/null; then
+        print_info "Installing GNU Stow..."
+        STOW_VERSION="2.4.0"
+        curl -L "https://ftp.gnu.org/gnu/stow/stow-${STOW_VERSION}.tar.gz" -o /tmp/stow.tar.gz
+        tar -xzf /tmp/stow.tar.gz -C /tmp
+        cd /tmp/stow-${STOW_VERSION}
+        ./configure --prefix="$HOME/.local"
+        make install
+        cd "$DOTFILES_DIR"
+        rm -rf /tmp/stow*
+        print_success "GNU Stow installed"
+    else
+        print_success "GNU Stow already installed"
+    fi
+
     # Install R if not already present
     if ! command -v R &> /dev/null && [ ! -d "$HOME/.local/R/current/bin" ]; then
         print_info "R not found - installing R 4.5.1..."
@@ -328,73 +345,70 @@ else
     print_success "zsh-syntax-highlighting already installed"
 fi
 
-# Backup existing configs
+# Backup existing configs that stow would conflict with
 print_info "Backing up existing configurations..."
-if [ -f "$HOME/.zshrc" ]; then
-    cp "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)"
-    print_success "Backed up .zshrc"
-fi
+backup_if_exists() {
+    local target="$1"
+    if [ -e "$target" ] && [ ! -L "$target" ]; then
+        mv "$target" "${target}.backup.$(date +%Y%m%d_%H%M%S)"
+        print_success "Backed up $(basename "$target")"
+    elif [ -L "$target" ]; then
+        rm "$target"  # Remove old symlinks so stow can recreate them
+    fi
+}
 
-if [ -d "$HOME/.config/nvim" ]; then
-    mv "$HOME/.config/nvim" "$HOME/.config/nvim.backup.$(date +%Y%m%d_%H%M%S)"
-    print_success "Backed up nvim config"
-fi
+mkdir -p "$HOME/.config"
+backup_if_exists "$HOME/.zshrc"
+backup_if_exists "$HOME/.p10k.zsh"
+backup_if_exists "$HOME/.tmux.conf"
+backup_if_exists "$HOME/.Rprofile"
+backup_if_exists "$HOME/.config/nvim"
+backup_if_exists "$HOME/.config/direnv"
+backup_if_exists "$HOME/.config/radian"
 
-# Create symlinks
-print_info "Creating symlinks..."
+# Stow packages
+print_info "Stowing dotfiles..."
 
-# .zshrc: Copy in containers (so nvm etc can modify it), symlink on host
+# Helper function to stow a package
+stow_package() {
+    local pkg="$1"
+    if [ -d "$DOTFILES_DIR/$pkg" ]; then
+        stow -d "$DOTFILES_DIR" -t "$HOME" --restow "$pkg" 2>/dev/null && \
+            print_success "Stowed $pkg" || \
+            print_error "Failed to stow $pkg"
+    fi
+}
+
+# Container mode: copy .zshrc instead of stowing (so nvm etc can modify it)
 if $IS_CONTAINER; then
     cp "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
-    print_success "Copied .zshrc (container mode - editable)"
+    [ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ] && cp "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+    print_success "Copied zsh configs (container mode - editable)"
 else
-    ln -sf "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
-    print_success "Linked .zshrc"
+    stow_package "zsh"
 fi
 
-# Symlink p10k config (if exists)
-if [ -f "$DOTFILES_DIR/zsh/.p10k.zsh" ]; then
-    ln -sf "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
-    print_success "Linked .p10k.zsh"
-fi
+# Core packages (always stow these)
+stow_package "tmux"
+stow_package "R"
+stow_package "nvim"
+stow_package "direnv"
+stow_package "radian"
+stow_package "bin"
 
-# Symlink nvim config
-mkdir -p "$HOME/.config"
-ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
-print_success "Linked nvim config"
-
-# Symlink tmux config
-ln -sf "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
-print_success "Linked tmux config"
-
-# Symlink aliases
-ln -sf "$DOTFILES_DIR/zsh/aliases.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/aliases.zsh"
-print_success "Linked aliases"
-
-# Symlink functions
-ln -sf "$DOTFILES_DIR/zsh/functions.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/functions.zsh"
-print_success "Linked functions"
-
-# Symlink .Rprofile
-ln -sf "$DOTFILES_DIR/R/.Rprofile" "$HOME/.Rprofile"
-print_success "Linked .Rprofile"
-
-# Symlink direnv config
-mkdir -p "$HOME/.config/direnv"
-ln -sf "$DOTFILES_DIR/direnv/direnvrc" "$HOME/.config/direnv/direnvrc"
-print_success "Linked direnv config"
-
-# Symlink radian config
-mkdir -p "$HOME/.config/radian"
-ln -sf "$DOTFILES_DIR/radian/profile" "$HOME/.config/radian/profile"
 # Remove old .radian_profile if it exists and isn't a symlink
 if [ -f "$HOME/.radian_profile" ] && [ ! -L "$HOME/.radian_profile" ]; then
     rm "$HOME/.radian_profile"
     print_info "Removed old ~/.radian_profile (now using ~/.config/radian/profile)"
 fi
-print_success "Linked radian config"
 
-# Add git config include (preserves machine-specific settings in ~/.gitconfig)
+# oh-my-zsh custom plugins (can't use stow - dynamic path)
+ln -sf "$DOTFILES_DIR/zsh/aliases.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/aliases.zsh"
+print_success "Linked aliases"
+ln -sf "$DOTFILES_DIR/zsh/functions.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/functions.zsh"
+print_success "Linked functions"
+
+# Git config include (not a symlink - uses git's include mechanism)
 if [ -f "$DOTFILES_DIR/git/config" ]; then
     INCLUDE_PATH="$DOTFILES_DIR/git/config"
     if ! grep -q "path = $INCLUDE_PATH" "$HOME/.gitconfig" 2>/dev/null; then
@@ -403,18 +417,6 @@ if [ -f "$DOTFILES_DIR/git/config" ]; then
     else
         print_success "Git config include already present"
     fi
-fi
-
-# Symlink custom scripts from bin/
-mkdir -p "$HOME/.local/bin"
-if [ -d "$DOTFILES_DIR/bin" ]; then
-    for script in "$DOTFILES_DIR/bin"/*; do
-        if [ -f "$script" ]; then
-            script_name=$(basename "$script")
-            ln -sf "$script" "$HOME/.local/bin/$script_name"
-            print_success "Linked $script_name"
-        fi
-    done
 fi
 
 # Setup Ghostty config (only on local machines, not SSH sessions)
@@ -428,16 +430,8 @@ if ! $IS_SSH; then
             print_info "Removed Application Support config (using ~/.config/ghostty instead)"
         fi
 
-        # Backup existing ghostty config if it exists and is not a symlink
-        if [ -e "$HOME/.config/ghostty" ] && [ ! -L "$HOME/.config/ghostty" ]; then
-            mv "$HOME/.config/ghostty" "$HOME/.config/ghostty.backup.$(date +%Y%m%d_%H%M%S)"
-            print_success "Backed up existing ghostty config"
-        fi
-
-        # Remove existing symlink if present, then create new one
-        rm -rf "$HOME/.config/ghostty"
-        ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
-        print_success "Linked Ghostty directory to ~/.config/ghostty"
+        backup_if_exists "$HOME/.config/ghostty"
+        stow_package "ghostty"
     else
         print_info "Ghostty not found - skipping Ghostty configuration"
         if $IS_MAC; then
@@ -448,83 +442,40 @@ else
     print_info "SSH session detected - skipping Ghostty configuration (terminal emulator not needed)"
 fi
 
-# Setup AeroSpace tiling window manager (macOS only, not in SSH sessions)
+# Setup macOS GUI apps (only on macOS, not in SSH sessions)
 if $IS_MAC && ! $IS_SSH; then
+    # AeroSpace tiling window manager
     if command -v aerospace &> /dev/null || [ -d "/Applications/AeroSpace.app" ]; then
-        print_info "Setting up AeroSpace configuration..."
-
-        # Backup existing aerospace config if it exists and is not a symlink
-        if [ -e "$HOME/.config/aerospace" ] && [ ! -L "$HOME/.config/aerospace" ]; then
-            mv "$HOME/.config/aerospace" "$HOME/.config/aerospace.backup.$(date +%Y%m%d_%H%M%S)"
-            print_success "Backed up existing aerospace config"
-        fi
-
-        # Remove existing symlink if present, then create new one
-        rm -rf "$HOME/.config/aerospace"
-        ln -sf "$DOTFILES_DIR/aerospace" "$HOME/.config/aerospace"
-        print_success "Linked AeroSpace directory to ~/.config/aerospace"
+        backup_if_exists "$HOME/.config/aerospace"
+        stow_package "aerospace"
     else
         print_info "AeroSpace not found - skipping AeroSpace configuration"
         print_info "Install with: brew install --cask nikitabobko/tap/aerospace"
     fi
 
-    # Setup Karabiner-Elements (keyboard customization)
+    # Karabiner-Elements (keyboard customization)
     if [ -d "/Applications/Karabiner-Elements.app" ]; then
-        print_info "Setting up Karabiner-Elements configuration..."
-
-        # Backup existing karabiner config if it exists and is not a symlink
-        if [ -e "$HOME/.config/karabiner" ] && [ ! -L "$HOME/.config/karabiner" ]; then
-            mv "$HOME/.config/karabiner" "$HOME/.config/karabiner.backup.$(date +%Y%m%d_%H%M%S)"
-            print_success "Backed up existing karabiner config"
-        fi
-
-        # Remove existing symlink if present, then create new one
-        rm -rf "$HOME/.config/karabiner"
-        ln -sf "$DOTFILES_DIR/karabiner" "$HOME/.config/karabiner"
-        print_success "Linked Karabiner directory to ~/.config/karabiner"
+        backup_if_exists "$HOME/.config/karabiner"
+        stow_package "karabiner"
     else
         print_info "Karabiner-Elements not found - skipping Karabiner configuration"
         print_info "Install with: brew install --cask karabiner-elements"
     fi
 
-    # Setup SketchyBar (status bar for aerospace workspaces)
+    # SketchyBar (status bar for aerospace workspaces)
     if command -v sketchybar &> /dev/null; then
-        print_info "Setting up SketchyBar configuration..."
-
-        # Backup existing sketchybar config if it exists and is not a symlink
-        if [ -e "$HOME/.config/sketchybar" ] && [ ! -L "$HOME/.config/sketchybar" ]; then
-            mv "$HOME/.config/sketchybar" "$HOME/.config/sketchybar.backup.$(date +%Y%m%d_%H%M%S)"
-            print_success "Backed up existing sketchybar config"
-        fi
-
-        # Remove existing symlink if present, then create new one
-        rm -rf "$HOME/.config/sketchybar"
-        ln -sf "$DOTFILES_DIR/sketchybar" "$HOME/.config/sketchybar"
-        print_success "Linked SketchyBar directory to ~/.config/sketchybar"
-
-        # Restart sketchybar to apply config
+        backup_if_exists "$HOME/.config/sketchybar"
+        stow_package "sketchybar"
         brew services restart sketchybar 2>/dev/null || true
     else
         print_info "SketchyBar not found - skipping SketchyBar configuration"
         print_info "Install with: brew tap FelixKratz/formulae && brew install sketchybar"
     fi
 
-    # Setup JankyBorders (window border highlights)
+    # JankyBorders (window border highlights)
     if command -v borders &> /dev/null; then
-        print_info "Setting up JankyBorders configuration..."
-
-        # Backup existing borders config if it exists and is not a symlink
-        if [ -e "$HOME/.config/borders" ] && [ ! -L "$HOME/.config/borders" ]; then
-            mv "$HOME/.config/borders" "$HOME/.config/borders.backup.$(date +%Y%m%d_%H%M%S)"
-            print_success "Backed up existing borders config"
-        fi
-
-        # Remove existing symlink if present, then create new one
-        rm -rf "$HOME/.config/borders"
-        ln -sf "$DOTFILES_DIR/borders" "$HOME/.config/borders"
-        print_success "Linked JankyBorders directory to ~/.config/borders"
-
-        # Start borders service
+        backup_if_exists "$HOME/.config/borders"
+        stow_package "borders"
         brew services restart borders 2>/dev/null || true
         print_success "JankyBorders service started"
     else

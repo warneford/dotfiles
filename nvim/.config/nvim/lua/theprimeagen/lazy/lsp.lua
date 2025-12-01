@@ -16,6 +16,7 @@ return {
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
         "hrsh7th/cmp-nvim-lsp",
+        "hrsh7th/cmp-nvim-lsp-signature-help",
         "hrsh7th/cmp-buffer",
         "hrsh7th/cmp-path",
         "hrsh7th/cmp-cmdline",
@@ -55,12 +56,13 @@ return {
                 end,
 
                 -- R Language Server with rich documentation
+                -- Note: quarto files use otter.nvim for LSP features in code blocks
                 ["r_language_server"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.r_language_server.setup({
                         capabilities = capabilities,
                         cmd = { vim.fn.stdpath("data") .. "/mason/bin/r-languageserver" },
-                        filetypes = { "r", "rmd", "rmarkdown", "quarto" },
+                        filetypes = { "r", "rmd", "rmarkdown" },
                         settings = {
                             r = {
                                 lsp = {
@@ -134,14 +136,22 @@ return {
                     require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
                 end,
             },
+            window = {
+                completion = cmp.config.window.bordered(),
+                documentation = cmp.config.window.bordered(),
+            },
             mapping = cmp.mapping.preset.insert({
                 ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
                 ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
                 ['<C-y>'] = cmp.mapping.confirm({ select = true }),
                 ["<C-Space>"] = cmp.mapping.complete(),
+                ['<C-d>'] = cmp.mapping.scroll_docs(4),
+                ['<C-u>'] = cmp.mapping.scroll_docs(-4),
             }),
             sources = cmp.config.sources({
+                { name = 'otter' },  -- Otter for quarto/markdown code blocks
                 { name = 'nvim_lsp', group_index = 1 },  -- LSP first priority
+                { name = 'nvim_lsp_signature_help', group_index = 1 },  -- Function signatures
                 { name = 'luasnip', group_index = 1 },
                 { name = 'path', group_index = 1 },
             }, {

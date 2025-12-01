@@ -14,3 +14,4 @@ aerc/accounts.conf
 
 # Machine-specific docker env
 docker/.env
+karabiner/.config/karabiner/automatic_backups/
