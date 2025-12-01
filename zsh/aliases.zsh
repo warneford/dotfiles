@@ -32,4 +32,5 @@ if [[ "$OSTYPE" == darwin* ]]; then
     # macOS
     alias R='/Library/Frameworks/R.framework/Resources/bin/R'
     alias down='cd ~/Downloads'
+    alias quarto-preview='open -na "Google Chrome" --args --app=http://localhost:9013'
 fi
