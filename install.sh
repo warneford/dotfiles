@@ -74,6 +74,11 @@ if $IS_MAC; then
     CASK_DEPENDENCIES=(
         "karabiner-elements"  # Keyboard customization
     )
+
+    # macOS tools from custom taps
+    TAP_DEPENDENCIES=(
+        "FelixKratz/formulae/borders"  # JankyBorders - window border highlights
+    )
     # Note: We use CRAN R (not Homebrew R) for better package compatibility
     # Download from: https://cloud.r-project.org/bin/macosx/
 
@@ -95,6 +100,18 @@ if $IS_MAC; then
             print_info "Installing $cask..."
             brew install --cask "$cask"
             print_success "$cask installed"
+        fi
+    done
+
+    # Install tap dependencies (tools from custom taps)
+    for tap_dep in "${TAP_DEPENDENCIES[@]}"; do
+        dep_name=$(basename "$tap_dep")
+        if brew list "$dep_name" &> /dev/null; then
+            print_success "$dep_name already installed"
+        else
+            print_info "Installing $tap_dep..."
+            brew install "$tap_dep"
+            print_success "$dep_name installed"
         fi
     done
 
@@ -490,6 +507,29 @@ if $IS_MAC && ! $IS_SSH; then
     else
         print_info "SketchyBar not found - skipping SketchyBar configuration"
         print_info "Install with: brew tap FelixKratz/formulae && brew install sketchybar"
+    fi
+
+    # Setup JankyBorders (window border highlights)
+    if command -v borders &> /dev/null; then
+        print_info "Setting up JankyBorders configuration..."
+
+        # Backup existing borders config if it exists and is not a symlink
+        if [ -e "$HOME/.config/borders" ] && [ ! -L "$HOME/.config/borders" ]; then
+            mv "$HOME/.config/borders" "$HOME/.config/borders.backup.$(date +%Y%m%d_%H%M%S)"
+            print_success "Backed up existing borders config"
+        fi
+
+        # Remove existing symlink if present, then create new one
+        rm -rf "$HOME/.config/borders"
+        ln -sf "$DOTFILES_DIR/borders" "$HOME/.config/borders"
+        print_success "Linked JankyBorders directory to ~/.config/borders"
+
+        # Start borders service
+        brew services restart borders 2>/dev/null || true
+        print_success "JankyBorders service started"
+    else
+        print_info "JankyBorders not found - skipping borders configuration"
+        print_info "Install with: brew install FelixKratz/formulae/borders"
     fi
 fi
 

@@ -9,3 +9,7 @@
 
 [init]
 	defaultBranch = main
+
+[alias]
+	# Delete local branches whose remote tracking branch is gone (e.g., after PR merge)
+	cleanup = !git fetch -p && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -D 2>/dev/null || echo 'No branches to clean up'
