@@ -32,5 +32,27 @@ if [[ "$OSTYPE" == darwin* ]]; then
     # macOS
     alias R='/Library/Frameworks/R.framework/Resources/bin/R'
     alias down='cd ~/Downloads'
-    alias quarto-preview='open -na "Google Chrome" --args --app=http://localhost:9013'
+    function quarto-preview() {
+        local ws=$(aerospace list-workspaces --focused)
+        osascript -e 'tell application "Orion" to make new document with properties {URL:"http://localhost:9013"}'
+        sleep 0.3
+        # Switch back to original workspace immediately
+        aerospace workspace "$ws"
+        # Wait for window to appear in aerospace
+        local win_id=""
+        for i in {1..10}; do
+            sleep 0.3
+            win_id=$(aerospace list-windows --all | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
+            [[ -n "$win_id" ]] && break
+        done
+        if [[ -n "$win_id" ]]; then
+            aerospace move-node-to-workspace --window-id "$win_id" "$ws"
+            aerospace focus --window-id "$win_id"
+            sleep 0.3
+            osascript -e 'tell application "Orion" to activate' \
+                      -e 'tell application "System Events" to tell process "Orion" to click menu item "Enter Focus Mode" of menu "View" of menu bar 1'
+        else
+            echo "Could not find Orion localhost window"
+        fi
+    }
 fi
