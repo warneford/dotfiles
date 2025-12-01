@@ -146,7 +146,7 @@ return {
 					-- Kill any existing process on port 9013 first, then start preview
 					local cmd = "system('fuser -k 9013/tcp 2>/dev/null; quarto preview "
 						.. current_file
-						.. " --port 9013 --host 0.0.0.0')"
+						.. " --port 9013 --host 0.0.0.0 --no-browser')"
 					require("r.send").cmd(cmd)
 					vim.notify("Quarto preview sent to R console", vim.log.levels.INFO)
 				else
