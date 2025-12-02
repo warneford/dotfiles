@@ -95,7 +95,7 @@ run = 'layout floating'
 
     # App launchers
     alt-s = 'exec-and-forget open -a Slack'
-    alt-o = 'exec-and-forget open -a Orion --args --profile Work'
+    alt-o = 'exec-and-forget open -a "Orion - Work"'
     alt-w = 'exec-and-forget open -a "Windows App"'
 
     # Service mode for less common operations

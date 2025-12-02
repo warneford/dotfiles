@@ -4,9 +4,9 @@
 # ============================================================================
 # Font Configuration
 # ============================================================================
-font-family = Hack Nerd Font Mono
+font-family = FiraCode Nerd Font Mono
 font-size = 14
-font-feature = -calt  # Disable ligatures (optional, remove if you like them)
+# font-feature = -calt  # Uncomment to disable ligatures
 
 # Disable synthetic styles - use real font variants
 font-synthetic-style = false
