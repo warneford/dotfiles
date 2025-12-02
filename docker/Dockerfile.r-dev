@@ -41,11 +41,20 @@ RUN NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/l
     ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim && \
     rm nvim-linux-x86_64.tar.gz
 
+# Install fastfetch (latest from GitHub release)
+RUN curl -LO https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb && \
+    dpkg -i fastfetch-linux-amd64.deb && \
+    rm fastfetch-linux-amd64.deb
+
 # Install R packages for LSP and development
 # Note: radian is installed per-project via direnv/uv to share Python with reticulate
 # httpgd installed from GitHub as CRAN version is temporarily archived
-RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes'))" && \
-    R -e "remotes::install_github('nx10/httpgd')"
+# pak installed from r-lib repo for binary support on new R versions
+ARG GITHUB_PAT
+RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes', 'here', 'pacman'))" && \
+    R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s', .Platform\$pkgType, R.Version()\$os, R.Version()\$arch))" && \
+    R -e "remotes::install_github('nx10/httpgd')" && \
+    GITHUB_PAT=${GITHUB_PAT} R -e "pak::pak('octantbio/platbiotools')"
 
 # Copy entrypoint script (as root, before user switch)
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
@@ -70,20 +79,9 @@ WORKDIR /home/${USERNAME}
 # Install uv for the user (used to manage per-project Python/radian)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Create bootstrap .zshrc that runs dotfiles install on first login
-# After install, ~/.zshrc is replaced with the actual config
-RUN echo '# Bootstrap: run dotfiles install on first container login\n\
-if [[ ! -f "/var/tmp/.dotfiles-installed" && -f "$HOME/dotfiles/install.sh" ]]; then\n\
-    echo "First login - setting up dotfiles..."\n\
-    sleep 2\n\
-    if cd "$HOME/dotfiles" && bash install.sh; then\n\
-        touch "/var/tmp/.dotfiles-installed"\n\
-        echo "Dotfiles setup complete! Restarting shell..."\n\
-        exec zsh\n\
-    else\n\
-        echo "Dotfiles install failed! Run manually: cd ~/dotfiles && bash install.sh"\n\
-    fi\n\
-fi\n\
+# Create .zshrc that sources dotfiles config
+# First-boot setup (dotfiles install + Lazy sync) is handled by entrypoint.sh
+RUN echo '# Source dotfiles zsh config\n\
 [[ -f "$HOME/dotfiles/zsh/.zshrc" ]] && source "$HOME/dotfiles/zsh/.zshrc"' > ~/.zshrc
 
 # Expose httpgd port
