@@ -35,8 +35,7 @@ return {
 			-- Disable Quarto code chunk highlighting to prevent errors with special buffers
 			hl_term = false,
 
-			-- Disable R.nvim's built-in LSP to prevent "Failed to send message to r_ls" errors
-			-- You still get completions from r_language_server via Mason
+			-- Disable R.nvim's built-in LSP (use r_language_server from Mason instead)
 			r_ls = {
 				completion = false,
 				hover = false,
