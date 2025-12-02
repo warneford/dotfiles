@@ -50,8 +50,16 @@ return {
                 lualine_z = {},
             },
             tabline = {},
-            winbar = {},
-            inactive_winbar = {},
+            winbar = {
+                lualine_z = {
+                    { "filename", path = 0 },
+                },
+            },
+            inactive_winbar = {
+                lualine_z = {
+                    { "filename", path = 0 },
+                },
+            },
             extensions = { "fugitive", "trouble" },
         })
     end,
