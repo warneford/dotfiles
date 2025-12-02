@@ -7,6 +7,7 @@ services:
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
         USERNAME: ${USER:-dev}
+        GITHUB_PAT: ${GITHUB_PAT}
     image: r-dev:local
     container_name: rwt-mind-palace
     hostname: rwt-mind-palace
@@ -31,9 +32,12 @@ services:
       - ~/.secrets:/home/${USER:-dev}/.secrets
       # Persist tmux sessions across container restarts
       - r-dev-tmp:/tmp
+      # Tentacle data directory
+      - /data/echoms/:/data/echoms
     environment:
       - TERM=xterm-256color
       - TZ=America/Los_Angeles
+      - GITHUB_PAT=${GITHUB_PAT}
 
   rstudio:
     image: rocker/tidyverse:4.5.2
