@@ -1,7 +1,7 @@
 {
   "Comment.nvim": { "branch": "master", "commit": "e30b7f2008e52442154b66f7c519bfd2f1e32acb" },
   "LuaSnip": { "branch": "master", "commit": "5a1e39223db9a0498024a77b8441169d260c8c25" },
-  "R.nvim": { "branch": "main", "commit": "eff6229d3c8aee21fec3c42415e679a580872e53" },
+  "R.nvim": { "branch": "main", "commit": "fef990378e4b5157f23314dca4136bc0079cc2c4" },
   "aerial.nvim": { "branch": "master", "commit": "8bb8697d180681746da41bef5c8691d04443af36" },
   "brightburn.vim": { "branch": "master", "commit": "fc0d2fafc51e86d6065acd54b5e82e686019ff2f" },
   "cellular-automaton.nvim": { "branch": "main", "commit": "1606e9d5d04ff254023c3f3c62842d065708d6d3" },
@@ -26,6 +26,7 @@
   "luarocks.nvim": { "branch": "main", "commit": "1db9093915eb16ba2473cfb8d343ace5ee04130a" },
   "mason-lspconfig.nvim": { "branch": "main", "commit": "0b9bb925c000ae649ff7e7149c8cd00031f4b539" },
   "mason-nvim-dap.nvim": { "branch": "main", "commit": "9a10e096703966335bd5c46c8c875d5b0690dade" },
+  "mason-tool-installer.nvim": { "branch": "main", "commit": "517ef5994ef9d6b738322664d5fdd948f0fdeb46" },
   "mason.nvim": { "branch": "main", "commit": "57e5a8addb8c71fb063ee4acda466c7cf6ad2800" },
   "nabla.nvim": { "branch": "master", "commit": "9b69b709063ccf40ac36fabb4fff7d90b3736475" },
   "nvim-cmp": { "branch": "main", "commit": "d97d85e01339f01b842e6ec1502f639b080cb0fc" },

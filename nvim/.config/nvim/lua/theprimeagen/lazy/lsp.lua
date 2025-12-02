@@ -4,6 +4,7 @@ return {
         "stevearc/conform.nvim",
         "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
         "hrsh7th/cmp-nvim-lsp",
         "hrsh7th/cmp-nvim-lsp-signature-help",
         "hrsh7th/cmp-buffer",
@@ -36,6 +37,18 @@ return {
                 upgrade_pip = false,
             },
         })
+
+        -- Auto-install formatters and linters via mason-tool-installer
+        require("mason-tool-installer").setup({
+            ensure_installed = {
+                "air",       -- R formatter (Posit)
+                "stylua",    -- Lua formatter
+                "prettier",  -- JS/TS/JSON/YAML/MD formatter
+            },
+            auto_update = false,
+            run_on_start = true,
+        })
+
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "lua_ls",        -- Lua (for Neovim config)
