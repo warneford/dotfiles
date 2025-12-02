@@ -6,6 +6,9 @@ return {
 		opts = {
 			default = {
 				dir_path = "img",
+				-- Use pngpaste on macOS (works in tmux)
+				-- Falls back to osascript if pngpaste not available
+				process_cmd = vim.fn.has("mac") == 1 and "pngpaste -" or nil,
 			},
 			filetypes = {
 				markdown = {

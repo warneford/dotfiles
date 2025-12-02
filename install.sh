@@ -69,6 +69,10 @@ if $IS_MAC; then
         "direnv"        # Directory-based environment management
         "fzf"           # Fuzzy finder for shell
         "stow"          # Symlink farm manager for dotfiles
+        "fd"            # Fast file finder for Telescope
+        "prettier"      # Code formatter for JS/TS/JSON/etc
+        "stylua"        # Lua code formatter
+        "pngpaste"      # Paste images from clipboard (for img-clip.nvim)
     )
 
     # macOS GUI apps (casks)
