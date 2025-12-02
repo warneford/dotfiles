@@ -53,6 +53,9 @@ fi
 # Add bob-nvim (neovim version manager) to PATH
 add_to_path "$HOME/.local/share/bob/nvim-bin"
 
+# Add Mason (nvim package manager) bin to PATH for formatters/linters
+add_to_path "$HOME/.local/share/nvim/mason/bin"
+
 # Add Rust/Cargo to PATH
 add_to_path "$HOME/.cargo/bin"
 
