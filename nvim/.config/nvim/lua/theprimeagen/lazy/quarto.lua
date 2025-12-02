@@ -41,7 +41,8 @@ return {
 			require("otter").setup({
 				buffers = {
 					set_filetype = true,
-					write_to_disk = false,
+					-- Write otter buffers to disk so lintr can find them
+					write_to_disk = true,
 				},
 				handle_leading_whitespace = true,
 			})
