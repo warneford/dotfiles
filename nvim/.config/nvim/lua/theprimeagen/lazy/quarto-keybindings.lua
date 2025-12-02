@@ -154,6 +154,21 @@ return {
 				end
 			end, { desc = "[q]uarto [p]review in R console" })
 
+			vim.keymap.set("n", "<leader>qP", function()
+				local current_file = vim.fn.expand("%:p")
+				if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
+					-- Send quarto preview command with --cache-refresh to R console
+					-- Kill any existing process on port 9013 first, then start preview
+					local cmd = "system('fuser -k 9013/tcp 2>/dev/null; quarto preview "
+						.. current_file
+						.. " --cache-refresh --port 9013 --host 0.0.0.0 --no-browser')"
+					require("r.send").cmd(cmd)
+					vim.notify("Quarto preview (cache refresh) sent to R console", vim.log.levels.INFO)
+				else
+					vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
+				end
+			end, { desc = "[q]uarto [P]review with cache refresh" })
+
 			vim.keymap.set("n", "<leader>qr", function()
 				local current_file = vim.fn.expand("%:p")
 				if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then

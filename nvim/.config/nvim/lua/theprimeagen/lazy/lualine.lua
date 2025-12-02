@@ -29,54 +29,15 @@ return {
                     {
                         "diagnostics",
                         sources = { "nvim_diagnostic", "nvim_lsp" },
-                        sections = { "error", "warn", "info", "hint" },
-                        symbols = { error = "E", warn = "W", info = "I", hint = "H" },
+                        sections = { "error", "warn" },
+                        symbols = { error = "E", warn = "W" },
                         colored = true,
                         update_in_insert = false,
                         always_visible = false,
                     },
                 },
-                lualine_c = {
-                    {
-                        "filename",
-                        file_status = true, -- displays file status (readonly, modified)
-                        path = 1, -- 0 = just filename, 1 = relative path, 2 = absolute path
-                        shorting_target = 40,
-                        symbols = {
-                            modified = "[+]",
-                            readonly = "[-]",
-                            unnamed = "[No Name]",
-                        },
-                    },
-                },
-                lualine_x = {
-                    {
-                        -- show active LSP clients
-                        function()
-                            local clients = vim.lsp.get_active_clients()
-                            if next(clients) == nil then
-                                return ""
-                            end
-
-                            local client_names = {}
-                            for _, client in pairs(clients) do
-                                table.insert(client_names, client.name)
-                            end
-                            return " " .. table.concat(client_names, ", ")
-                        end,
-                        color = { gui = "bold" },
-                    },
-                    "encoding",
-                    {
-                        "fileformat",
-                        symbols = {
-                            unix = "LF",
-                            dos = "CRLF",
-                            mac = "CR",
-                        },
-                    },
-                    "filetype",
-                },
+                lualine_c = {},
+                lualine_x = { "filetype" },
                 lualine_y = { "progress" },
                 lualine_z = { "location" },
             },
@@ -91,7 +52,7 @@ return {
             tabline = {},
             winbar = {},
             inactive_winbar = {},
-            extensions = { "fugitive", "neo-tree", "trouble" },
+            extensions = { "fugitive", "trouble" },
         })
     end,
 }
