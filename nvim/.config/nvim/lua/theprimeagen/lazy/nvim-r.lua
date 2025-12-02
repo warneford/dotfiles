@@ -1,7 +1,8 @@
 return {
-	"R-nvim/R.nvim",
-	lazy = false,
-	config = function()
+	{
+		"R-nvim/R.nvim",
+		lazy = false,
+		config = function()
 		-- Create a table with the options to be passed to setup()
 		local opts = {
 			-- Use radian-direnv wrapper to ensure VIRTUAL_ENV is loaded
@@ -54,14 +55,14 @@ return {
 		require("r").setup(opts)
 
 		-- Wrap R.nvim's hl_code_bg function to prevent errors with special buffers
-		-- This prevents "Parser could not be created" errors when switching to neo-tree/harpoon
+		-- This prevents "Parser could not be created" errors when switching to netrw/harpoon
 		local quarto_module = require("r.quarto")
 		local original_hl_code_bg = quarto_module.hl_code_bg
 		quarto_module.hl_code_bg = function()
 			local buftype = vim.bo.buftype
 			local filetype = vim.bo.filetype
 			-- Skip highlighting for special buffers
-			if buftype ~= "" or filetype == "neo-tree" or filetype == "harpoon" or filetype == "" then
+			if buftype ~= "" or filetype == "netrw" or filetype == "harpoon" or filetype == "" then
 				return
 			end
 			-- Call original function for normal buffers
@@ -88,4 +89,43 @@ return {
 		-- Note: For Python/Julia/other languages, use vim-slime with <leader>cr
 		-- R.nvim (,rf) provides the best R experience with object browser, help, etc.
 	end,
+	},
+	{
+		-- Completion source for R.nvim - provides Quarto YAML frontmatter completion
+		"R-nvim/cmp-r",
+		config = function()
+			-- Find Quarto's yaml-intelligence file dynamically (works on macOS and Linux)
+			local function find_quarto_intel()
+				local handle = io.popen("quarto --paths 2>/dev/null | grep share | head -1")
+				if handle then
+					local share_path = handle:read("*l")
+					handle:close()
+					if share_path then
+						local intel_path = share_path .. "/editor/tools/yaml/yaml-intelligence-resources.json"
+						if vim.fn.filereadable(intel_path) == 1 then
+							return intel_path
+						end
+					end
+				end
+				-- Fallback paths
+				local fallbacks = {
+					"/Applications/quarto/share/editor/tools/yaml/yaml-intelligence-resources.json", -- macOS
+					vim.fn.expand("~/.local/quarto/share/editor/tools/yaml/yaml-intelligence-resources.json"), -- Linux user install
+					"/usr/local/quarto/share/editor/tools/yaml/yaml-intelligence-resources.json", -- Linux system install
+				}
+				for _, path in ipairs(fallbacks) do
+					if vim.fn.filereadable(path) == 1 then
+						return path
+					end
+				end
+				return nil
+			end
+
+			require("cmp_r").setup({
+				filetypes = { "r", "rmd", "quarto" },
+				doc_width = 58,
+				quarto_intel = find_quarto_intel(),
+			})
+		end,
+	},
 }
