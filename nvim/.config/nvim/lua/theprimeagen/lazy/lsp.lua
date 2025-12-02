@@ -1,14 +1,3 @@
-local root_files = {
-  '.luarc.json',
-  '.luarc.jsonc',
-  '.luacheckrc',
-  '.stylua.toml',
-  'stylua.toml',
-  'selene.toml',
-  'selene.yml',
-  '.git',
-}
-
 return {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -27,10 +16,6 @@ return {
     },
 
     config = function()
-        require("conform").setup({
-            formatters_by_ft = {
-            }
-        })
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
         local capabilities = vim.tbl_deep_extend(
@@ -40,13 +25,24 @@ return {
             cmp_lsp.default_capabilities())
 
         require("fidget").setup({})
-        require("mason").setup()
+
+        -- Mason setup
+        -- Note: checkhealth warnings about Go/Rust/PHP/etc are expected
+        -- if you don't have those language runtimes installed.
+        -- They're only needed to install tools written in those languages.
+        require("mason").setup({
+            -- Use Homebrew Python for pip (avoids venv issues)
+            pip = {
+                upgrade_pip = false,
+            },
+        })
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "lua_ls",        -- Lua (for Neovim config)
                 "pyright",       -- Python
                 "r_language_server",  -- R (installed globally via R package manager)
                 "ts_ls",         -- JavaScript/TypeScript
+                "yamlls",        -- YAML (for Quarto frontmatter)
             },
             handlers = {
                 function(server_name) -- default handler (optional)
@@ -90,22 +86,6 @@ return {
                     })
                 end,
 
-                zls = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.zls.setup({
-                        root_dir = lspconfig.util.root_pattern(".git", "build.zig", "zls.json"),
-                        settings = {
-                            zls = {
-                                enable_inlay_hints = true,
-                                enable_snippets = true,
-                                warn_style = true,
-                            },
-                        },
-                    })
-                    vim.g.zig_fmt_parse_errors = 0
-                    vim.g.zig_fmt_autosave = 0
-
-                end,
                 ["lua_ls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.lua_ls.setup {
@@ -124,6 +104,27 @@ return {
                             }
                         }
                     }
+                end,
+
+                -- YAML Language Server for YAML files (e.g., _quarto.yml, CI configs)
+                -- Note: Quarto frontmatter completion is handled by cmp-r
+                ["yamlls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.yamlls.setup({
+                        capabilities = capabilities,
+                        filetypes = { "yaml" },
+                        settings = {
+                            yaml = {
+                                schemaStore = {
+                                    enable = true,
+                                    url = "https://www.schemastore.org/api/json/catalog.json",
+                                },
+                                validate = true,
+                                completion = true,
+                                hover = true,
+                            },
+                        },
+                    })
                 end,
             }
         })
@@ -150,6 +151,7 @@ return {
             }),
             sources = cmp.config.sources({
                 { name = 'otter' },  -- Otter for quarto/markdown code blocks
+                { name = 'cmp_r' },  -- R.nvim completions + Quarto YAML frontmatter
                 { name = 'nvim_lsp', group_index = 1 },  -- LSP first priority
                 { name = 'nvim_lsp_signature_help', group_index = 1 },  -- Function signatures
                 { name = 'luasnip', group_index = 1 },

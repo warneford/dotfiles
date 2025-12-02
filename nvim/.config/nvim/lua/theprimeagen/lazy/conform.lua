@@ -3,26 +3,27 @@ return {
 	opts = {},
 	config = function()
 		require("conform").setup({
-			format_on_save = {
-				timeout_ms = 5000,
-                lsp_format = "fallback",
-			},
+			format_on_save = function(bufnr)
+				-- Use LSP formatting for filetypes that don't have dedicated formatters
+				local lsp_format_ft = { "lua" } -- lua_ls has good built-in formatting
+				local ft = vim.bo[bufnr].filetype
+				return {
+					timeout_ms = 5000,
+					lsp_format = vim.tbl_contains(lsp_format_ft, ft) and "fallback" or "never",
+				}
+			end,
 			formatters_by_ft = {
-				c = { "clang-format" },
-				cpp = { "clang-format" },
 				lua = { "stylua" },
-				go = { "gofmt" },
 				javascript = { "prettier" },
 				typescript = { "prettier" },
-				elixir = { "mix" },
+				json = { "prettier" },
+				yaml = { "prettier" },
+				markdown = { "prettier" },
 				r = { "air" },
-			rmd = { "injected" },
-			quarto = { "injected" },
+				rmd = { "injected" },
+				quarto = { "injected" },
 			},
 			formatters = {
-				["clang-format"] = {
-					prepend_args = { "-style=file", "-fallback-style=LLVM" },
-				},
 				injected = {
 					options = {
 						ignore_errors = true,

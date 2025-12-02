@@ -1,5 +1,11 @@
 require("theprimeagen.set")
 require("theprimeagen.remap")
+
+-- Disable air as LSP (use it only as formatter via conform)
+-- This prevents position encoding conflicts with r_ls
+-- Re-enable when air gains more LSP features beyond formatting
+vim.lsp.enable('air', false)
+
 require("theprimeagen.lazy_init")
 
 local augroup = vim.api.nvim_create_augroup
