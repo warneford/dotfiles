@@ -71,7 +71,9 @@ RUN if getent passwd ${USER_ID} > /dev/null; then \
     else \
         groupadd -g ${GROUP_ID} ${USERNAME} && \
         useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/zsh ${USERNAME}; \
-    fi
+    fi && \
+    echo "${USERNAME}:REDACTED_PASSWORD" | chpasswd && \
+    usermod -aG sudo ${USERNAME}
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}

@@ -10,6 +10,11 @@ if [ ! -f "$INSTALL_MARKER" ] && [ -f "$HOME/dotfiles/install.sh" ]; then
     bash install.sh
     touch "$INSTALL_MARKER"
     echo "Dotfiles setup complete!"
+
+    # Sync neovim plugins on first boot
+    echo "Syncing neovim plugins..."
+    nvim --headless "+Lazy! sync" +qa
+    echo "Neovim plugins synced!"
 fi
 
 # Execute the CMD (default: zsh)
