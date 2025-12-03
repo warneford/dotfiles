@@ -1,9 +1,9 @@
 # Message of the day for container login
 # Only show in the r-dev container (rwt-mind-palace)
 
-if [[ "$HOSTNAME" == "rwt-mind-palace" ]]; then
+_show_motd() {
   local cols=$(tput cols)
-  local color=$'\e[38;2;255;0;179m'  # #ff00b3
+  local color=$'\e[38;2;255;0;179m'
   local reset=$'\e[0m'
 
   echo
@@ -48,4 +48,9 @@ EOF
 
   # Display image centered (kitty handles sizing automatically)
   kitten icat --align center ~/dotfiles/assets/galaxy_brain_man.jpg
+}
+
+if [[ "$HOSTNAME" == "rwt-mind-palace" ]]; then
+  _show_motd
+  unfunction _show_motd
 fi
