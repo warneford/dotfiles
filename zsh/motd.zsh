@@ -12,5 +12,5 @@ if [[ "$HOSTNAME" == "rwt-mind-palace" ]]; then
   ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝     ╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝╚══════╝
 
 EOF
-  kitten icat ~/dotfiles/assets/galaxy_brain_man.jpg
+  kitten icat --align center ~/dotfiles/assets/galaxy_brain_man.jpg
 fi
