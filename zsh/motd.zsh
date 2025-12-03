@@ -3,6 +3,8 @@
 
 if [[ "$HOSTNAME" == "rwt-mind-palace" ]]; then
   local cols=$(tput cols)
+  local cyan=$'\e[96m'
+  local reset=$'\e[0m'
 
   echo
   if [[ $cols -ge 84 ]]; then
@@ -11,7 +13,7 @@ if [[ "$HOSTNAME" == "rwt-mind-palace" ]]; then
     local pad=$(( (cols - art_width) / 2 ))
     [[ $pad -lt 0 ]] && pad=0
     while IFS= read -r line; do
-      printf '%*s%s\n' $pad '' "$line"
+      printf '%*s%s%s%s\n' $pad '' "$cyan" "$line" "$reset"
     done << 'EOF'
 ███╗   ███╗██╗███╗   ██╗██████╗     ██████╗  █████╗ ██╗      █████╗  ██████╗███████╗
 ████╗ ████║██║████╗  ██║██╔══██╗    ██╔══██╗██╔══██╗██║     ██╔══██╗██╔════╝██╔════╝
@@ -26,7 +28,7 @@ EOF
     local pad=$(( (cols - art_width) / 2 ))
     [[ $pad -lt 0 ]] && pad=0
     while IFS= read -r line; do
-      printf '%*s%s\n' $pad '' "$line"
+      printf '%*s%s%s%s\n' $pad '' "$cyan" "$line" "$reset"
     done << 'EOF'
 ███╗   ███╗██╗███╗   ██╗██████╗
 ████╗ ████║██║████╗  ██║██╔══██╗
