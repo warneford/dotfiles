@@ -110,10 +110,41 @@ return {
                 },
                 lualine_c = {},
                 lualine_x = {
-                    { "filetype", icon_only = false },
+                    {
+                        function() return "" end,
+                        color = { fg = colors.deep, bg = "none" },
+                        padding = { left = 0, right = 0 },
+                    },
+                    {
+                        "filetype",
+                        icon_only = false,
+                        padding = { left = 1, right = 1 },
+                        color = { bg = colors.deep, fg = colors.aqua },
+                    },
+                    {
+                        function() return "" end,
+                        color = { fg = colors.deep, bg = "none" },
+                        padding = { left = 0, right = 0 },
+                    },
                 },
                 lualine_y = {},
-                lualine_z = { "location" },
+                lualine_z = {
+                    {
+                        function() return "" end,
+                        color = { fg = colors.teal, bg = "none" },
+                        padding = { left = 0, right = 0 },
+                    },
+                    {
+                        "location",
+                        padding = { left = 1, right = 1 },
+                        color = { bg = colors.teal, fg = colors.surface, gui = "bold" },
+                    },
+                    {
+                        function() return "" end,
+                        color = { fg = colors.teal, bg = "none" },
+                        padding = { left = 0, right = 0 },
+                    },
+                },
             },
             inactive_sections = {
                 lualine_a = {},
