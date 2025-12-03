@@ -1,33 +1,31 @@
 # Dotfiles
 
-> *Life is a brief existence falling through time. One should fall beautifully.*
-
-My personal development environment—a curated descent through terminal aesthetics and scientific computing workflows. Built for quick setup on new machines and tested across macOS and Linux (no root required).
+My personal development environment—a terminal descent through aesthetics and scientific computing workflows. After all, what you do is almost as important as how you look doing it. Built for quick setup on new machines and tested across macOS and Linux (no root required).
 
 ## The Premise
 
-This is an opinionated environment for **R/Quarto data science work** with excellent Python support. Everything talks to everything else: Neovim sends code to tmux panes running radian, vim keybindings work seamlessly across splits and panes, and the whole thing looks unreasonably good while doing it.
+This is an opinionated environment for **R/Quarto data science work** with excellent Python support. Where possible, the tools try to integrate well with each other: Neovim sends code to tmux panes running radian, vim keybindings work seamlessly across splits and panes, and macOS software integrates with terminal/CLI tools.
 
 ## What's Included
 
-| Component | Purpose | Highlights |
-|-----------|---------|------------|
-| **[Neovim](#neovim)** | Primary editor | LSP, Quarto, R integration, AI completion |
-| **[Zsh](#zsh)** | Shell | Oh-My-Zsh, Powerlevel10k, custom functions |
-| **[Tmux](#tmux)** | Terminal multiplexer | Vim-tmux navigation, sensible defaults |
-| **[Ghostty](#ghostty)** | Terminal emulator | 30+ custom shaders, because why not |
-| **[direnv + uv](#python-environment)** | Python environment | Automatic venv activation, fast dependency management |
-| **[R + radian](#r-environment)** | R development | Per-project radian, reticulate-compatible Python |
-| **[Docker](#docker-optional)** | Containerized R dev | Reproducible environment for the commitment-phobic |
+| Component                              | Purpose              | Highlights                                            |
+| -------------------------------------- | -------------------- | ----------------------------------------------------- |
+| **[Neovim](#neovim)**                  | Primary editor       | LSP, Quarto, R integration, AI completion             |
+| **[Zsh](#zsh)**                        | Shell                | Oh-My-Zsh, Powerlevel10k, custom functions            |
+| **[Tmux](#tmux)**                      | Terminal multiplexer | Vim-tmux navigation, sensible defaults                |
+| **[Ghostty](#ghostty)**                | Terminal emulator    | 30+ custom shaders, because why not                   |
+| **[direnv + uv](#python-environment)** | Python environment   | Automatic venv activation, fast dependency management |
+| **[R + radian](#r-environment)**       | R development        | Per-project radian, reticulate-compatible Python      |
+| **[Docker](#docker-optional)**         | Containerized R dev  | Reproducible environment for the commitment-phobic    |
 
 ### macOS Extras
 
-| Component | Purpose |
-|-----------|---------|
-| **AeroSpace** | i3-like tiling window manager |
+| Component      | Purpose                                     |
+| -------------- | ------------------------------------------- |
+| **AeroSpace**  | i3-like tiling window manager               |
 | **SketchyBar** | Custom status bar with workspace indicators |
-| **Karabiner** | Advanced keyboard remapping |
-| **Borders** | Window border highlighting (JankyBorders) |
+| **Karabiner**  | Advanced keyboard remapping                 |
+| **Borders**    | Window border highlighting (JankyBorders)   |
 
 ## Quick Start
 
@@ -35,7 +33,7 @@ This is an opinionated environment for **R/Quarto data science work** with excel
 
 - Git
 - Zsh
-- A [Nerd Font](https://www.nerdfonts.com/) (for icons—I recommend JetBrainsMono)
+- A [Nerd Font](https://www.nerdfonts.com/) (for icons—I recommend Fira Code)
 
 **Everything else installs automatically.** No root access required on Linux.
 
@@ -57,9 +55,11 @@ nvim            # Plugins install automatically
 ### What Gets Installed
 
 **macOS** (via Homebrew):
+
 - node, python, ripgrep, neovim, lazygit, tmux, quarto, and friends
 
 **Linux** (no root needed):
+
 - Rust toolchain → ripgrep (cargo)
 - nvm → Node.js LTS
 - bob-nvim → Neovim stable
@@ -67,6 +67,7 @@ nvim            # Plugins install automatically
 - lazygit
 
 **Both platforms**:
+
 - Oh-My-Zsh + Powerlevel10k + plugins
 - Python packages (pynvim, cairosvg, pillow)
 - R languageserver (if R is available)
@@ -82,6 +83,7 @@ Based on [ThePrimeagen's init.lua](https://github.com/ThePrimeagen/init.lua), he
 **LSP Support**: Pyright (Python), R Language Server, TypeScript, Lua, Bash
 
 **Key Plugins**:
+
 - **Quarto/R**: quarto-nvim, nvim-r, slime (REPL integration via tmux)
 - **Navigation**: Harpoon, Telescope, Leap
 - **Code**: Treesitter, LSP, Conform (formatting), Trouble (diagnostics)
@@ -95,6 +97,7 @@ Based on [ThePrimeagen's init.lua](https://github.com/ThePrimeagen/init.lua), he
 - **Plugins**: git, zsh-autosuggestions, zsh-syntax-highlighting
 
 **Custom additions**:
+
 - `uvinit` - Initialize a project with direnv + uv
 - `quarto-preview` - Preview with proper browser handling
 - Dynamic ASCII art MOTD (because terminals should spark joy)
@@ -104,6 +107,7 @@ Based on [ThePrimeagen's init.lua](https://github.com/ThePrimeagen/init.lua), he
 Prefix: `Ctrl+Space` (ergonomic, doesn't conflict with vim)
 
 **Features**:
+
 - **Vim-tmux-navigator**: `Ctrl+hjkl` moves between vim splits AND tmux panes seamlessly
 - **Sensible window switching**: `Alt+1-5` for windows, `Alt+n/p` for next/prev
 - **True color**: 24-bit RGB, undercurl, italics
@@ -115,6 +119,7 @@ See **[TMUX_GUIDE.md](TMUX_GUIDE.md)** for the full reference.
 ### Ghostty
 
 The terminal of choice. Config includes:
+
 - **30+ custom GLSL shaders**: Bloom, starfield, matrix, CRT, galaxy, dither effects
 - Shaders range from "subtle and readable" to "I am become terminal, destroyer of eyestrain"
 - Background images for extra atmosphere
@@ -152,19 +157,21 @@ The default `pyproject.toml` template includes radian, so every project gets it 
 #### radian features
 
 Once installed in your project:
+
 - Vi mode editing (matching nvim muscle memory)
-- `Alt+-` inserts ` <- ` (assignment)
-- `Alt+m` inserts ` |> ` (pipe)
+- `Alt+-` inserts `<-` (assignment)
+- `Alt+m` inserts `|>` (pipe)
 - Syntax highlighting, multiline editing, 20k line history
 
 #### .Rprofile
 
 Global R configuration includes:
+
 - Posit Package Manager (fast binary packages) with CRAN fallback
 - httpgd for web-based graphics (SSH-friendly)
 - Google auth for gargle/googledrive packages
 
-> **Escape hatch**: For quick one-off R sessions where reticulate compatibility doesn't matter, you *can* run `uv tool install radian` to get a global radian. Just understand it won't see your project's Python packages.
+> **Escape hatch**: For quick one-off R sessions where reticulate compatibility doesn't matter, you _can_ run `uv tool install radian` to get a global radian. Just understand it won't see your project's Python packages.
 
 ### Docker (Optional)
 
@@ -175,6 +182,7 @@ A containerized R development environment for when you want reproducibility with
 ```
 
 **r-dev container** includes:
+
 - rocker/tidyverse base
 - Neovim (latest), Node.js, deno, ripgrep, fzf, direnv
 - Your dotfiles mounted and ready
@@ -183,11 +191,13 @@ A containerized R development environment for when you want reproducibility with
 ### macOS Window Management
 
 **AeroSpace**: i3-like tiling for macOS
+
 - Workspaces 1-9 with keyboard navigation
 - Accordion and tile layouts
 - Focus-follows-mouse on monitor change
 
 **SketchyBar**: Status bar with:
+
 - Workspace indicators
 - System monitoring (CPU, calendar)
 - GitHub notifications
@@ -201,7 +211,7 @@ A containerized R development environment for when you want reproducibility with
 
 ## Documentation
 
-- **[KEYBINDINGS.md](KEYBINDINGS.md)** - Comprehensive keybinding reference *(TODO: some conflicts to resolve)*
+- **[KEYBINDINGS.md](KEYBINDINGS.md)** - Comprehensive keybinding reference _(TODO: some conflicts to resolve)_
 - **[TMUX_GUIDE.md](TMUX_GUIDE.md)** - Tmux quick reference and workflows
 
 ## Customization
@@ -246,11 +256,3 @@ source ~/.zshrc  # or restart terminal
 ```
 
 For Neovim plugins: `:Lazy sync`
-
----
-
-## License
-
-MIT
-
-*Fall beautifully.*
