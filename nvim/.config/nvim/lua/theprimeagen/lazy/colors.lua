@@ -20,6 +20,15 @@ function ColorMyPencils(color)
 
 end
 
+-- Run ColorMyPencils when vim starts without a file argument
+vim.api.nvim_create_autocmd("VimEnter", {
+	callback = function()
+		if vim.fn.argc() == 0 then
+			ColorMyPencils()
+		end
+	end,
+})
+
 return {
 
     {
