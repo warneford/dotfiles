@@ -120,7 +120,6 @@ return {
                 end,
 
                 -- YAML Language Server for YAML files (e.g., _quarto.yml, CI configs)
-                -- Note: Quarto frontmatter completion is handled by cmp-r
                 ["yamlls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.yamlls.setup({
@@ -164,7 +163,6 @@ return {
             }),
             sources = cmp.config.sources({
                 { name = 'otter' },  -- Otter for quarto/markdown code blocks
-                { name = 'cmp_r' },  -- R.nvim completions + Quarto YAML frontmatter
                 { name = 'nvim_lsp', group_index = 1 },  -- LSP first priority
                 { name = 'nvim_lsp_signature_help', group_index = 1 },  -- Function signatures
                 { name = 'luasnip', group_index = 1 },

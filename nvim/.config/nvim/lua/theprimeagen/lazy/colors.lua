@@ -5,7 +5,8 @@ function ColorMyPencils(color)
 	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 	vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
-	vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
+	vim.api.nvim_set_hl(0, "WinBar", { bg = "none" })
+	vim.api.nvim_set_hl(0, "WinBarNC", { bg = "none" })
 
 	-- Colorcolumn: subtle vertical line at 80 chars
 	-- Options to try:
@@ -14,6 +15,7 @@ function ColorMyPencils(color)
 	-- Rose-pine inspired muted: { bg = "#26233a" }
 	-- Just a thin line (no bg): { fg = "#6e6a86" }
 	vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#6e6a86" })
+
 end
 
 return {
