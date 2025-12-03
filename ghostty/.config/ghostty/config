@@ -116,7 +116,7 @@ unfocused-split-opacity = 0.7
 # ===== RECOMMENDED (Subtle & Readable) =====
 
 # Simple Bloom (subtle glow on bright text)
-custom-shader = shaders/bloom.glsl
+# custom-shader = shaders/bloom.glsl
 
 # Subtle Bloom (reduced intensity, better selection visibility)
 # custom-shader = shaders/bloom-subtle.glsl
