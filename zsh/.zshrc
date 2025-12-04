@@ -92,6 +92,14 @@ alias reload='ZSHRC_RELOADING=1 source ~/.zshrc && unset ZSHRC_RELOADING'
 # direnv hook for uv + per-project Python environments
 eval "$(direnv hook zsh)"
 
+# uv cache in projects directory (allows hardlinking to venvs)
+# Use /data/home path if it exists (container), otherwise ~/projects (host)
+if [[ -d "/data/home/$USER/projects" ]]; then
+    export UV_CACHE_DIR="/data/home/$USER/projects/.cache/uv"
+else
+    export UV_CACHE_DIR="$HOME/projects/.cache/uv"
+fi
+
 # Source all function files from ~/dotfiles/zsh/functions/
 for func_file in ~/dotfiles/zsh/functions/*.zsh(N); do
     source "$func_file"
@@ -99,3 +107,4 @@ done
 
 # Show MOTD for container login
 [[ -f ~/dotfiles/zsh/motd.zsh ]] && source ~/dotfiles/zsh/motd.zsh
+export PATH="$HOME/bin:$PATH"
