@@ -3,8 +3,8 @@
 # Runs dotfiles install script on first start, then executes CMD
 
 # Create symlink to projects in home directory (mounted at /data/home/... for venv compatibility)
-if [ -d "/data/home/$USER/projects" ] && [ ! -e "$HOME/projects" ]; then
-    ln -s "/data/home/$USER/projects" "$HOME/projects"
+if [ -d "/data/home/$(whoami)/projects" ] && [ ! -e "$HOME/projects" ]; then
+    ln -s "/data/home/$(whoami)/projects" "$HOME/projects"
 fi
 
 INSTALL_MARKER="$HOME/.dotfiles-installed"
