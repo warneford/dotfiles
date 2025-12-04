@@ -22,6 +22,8 @@ services:
       - ~/dotfiles:/home/${USER:-dev}/dotfiles
       # Mount projects directory (path matches host for venv compatibility)
       - ~/projects:/data/home/${USER:-dev}/projects
+      # R package library (versioned, persists across container rebuilds)
+      - ~/R/library:/home/${USER:-dev}/R/library
       # Mount ArgoAPI
       - /data/home/scott/projects/argoAPI:/home/${USER:-dev}/argoAPI:ro
       # Git/SSH config (read-only)
