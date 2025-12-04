@@ -15,13 +15,13 @@ services:
     tty: true
     restart: unless-stopped
     ports:
-      - "9012:35211"  # httpgd
-      - "9013:9013"   # quarto preview
+      - "9012:35211" # httpgd
+      - "9013:9013" # quarto preview
     volumes:
       # Mount dotfiles (install.sh creates symlinks to these)
       - ~/dotfiles:/home/${USER:-dev}/dotfiles
-      # Mount projects directory
-      - ~/projects:/home/${USER:-dev}/projects
+      # Mount projects directory (path matches host for venv compatibility)
+      - ~/projects:/data/home/${USER:-dev}/projects
       # Mount ArgoAPI
       - /data/home/scott/projects/argoAPI:/home/${USER:-dev}/argoAPI:ro
       # Git/SSH config (read-only)
@@ -41,13 +41,25 @@ services:
 
   rstudio:
     image: rocker/tidyverse:4.5.2
-    container_name: rstudio
+    container_name: rstudio-rwt
     environment:
       - PASSWORD=${RSTUDIO_PASSWORD:-rstudio}
+      # Match host user for file permissions on mounted volumes
+      - USERID=${UID:-1000}
+      - GROUPID=${GID:-1000}
+      # GitHub PAT for pak/remotes to install private packages
+      - GITHUB_PAT=${GITHUB_PAT}
     ports:
-      - "9010:8787"  # RStudio Server
+      - "9010:8787" # RStudio Server
     volumes:
-      - ~/projects:/home/rstudio/projects
+      - ~/projects:/home/rstudio/projects:rw
+      - /data/home/scott/projects/argoAPI:/home/rstudio/argoAPI:ro
+      - ~/.gitconfig:/home/rstudio/.gitconfig:ro
+      - ~/.git-credentials:/home/rstudio/.git-credentials
+      # Google auth tokens for gargle/googlesheets4/googledrive
+      - ~/.secrets:/home/rstudio/.secrets
+      # Tentacle data directory
+      - /data/echoms:/data/echoms
     restart: unless-stopped
 
 volumes:

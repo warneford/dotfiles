@@ -2,6 +2,11 @@
 # Entrypoint for r-dev container
 # Runs dotfiles install script on first start, then executes CMD
 
+# Create symlink to projects in home directory (mounted at /data/home/... for venv compatibility)
+if [ -d "/data/home/$USER/projects" ] && [ ! -e "$HOME/projects" ]; then
+    ln -s "/data/home/$USER/projects" "$HOME/projects"
+fi
+
 INSTALL_MARKER="$HOME/.dotfiles-installed"
 
 if [ ! -f "$INSTALL_MARKER" ] && [ -f "$HOME/dotfiles/install.sh" ]; then
