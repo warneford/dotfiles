@@ -35,6 +35,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
 # Install Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
+# Install rclone for cloud storage sync (Dropbox, etc.)
+RUN curl -fsSL https://rclone.org/install.sh | bash
+
 # Install deno (needed for peek.nvim markdown preview) - install to /usr/local/bin for all users
 RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
 

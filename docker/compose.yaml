@@ -29,6 +29,11 @@ services:
       # Git/SSH config (read-only)
       - ~/.ssh:/home/${USER:-dev}/.ssh:ro
       - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
+      # rclone config for Dropbox sync
+      - ~/.config/rclone:/home/${USER:-dev}/.config/rclone:ro
+      # Claude Code auth and config
+      - ~/.claude.json:/home/${USER:-dev}/.claude.json
+      - ~/.claude:/home/${USER:-dev}/.claude
       - ~/.git-credentials:/home/${USER:-dev}/.git-credentials
       # Google auth tokens for gargle/googlesheets4/googledrive
       - ~/.secrets:/home/${USER:-dev}/.secrets
