@@ -68,8 +68,10 @@ COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Configure SSH server (runs on port 9015 to avoid conflict with host sshd)
 # Must be done as root before user switch
+# AcceptEnv TERM allows client to set terminal type for graphics protocol support
 RUN mkdir -p /run/sshd && \
-    echo "Port 9015" >> /etc/ssh/sshd_config
+    echo "Port 9015" >> /etc/ssh/sshd_config && \
+    echo "AcceptEnv TERM COLORTERM" >> /etc/ssh/sshd_config
 
 # Create non-root user matching host UID (configurable at build time)
 # Rocker images have rstudio user with UID/GID 1000, so we rename if conflict exists
