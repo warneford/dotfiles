@@ -46,13 +46,11 @@ EOF
   fi
   echo
 
-  # Display image using chafa (works with kitty graphics protocol in tmux)
-  # --format=kitty uses the kitty graphics protocol
-  # --passthrough=tmux wraps escape sequences for tmux passthrough
-  # --size=40 limits width for reasonable banner size
-  local passthrough_mode="auto"
-  [[ -n "$TMUX" ]] && passthrough_mode="tmux"
-  chafa --format=kitty --passthrough="$passthrough_mode" --align=center --size=40 ~/dotfiles/assets/galaxy_brain_man.jpg
+  # Display image using kitten icat (kitty graphics protocol)
+  # --unicode-placeholder is required when client is inside tmux (can't track cursor position)
+  # --passthrough defaults to 'detect' which auto-detects tmux on the client side
+  # Always use --unicode-placeholder since we typically SSH from inside local tmux
+  kitten icat --unicode-placeholder --align=center ~/dotfiles/assets/galaxy_brain_man.jpg
 }
 
 if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
