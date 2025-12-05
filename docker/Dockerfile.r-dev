@@ -32,9 +32,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Claude Code CLI
-RUN npm install -g @anthropic-ai/claude-code
-
 # Install rclone for cloud storage sync (Dropbox, etc.)
 RUN curl -fsSL https://rclone.org/install.sh | bash
 
@@ -88,6 +85,9 @@ WORKDIR /home/${USERNAME}
 
 # Install uv for the user (used to manage per-project Python/radian)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install Claude Code CLI (user-local for auto-update support)
+RUN npm config set prefix ~/.local && npm install -g @anthropic-ai/claude-code
 
 # Create .zshrc that sources dotfiles config
 # First-boot setup (dotfiles install + Lazy sync) is handled by entrypoint.sh
