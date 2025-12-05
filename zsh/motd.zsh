@@ -47,8 +47,7 @@ EOF
   echo
 
   # Display image centered (kitty handles sizing automatically)
-  # Use --passthrough=tmux to explicitly enable tmux passthrough mode
-  kitten icat --align center --passthrough=tmux ~/dotfiles/assets/galaxy_brain_man.jpg
+  kitten icat --align center ~/dotfiles/assets/galaxy_brain_man.jpg
 }
 
 if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
