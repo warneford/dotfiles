@@ -50,6 +50,8 @@ services:
       # TERM not set - inherit from SSH client for proper graphics protocol support
       - TZ=America/Los_Angeles
       - GITHUB_PAT=${GITHUB_PAT}
+      # Local username for reverse SSH tunnel (nvim quarto-preview → local browser)
+      - LOCAL_USER=${LOCAL_USER:-}
 
   rstudio:
     image: rocker/tidyverse:4.5.2
