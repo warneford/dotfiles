@@ -149,20 +149,55 @@ return {
 						.. " --port 9013 --host 0.0.0.0 --no-browser')"
 					require("r.send").cmd(cmd)
 					vim.notify("Quarto preview sent to R console", vim.log.levels.INFO)
-					-- Trigger local machine's quarto-preview function via reverse SSH tunnel
-					-- Requires: RemoteForward 9014 localhost:22 in SSH config, LOCAL_USER env var
-					-- Use ProxyCommand instead of -J to pass StrictHostKeyChecking to both hops
-					local local_user = vim.fn.getenv("LOCAL_USER") or "rwarne"
-					vim.fn.jobstart("ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9014 " .. local_user .. "@localhost 'source ~/.zshrc && quarto-preview'", {
-						detach = true,
-						on_exit = function(_, code)
-							if code ~= 0 then
-								vim.schedule(function()
-									vim.notify("Failed to open browser on Mac (exit " .. code .. ")", vim.log.levels.WARN)
-								end)
-							end
-						end,
-					})
+
+					-- Only trigger reverse SSH tunnel if running inside a Docker container
+					local is_docker = vim.fn.filereadable("/.dockerenv") == 1
+					if is_docker then
+						-- Wait for quarto preview to start (poll for port 9013)
+						-- Then trigger local machine's browser via reverse SSH tunnel
+						local local_user = vim.fn.getenv("LOCAL_USER") or "rwarne"
+						local attempts = 0
+						local max_attempts = 180 -- 3 minutes max wait
+						local timer = vim.loop.new_timer()
+						timer:start(
+							1000,
+							1000,
+							vim.schedule_wrap(function()
+								attempts = attempts + 1
+								-- Check if port 9013 is listening
+								local handle = io.popen("fuser 9013/tcp 2>/dev/null")
+								local result = handle:read("*a")
+								handle:close()
+								if result and result ~= "" then
+									-- Port is ready, trigger browser
+									timer:stop()
+									timer:close()
+									vim.fn.jobstart(
+										"ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9014 "
+											.. local_user
+											.. "@localhost 'source ~/.zshrc && quarto-preview'",
+										{
+											detach = true,
+											on_exit = function(_, code)
+												if code ~= 0 then
+													vim.schedule(function()
+														vim.notify(
+															"Failed to open browser on Mac (exit " .. code .. ")",
+															vim.log.levels.WARN
+														)
+													end)
+												end
+											end,
+										}
+									)
+								elseif attempts >= max_attempts then
+									timer:stop()
+									timer:close()
+									vim.notify("Timeout waiting for quarto preview to start", vim.log.levels.WARN)
+								end
+							end)
+						)
+					end
 				else
 					vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
 				end
