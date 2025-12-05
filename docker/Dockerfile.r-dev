@@ -66,6 +66,11 @@ RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes', 'he
 # Copy entrypoint script (as root, before user switch)
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
+# Configure SSH server (runs on port 9015 to avoid conflict with host sshd)
+# Must be done as root before user switch
+RUN mkdir -p /run/sshd && \
+    echo "Port 9015" >> /etc/ssh/sshd_config
+
 # Create non-root user matching host UID (configurable at build time)
 # Rocker images have rstudio user with UID/GID 1000, so we rename if conflict exists
 ARG USER_ID=1000
@@ -80,7 +85,8 @@ RUN if getent passwd ${USER_ID} > /dev/null; then \
         useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/zsh ${USERNAME}; \
     fi && \
     echo "${USERNAME}:REDACTED_PASSWORD" | chpasswd && \
-    usermod -aG sudo ${USERNAME}
+    usermod -aG sudo ${USERNAME} && \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers.d/${USERNAME}
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
@@ -95,10 +101,6 @@ RUN npm config set prefix ~/.local && npm install -g @anthropic-ai/claude-code
 # First-boot setup (dotfiles install + Lazy sync) is handled by entrypoint.sh
 RUN echo '# Source dotfiles zsh config\n\
 [[ -f "$HOME/dotfiles/zsh/.zshrc" ]] && source "$HOME/dotfiles/zsh/.zshrc"' > ~/.zshrc
-
-# Configure SSH server (runs on port 9015 to avoid conflict with host sshd)
-RUN mkdir -p /run/sshd && \
-    echo "Port 9015" >> /etc/ssh/sshd_config
 
 # Expose ports: httpgd, SSH
 EXPOSE 35211 9015
