@@ -46,17 +46,8 @@ EOF
   fi
   echo
 
-  # Display image using kitten icat (kitty graphics protocol)
-  # TMUX_PASSTHROUGH is set via SSH SetEnv when connecting from inside local tmux
-  # --transfer-mode=stream sends data via escape codes (needed over SSH)
-  # --unicode-placeholder is required for tmux (can't track cursor position)
-  # --passthrough=tmux wraps escape sequences for tmux
-  # TMUX= unsets the socket path so kitten doesn't try to verify passthrough setting
-  if [[ -n "$TMUX_PASSTHROUGH" ]]; then
-    TMUX= kitten icat --transfer-mode=stream --passthrough=tmux --unicode-placeholder --align=center ~/dotfiles/assets/galaxy_brain_man.jpg
-  else
-    kitten icat --align=center ~/dotfiles/assets/galaxy_brain_man.jpg
-  fi
+  # Display image centered (kitty handles sizing automatically)
+  kitten icat --align center ~/dotfiles/assets/galaxy_brain_man.jpg
 }
 
 if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
