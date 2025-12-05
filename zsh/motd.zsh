@@ -46,8 +46,13 @@ EOF
   fi
   echo
 
-  # Display image centered (kitty handles sizing automatically)
-  kitten icat --align center ~/dotfiles/assets/galaxy_brain_man.jpg
+  # Display image using chafa (works with kitty graphics protocol in tmux)
+  # --format=kitty uses the kitty graphics protocol
+  # --passthrough=tmux wraps escape sequences for tmux passthrough
+  # --size=40 limits width for reasonable banner size
+  local passthrough_mode="auto"
+  [[ -n "$TMUX" ]] && passthrough_mode="tmux"
+  chafa --format=kitty --passthrough="$passthrough_mode" --align=center --size=40 ~/dotfiles/assets/galaxy_brain_man.jpg
 }
 
 if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
