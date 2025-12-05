@@ -44,6 +44,8 @@ services:
       - r-dev-tmp:/tmp
       # Tentacle data directory
       - /data/echoms/:/data/echoms
+    extra_hosts:
+      - "dockerhost:host-gateway"
     environment:
       # TERM not set - inherit from SSH client for proper graphics protocol support
       - TZ=America/Los_Angeles
