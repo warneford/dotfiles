@@ -47,10 +47,13 @@ EOF
   echo
 
   # Display image using kitten icat (kitty graphics protocol)
-  # --unicode-placeholder is required when client is inside tmux (can't track cursor position)
-  # --passthrough defaults to 'detect' which auto-detects tmux on the client side
-  # Always use --unicode-placeholder since we typically SSH from inside local tmux
-  kitten icat --unicode-placeholder --align=center ~/dotfiles/assets/galaxy_brain_man.jpg
+  # $TMUX is passed via SSH SendEnv when connecting from inside local tmux
+  # --unicode-placeholder is required for tmux (can't track cursor position)
+  if [[ -n "$TMUX" ]]; then
+    kitten icat --unicode-placeholder --align=center ~/dotfiles/assets/galaxy_brain_man.jpg
+  else
+    kitten icat --align=center ~/dotfiles/assets/galaxy_brain_man.jpg
+  fi
 }
 
 if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
