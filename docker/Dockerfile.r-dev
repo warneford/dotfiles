@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fzf \
     unzip \
     direnv \
-    # Image display for MOTD banner (chafa works with kitty graphics protocol in tmux)
-    chafa \
+    # Kitty terminal tools (for kitten icat image display in MOTD banner)
+    kitty \
     # SSH server for proper terminal capabilities (kitty graphics protocol)
     openssh-server \
     # Python for radian and reticulate
