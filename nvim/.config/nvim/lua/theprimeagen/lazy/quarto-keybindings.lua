@@ -150,8 +150,8 @@ return {
 					require("r.send").cmd(cmd)
 					vim.notify("Quarto preview sent to R console", vim.log.levels.INFO)
 					-- Trigger Mac's quarto-preview function via reverse SSH tunnel (port 9014)
-					-- This opens Orion browser to localhost:9013
-					vim.fn.jobstart("ssh -o StrictHostKeyChecking=no -p 9014 localhost 'source ~/.zshrc && quarto-preview'", {
+					-- Tunnel is on tentacle host, so connect via docker gateway IP
+					vim.fn.jobstart("ssh -o StrictHostKeyChecking=no -p 9014 172.18.0.1 'source ~/.zshrc && quarto-preview'", {
 						detach = true,
 						on_exit = function(_, code)
 							if code ~= 0 then
