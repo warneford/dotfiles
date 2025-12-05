@@ -17,9 +17,10 @@ if [ ! -f "$INSTALL_MARKER" ] && [ -f "$HOME/dotfiles/install.sh" ]; then
     echo "Dotfiles setup complete!"
 
     # Sync neovim plugins on first boot
+    # Mason tools install automatically on first interactive nvim launch
     echo "Syncing neovim plugins..."
-    nvim --headless "+Lazy! sync" +qa
-    echo "Neovim plugins synced!"
+    nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
+    echo "Neovim setup complete!"
 fi
 
 # Execute the CMD (default: zsh)
