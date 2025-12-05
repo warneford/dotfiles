@@ -45,7 +45,7 @@ services:
       # Tentacle data directory
       - /data/echoms/:/data/echoms
     environment:
-      - TERM=xterm-256color
+      # TERM not set - inherit from SSH client for proper graphics protocol support
       - TZ=America/Los_Angeles
       - GITHUB_PAT=${GITHUB_PAT}
 
