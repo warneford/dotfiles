@@ -149,6 +149,18 @@ return {
 						.. " --port 9013 --host 0.0.0.0 --no-browser')"
 					require("r.send").cmd(cmd)
 					vim.notify("Quarto preview sent to R console", vim.log.levels.INFO)
+					-- Trigger Mac's quarto-preview function via reverse SSH tunnel (port 9014)
+					-- This opens Orion browser to localhost:9013
+					vim.fn.jobstart("ssh -o StrictHostKeyChecking=no -p 9014 localhost 'source ~/.zshrc && quarto-preview'", {
+						detach = true,
+						on_exit = function(_, code)
+							if code ~= 0 then
+								vim.schedule(function()
+									vim.notify("Failed to open browser on Mac (exit " .. code .. ")", vim.log.levels.WARN)
+								end)
+							end
+						end,
+					})
 				else
 					vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
 				end
