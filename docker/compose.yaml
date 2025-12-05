@@ -17,6 +17,7 @@ services:
     ports:
       - "9012:35211" # httpgd
       - "9013:9013" # quarto preview
+      - "9015:9015" # SSH
     volumes:
       # Mount dotfiles (install.sh creates symlinks to these)
       - ~/dotfiles:/home/${USER:-dev}/dotfiles
