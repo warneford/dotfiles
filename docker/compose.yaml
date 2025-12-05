@@ -30,6 +30,8 @@ services:
       # Git/SSH config (read-only)
       - ~/.ssh:/home/${USER:-dev}/.ssh:ro
       - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
+      # Terminfo for ghostty terminal
+      - ~/.terminfo:/home/${USER:-dev}/.terminfo:ro
       # rclone config for Dropbox sync
       - ~/.config/rclone:/home/${USER:-dev}/.config/rclone:ro
       # Claude Code auth and config

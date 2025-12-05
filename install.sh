@@ -399,6 +399,7 @@ stow_package "nvim"
 stow_package "direnv"
 stow_package "radian"
 stow_package "bin"
+stow_package "terminfo"
 
 # Remove old .radian_profile if it exists and isn't a symlink
 if [ -f "$HOME/.radian_profile" ] && [ ! -L "$HOME/.radian_profile" ]; then
