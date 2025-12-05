@@ -2,6 +2,9 @@
 # Entrypoint for r-dev container
 # Runs dotfiles install script on first start, then executes CMD
 
+# Start SSH server (needs sudo since we run as non-root user)
+sudo /usr/sbin/sshd
+
 # Create symlink to projects in home directory (mounted at /data/home/... for venv compatibility)
 if [ -d "/data/home/$(whoami)/projects" ] && [ ! -e "$HOME/projects" ]; then
     ln -s "/data/home/$(whoami)/projects" "$HOME/projects"
