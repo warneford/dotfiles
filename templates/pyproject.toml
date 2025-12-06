@@ -7,6 +7,8 @@ requires-python = ">=3.10"
 dependencies = [
     # R console with reticulate compatibility
     "radian",
+    # Enhanced Python REPL - for polyglot notebooks
+    "ipython",
 
     # Common dependencies (uncomment as needed)
     # "numpy>=1.20.0",
