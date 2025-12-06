@@ -50,7 +50,7 @@ EOF
   kitten icat --align center ~/dotfiles/assets/galaxy_brain_man.jpg
 }
 
-if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
+if [[ "$(hostname)" == "rwt-mind-palace" && -z "$NVIM_TERMINAL" ]]; then
   _show_motd
   unfunction _show_motd
 fi

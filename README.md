@@ -138,21 +138,21 @@ The `use_uv` function in direnvrc handles everything—respects `.python-version
 
 ### R Environment
 
-#### Why radian is per-project
+#### Why radian and ipython are per-project
 
-**radian** (the enhanced R console) is intentionally installed per-project rather than globally. This ensures reticulate uses the same Python environment as your project dependencies—critical for reproducible R↔Python workflows.
+**radian** (enhanced R console) and **ipython** (enhanced Python REPL) are intentionally installed per-project rather than globally. This ensures reticulate uses the same Python environment as your project dependencies—critical for reproducible R↔Python workflows in polyglot Quarto notebooks.
 
 #### Getting started with R
 
 ```bash
 mkdir my-analysis && cd my-analysis
-uvinit                    # Creates .envrc + pyproject.toml (includes radian!)
+uvinit                    # Creates .envrc + pyproject.toml (includes radian + ipython!)
                           # Opens pyproject.toml in nvim
                           # Edit dependencies, :wq to save and sync
 r                         # Alias for radian - now available in this directory
 ```
 
-The default `pyproject.toml` template includes radian, so every project gets it automatically.
+The default `pyproject.toml` template includes both radian and ipython, so every project gets them automatically.
 
 #### radian features
 
@@ -162,6 +162,15 @@ Once installed in your project:
 - `Alt+-` inserts `<-` (assignment)
 - `Alt+m` inserts `|>` (pipe)
 - Syntax highlighting, multiline editing, 20k line history
+
+#### ipython features
+
+For Python chunks in Quarto notebooks:
+
+- Syntax highlighting, tab completion, `?` for help
+- `%magic` commands, better tracebacks
+- Handles multi-line code blocks from nvim seamlessly
+- Same Python environment as your R/reticulate code
 
 #### .Rprofile
 

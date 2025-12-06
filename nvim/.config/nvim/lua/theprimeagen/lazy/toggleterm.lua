@@ -31,8 +31,9 @@ return {
 			local Terminal = require("toggleterm.terminal").Terminal
 
 			-- Shell terminal (always available, count=2)
+			-- Set NVIM_TERMINAL to skip MOTD display
 			local shell_term = Terminal:new({
-				cmd = vim.o.shell,
+				cmd = "NVIM_TERMINAL=1 " .. vim.o.shell,
 				count = 2,
 				direction = "horizontal",
 				display_name = "shell",
@@ -54,7 +55,8 @@ return {
 			local function get_python_term()
 				if not python_term then
 					python_term = Terminal:new({
-						cmd = "ipython",
+						-- Use ipython-direnv wrapper to load project's Python environment
+						cmd = "NVIM_TERMINAL=1 ipython-direnv",
 						count = 3,
 						direction = "horizontal",
 						display_name = "python",
@@ -72,13 +74,70 @@ return {
 				return python_term
 			end
 
-			-- Toggle functions
+			-- Helper to find R.nvim terminal window and buffer
+			local function find_r_terminal()
+				for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+					local bufname = vim.api.nvim_buf_get_name(buf)
+					if bufname:match("term://.*[Rr]adian") or bufname:match("term://.*:R$") then
+						-- Find window if visible
+						for _, win in ipairs(vim.api.nvim_list_wins()) do
+							if vim.api.nvim_win_get_buf(win) == buf then
+								return buf, win
+							end
+						end
+						return buf, nil
+					end
+				end
+				return nil, nil
+			end
+
+			-- Toggle functions - swap between R and shell/python in same space
 			local function toggle_shell()
-				shell_term:toggle()
+				local r_buf, r_win = find_r_terminal()
+
+				if shell_term:is_open() then
+					-- Shell is open, close it and show R if available
+					shell_term:close()
+					if r_buf and not r_win then
+						vim.cmd("botright split")
+						vim.api.nvim_win_set_buf(0, r_buf)
+						vim.cmd("resize " .. math.floor(vim.o.lines / 3))
+					end
+				else
+					-- Shell is closed, hide R and open shell
+					if r_win then
+						vim.api.nvim_win_hide(r_win)
+					end
+					shell_term:open()
+				end
 			end
 
 			local function toggle_python()
-				get_python_term():toggle()
+				local r_buf, r_win = find_r_terminal()
+				local term = get_python_term()
+
+				-- Check if python terminal window is actually visible
+				local python_visible = term.bufnr and vim.api.nvim_buf_is_valid(term.bufnr)
+					and vim.fn.bufwinnr(term.bufnr) ~= -1
+
+				if python_visible then
+					-- Python is visible, close it and show R if available
+					term:close()
+					if r_buf then
+						vim.cmd("botright split")
+						vim.api.nvim_win_set_buf(0, r_buf)
+						vim.cmd("resize " .. math.floor(vim.o.lines / 3))
+					end
+				else
+					-- Python is not visible, hide R and shell, open python
+					if r_win then
+						vim.api.nvim_win_hide(r_win)
+					end
+					if shell_term:is_open() then
+						shell_term:close()
+					end
+					term:open()
+				end
 			end
 
 			-- Send code to shell terminal

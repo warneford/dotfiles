@@ -1,0 +1,30 @@
+#!/bin/bash
+# Wrapper script for ipython that loads direnv environment first
+# This ensures the project's Python venv is used for polyglot notebooks
+
+# Load direnv environment if available
+if command -v direnv &> /dev/null; then
+    eval "$(direnv export bash 2>/dev/null)"
+fi
+
+# If ipython is in PATH (from direnv/venv), use it
+if command -v ipython &> /dev/null; then
+    exec ipython "$@"
+fi
+
+# Fallback: look for ipython in local .venv
+if [ -x ".venv/bin/ipython" ]; then
+    exec .venv/bin/ipython "$@"
+fi
+
+# Fallback: search upward for .venv directory
+dir="$PWD"
+while [ "$dir" != "/" ]; do
+    if [ -x "$dir/.venv/bin/ipython" ]; then
+        exec "$dir/.venv/bin/ipython" "$@"
+    fi
+    dir="$(dirname "$dir")"
+done
+
+echo "Error: ipython not found. Run 'uv sync' in a project with ipython in pyproject.toml"
+exit 1
