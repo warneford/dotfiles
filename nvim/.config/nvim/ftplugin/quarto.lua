@@ -10,16 +10,13 @@ vim.wo.linebreak = true
 vim.wo.breakindent = true
 vim.wo.showbreak = '|'
 
--- Alternative R start: vertical split (console below)
--- Use <localleader>rb for vertical layout on smaller screens (bottom)
+-- ,rb - Start R with bottom split layout (uses nvim terminal)
+-- R.nvim now uses nvim's built-in terminal instead of tmux
+-- The shell terminal opens automatically alongside R via toggleterm
 vim.keymap.set("n", "<localleader>rb", function()
+	-- Set R.nvim to use horizontal split (bottom 1/3 of screen)
 	local config = require("r.config").get_config()
-	local original = config.external_term
-	config.external_term = "tmux split-window -v -l 15"
-	package.loaded["r.term.tmux"] = nil
-	package.loaded["r.run"] = nil
+	config.rconsole_width = 0  -- 0 = horizontal split
+	config.rconsole_height = math.floor(vim.o.lines / 3)
 	require("r.run").start_R("R")
-	vim.defer_fn(function()
-		config.external_term = original
-	end, 500)
 end, { buffer = true, desc = "Start R (bottom split)" })

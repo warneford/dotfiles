@@ -6,13 +6,11 @@ return {
 		-- Create a table with the options to be passed to setup()
 		local opts = {
 			-- Use radian-direnv wrapper to ensure VIRTUAL_ENV is loaded
-			-- This is needed because tmux split-window doesn't inherit direnv env
 			R_app = "radian-direnv",
 			R_cmd = "R",
 
-			-- Use external tmux terminal instead of built-in (avoids TCP issues)
-			-- -l 80: fixed width (percentage -p doesn't work in all contexts)
-			external_term = "tmux split-window -h -l 80",
+			-- Use nvim's built-in terminal (no external_term)
+			-- This integrates better with toggleterm for shell/python terminals
 
 			R_args = {},  -- radian doesn't need --quiet --no-save
 			min_editor_width = 72,
