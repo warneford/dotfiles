@@ -68,6 +68,7 @@ macos-titlebar-style = hidden
 window-save-state = always
 window-colorspace = display-p3
 quick-terminal-screen = macos-menu-bar
+confirm-close-surface = false
 
 # ============================================================================
 # Key Bindings for Quarto/R Workflow
