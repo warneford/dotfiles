@@ -17,6 +17,61 @@ return {
             gold_dark = "#92400e",
         }
 
+        -- Terminal type themes
+        local terminal_themes = {
+            radian = {
+                icon = "󰟔",
+                name = "radian",
+                bg = "#276dc3",      -- R blue
+                fg = "#f0f0f0",      -- Light gray text
+            },
+            ipython = {
+                icon = "\238\156\188",  -- Python icon U+E73C
+                name = "ipython",
+                bg = "#3776ab",      -- Python blue
+                fg = "#ffd43b",      -- Python yellow
+            },
+            shell = {
+                icon = "\238\158\149",  -- Shell icon U+E795 (nf-dev-terminal)
+                name = "shell",
+                bg = "#1e1e1e",      -- Near black
+                fg = "#ffffff",      -- White
+            },
+            toggleterm = {
+                icon = "\238\130\162",  -- Terminal prompt icon
+                name = "toggleterm",
+                bg = colors.deep,
+                fg = colors.aqua,
+            },
+            default = {
+                icon = "\238\130\162",  -- Terminal prompt icon
+                name = "term",
+                bg = colors.deep,
+                fg = colors.aqua,
+            },
+        }
+
+        -- Powerline semicircle characters
+        local left_sep = "\238\130\182"   -- U+E0B6
+        local right_sep = "\238\130\180"  -- U+E0B4
+
+        -- Mode colors for statusline elements
+        local mode_colors = {
+            n = colors.teal,
+            i = colors.gold,
+            v = colors.aqua,
+            V = colors.aqua,
+            ["\22"] = colors.aqua,
+            c = "#fb7185",
+            R = "#f97316",
+            t = colors.teal,
+        }
+
+        local function get_mode_color()
+            local mode = vim.fn.mode()
+            return { fg = mode_colors[mode] or colors.teal, bg = "none" }
+        end
+
         local aqua_forest = {
             normal = {
                 a = { bg = colors.teal, fg = colors.surface, gui = "bold" },
@@ -39,6 +94,11 @@ return {
                 a = { bg = "#fb7185", fg = colors.surface, gui = "bold" },
                 b = { bg = "#9f1239", fg = "#1e1e2e" },
             },
+            terminal = {
+                a = { bg = colors.teal, fg = colors.surface, gui = "bold" },
+                b = { bg = colors.deep, fg = colors.aqua },
+                c = { bg = colors.bg, fg = colors.muted },
+            },
             inactive = {
                 a = { bg = colors.bg, fg = colors.muted },
                 b = { bg = colors.bg, fg = colors.muted },
@@ -59,22 +119,32 @@ return {
             return ""
         end
 
-        -- Terminal type detection (for buffers without filetype)
+        -- Terminal type detection (for winbar display)
         local function terminal_type()
             if vim.bo.buftype ~= "terminal" then
-                return ""
+                return nil
             end
             local bufname = vim.api.nvim_buf_get_name(0)
             if bufname:match("[Rr]adian") then
-                return "󰟔 ∠ radian"  -- R logo + angle symbol
+                return terminal_themes.radian
             elseif bufname:match("[Ii][Pp]ython") or bufname:match("ipython%-direnv") then
-                return " ipython"
+                return terminal_themes.ipython
             elseif bufname:match("zsh") or bufname:match("bash") then
-                return " shell"
+                return terminal_themes.shell
             elseif vim.bo.filetype == "toggleterm" then
-                return ""  -- Let filetype component handle it
+                return terminal_themes.toggleterm
             end
-            return " term"
+            return terminal_themes.default
+        end
+
+        -- Check if current buffer is a terminal
+        local function is_terminal()
+            return vim.bo.buftype == "terminal"
+        end
+
+        -- Check if current buffer is NOT a terminal
+        local function is_not_terminal()
+            return vim.bo.buftype ~= "terminal"
         end
 
         require("lualine").setup({
@@ -82,10 +152,10 @@ return {
                 icons_enabled = true,
                 theme = aqua_forest,
                 component_separators = { left = "", right = "" },
-                section_separators = { left = "", right = "" },
+                section_separators = { left = "", right = "" },
                 disabled_filetypes = {
                     statusline = {},
-                    winbar = { "neo-tree", "Trouble", "alpha", "toggleterm" },
+                    winbar = { "neo-tree", "Trouble", "alpha" },
                 },
                 ignore_focus = {},
                 always_divide_middle = true,
@@ -94,24 +164,17 @@ return {
             sections = {
                 lualine_a = {
                     {
-                        function() return "" end,
+                        function() return left_sep end,
                         padding = { left = 0, right = 0 },
-                        color = function()
-                            local mode_colors = {
-                                n = colors.teal,
-                                i = colors.gold,
-                                v = colors.aqua,
-                                V = colors.aqua,
-                                ["\22"] = colors.aqua,
-                                c = "#fb7185",
-                                R = "#f97316",
-                            }
-                            local mode = vim.fn.mode()
-                            return { fg = mode_colors[mode] or colors.teal, bg = "none" }
-                        end,
+                        color = get_mode_color,
                     },
                     { os_icon, padding = { left = 1, right = 1 } },
                     { "mode" },
+                    {
+                        function() return right_sep end,
+                        padding = { left = 0, right = 0 },
+                        color = get_mode_color,
+                    },
                 },
                 lualine_b = {
                     { "branch", icon = "󰘬" },
@@ -129,33 +192,29 @@ return {
                 lualine_c = {},
                 lualine_x = {
                     {
-                        function() return "" end,
+                        function() return left_sep end,
                         color = { fg = colors.deep, bg = "none" },
                         padding = { left = 0, right = 0 },
+                        cond = is_not_terminal,
                     },
                     {
                         "filetype",
                         icon_only = false,
                         padding = { left = 1, right = 1 },
                         color = { bg = colors.deep, fg = colors.aqua },
-                        cond = function() return vim.bo.filetype ~= "" end,
+                        cond = is_not_terminal,
                     },
                     {
-                        terminal_type,
-                        padding = { left = 1, right = 1 },
-                        color = { bg = colors.deep, fg = colors.aqua },
-                        cond = function() return vim.bo.filetype == "" and terminal_type() ~= "" end,
-                    },
-                    {
-                        function() return "" end,
+                        function() return right_sep end,
                         color = { fg = colors.deep, bg = "none" },
                         padding = { left = 0, right = 0 },
+                        cond = is_not_terminal,
                     },
                 },
                 lualine_y = {},
                 lualine_z = {
                     {
-                        function() return "" end,
+                        function() return left_sep end,
                         color = { fg = colors.teal, bg = "none" },
                         padding = { left = 0, right = 0 },
                     },
@@ -165,7 +224,7 @@ return {
                         color = { bg = colors.teal, fg = colors.surface, gui = "bold" },
                     },
                     {
-                        function() return "" end,
+                        function() return right_sep end,
                         color = { fg = colors.teal, bg = "none" },
                         padding = { left = 0, right = 0 },
                     },
@@ -182,51 +241,119 @@ return {
             tabline = {},
             winbar = {
                 lualine_c = {
+                    -- Opening pill separator (peach for files, deep teal for terminals)
                     {
-                        function() return "" end,
+                        function() return left_sep end,
                         color = { fg = "#fab387", bg = "none" },
                         padding = { left = 0, right = 0 },
+                        cond = is_not_terminal,
                     },
+                    {
+                        function() return left_sep end,
+                        color = function()
+                            local t = terminal_type()
+                            return { fg = t and t.bg or colors.deep, bg = "none" }
+                        end,
+                        padding = { left = 0, right = 0 },
+                        cond = is_terminal,
+                    },
+                    -- Icon (filetype icon for files, terminal type icon for terminals)
                     {
                         "filetype",
                         icon_only = true,
                         padding = { left = 1, right = 0 },
                         color = { bg = "#fab387", fg = "#1e1e2e", gui = "bold" },
+                        cond = is_not_terminal,
                     },
+                    {
+                        function()
+                            local t = terminal_type()
+                            return t and t.icon or ""
+                        end,
+                        padding = { left = 1, right = 0 },
+                        color = function()
+                            local t = terminal_type()
+                            return { bg = t and t.bg or colors.deep, fg = t and t.fg or colors.aqua, gui = "bold" }
+                        end,
+                        cond = is_terminal,
+                    },
+                    -- Name (filename for files, terminal name for terminals)
                     {
                         "filename",
                         path = 0,
                         symbols = { modified = " ●", readonly = " ", unnamed = "[No Name]" },
                         color = { bg = "#fab387", fg = "#1e1e2e", gui = "bold" },
                         padding = { left = 0, right = 1 },
+                        cond = is_not_terminal,
                     },
                     {
-                        function() return "" end,
+                        function()
+                            local t = terminal_type()
+                            return t and t.name or "term"
+                        end,
+                        padding = { left = 1, right = 1 },
+                        color = function()
+                            local t = terminal_type()
+                            return { bg = t and t.bg or colors.deep, fg = t and t.fg or colors.aqua, gui = "bold" }
+                        end,
+                        cond = is_terminal,
+                    },
+                    -- Closing pill separator
+                    {
+                        function() return right_sep end,
                         color = { fg = "#fab387", bg = "none" },
                         padding = { left = 0, right = 0 },
+                        cond = is_not_terminal,
+                    },
+                    {
+                        function() return right_sep end,
+                        color = function()
+                            local t = terminal_type()
+                            return { fg = t and t.bg or colors.deep, bg = "none" }
+                        end,
+                        padding = { left = 0, right = 0 },
+                        cond = is_terminal,
                     },
                 },
             },
             inactive_winbar = {
                 lualine_c = {
-                    { "filetype", icon_only = true, padding = { left = 1, right = 0 } },
+                    -- File icon (for non-terminals)
+                    {
+                        "filetype",
+                        icon_only = true,
+                        padding = { left = 1, right = 0 },
+                        cond = is_not_terminal,
+                    },
+                    -- Terminal icon (for terminals)
+                    {
+                        function()
+                            local t = terminal_type()
+                            return t and t.icon or ""
+                        end,
+                        padding = { left = 1, right = 0 },
+                        cond = is_terminal,
+                    },
+                    -- Filename (for non-terminals)
                     {
                         "filename",
                         path = 0,
                         symbols = { modified = " ●", readonly = " ", unnamed = "[No Name]" },
+                        cond = is_not_terminal,
+                    },
+                    -- Terminal name (for terminals)
+                    {
+                        function()
+                            local t = terminal_type()
+                            return t and t.name or "term"
+                        end,
+                        padding = { left = 1, right = 0 },
+                        cond = is_terminal,
                     },
                 },
             },
             extensions = { "fugitive", "trouble" },
         })
-
-        -- Clear winbar background highlights
-        vim.api.nvim_set_hl(0, "lualine_c_normal", { bg = "none" })
-        vim.api.nvim_set_hl(0, "lualine_c_insert", { bg = "none" })
-        vim.api.nvim_set_hl(0, "lualine_c_visual", { bg = "none" })
-        vim.api.nvim_set_hl(0, "lualine_c_command", { bg = "none" })
-        vim.api.nvim_set_hl(0, "lualine_c_replace", { bg = "none" })
-        vim.api.nvim_set_hl(0, "lualine_c_inactive", { bg = "none" })
 
         -- Fix highlight issues with floating windows (telescope, etc.)
         local function fix_colors()

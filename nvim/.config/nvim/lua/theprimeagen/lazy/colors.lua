@@ -9,6 +9,8 @@ function ColorMyPencils(color)
 	vim.api.nvim_set_hl(0, "WinBarNC", { bg = "none" })
 	vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
 	vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
+	vim.api.nvim_set_hl(0, "StatusLineTerm", { bg = "none" })
+	vim.api.nvim_set_hl(0, "StatusLineTermNC", { bg = "none" })
 
 	-- Lualine section c backgrounds (between left and right pills)
 	vim.api.nvim_set_hl(0, "lualine_c_normal", { bg = "none" })
