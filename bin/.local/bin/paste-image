@@ -21,15 +21,27 @@ IMAGE_PATH="${TEMP_DIR}/clipboard_${TIMESTAMP}.png"
 mkdir -p "$TEMP_DIR"
 
 # SSH back to Mac through the reverse tunnel and fetch clipboard image
-# Uses ProxyCommand to jump: container -> dockerhost -> localhost:9014 -> Mac
-ssh -o StrictHostKeyChecking=no \
-    -o UserKnownHostsFile=/dev/null \
-    -o LogLevel=ERROR \
-    -o ConnectTimeout=10 \
-    -o "ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost" \
-    -p "$SSH_PORT" \
-    "${LOCAL_USER}@localhost" \
-    "~/.local/bin/clipboard-image-serve" > "$IMAGE_PATH" 2>/dev/null
+# Detect if we're in a container (dockerhost exists) or on the host directly
+if ssh -o BatchMode=yes -o ConnectTimeout=1 dockerhost true 2>/dev/null; then
+    # Inside container: use ProxyCommand to jump through dockerhost
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o LogLevel=ERROR \
+        -o ConnectTimeout=10 \
+        -o "ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost" \
+        -p "$SSH_PORT" \
+        "${LOCAL_USER}@localhost" \
+        "~/.local/bin/clipboard-image-serve" > "$IMAGE_PATH" 2>/dev/null
+else
+    # On host directly: connect straight to localhost
+    ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o LogLevel=ERROR \
+        -o ConnectTimeout=10 \
+        -p "$SSH_PORT" \
+        "${LOCAL_USER}@localhost" \
+        "~/.local/bin/clipboard-image-serve" > "$IMAGE_PATH" 2>/dev/null
+fi
 
 # Check if we got valid image data
 if [ ! -s "$IMAGE_PATH" ]; then
