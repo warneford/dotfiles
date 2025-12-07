@@ -215,3 +215,4 @@ custom-shader = shaders/underwater.glsl
 
 # Negative (inverted colors)
 # custom-shader = shaders/negative.glsl
+keybind = shift+enter=text:\x1b\r
