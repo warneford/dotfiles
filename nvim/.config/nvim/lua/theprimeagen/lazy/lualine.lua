@@ -59,6 +59,24 @@ return {
             return ""
         end
 
+        -- Terminal type detection (for buffers without filetype)
+        local function terminal_type()
+            if vim.bo.buftype ~= "terminal" then
+                return ""
+            end
+            local bufname = vim.api.nvim_buf_get_name(0)
+            if bufname:match("[Rr]adian") then
+                return "󰟔 ∠ radian"  -- R logo + angle symbol
+            elseif bufname:match("[Ii][Pp]ython") or bufname:match("ipython%-direnv") then
+                return " ipython"
+            elseif bufname:match("zsh") or bufname:match("bash") then
+                return " shell"
+            elseif vim.bo.filetype == "toggleterm" then
+                return ""  -- Let filetype component handle it
+            end
+            return " term"
+        end
+
         require("lualine").setup({
             options = {
                 icons_enabled = true,
@@ -120,6 +138,13 @@ return {
                         icon_only = false,
                         padding = { left = 1, right = 1 },
                         color = { bg = colors.deep, fg = colors.aqua },
+                        cond = function() return vim.bo.filetype ~= "" end,
+                    },
+                    {
+                        terminal_type,
+                        padding = { left = 1, right = 1 },
+                        color = { bg = colors.deep, fg = colors.aqua },
+                        cond = function() return vim.bo.filetype == "" and terminal_type() ~= "" end,
                     },
                     {
                         function() return "" end,
