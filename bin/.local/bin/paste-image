@@ -1,7 +1,7 @@
 #!/bin/bash
 # paste-image - Fetch clipboard image from Mac via reverse SSH tunnel
 #
-# Uses the reverse SSH tunnel (RemoteForward 9014 localhost:22) to connect
+# Uses the reverse SSH tunnel (RemoteForward 9018 localhost:22) to connect
 # back to the local Mac and fetch the clipboard image.
 # Uses ProxyCommand to jump through dockerhost to reach the tunnel.
 #

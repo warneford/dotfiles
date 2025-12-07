@@ -12,8 +12,8 @@ echo ""
 
 # Prompt for configuration
 read -p "Local machine username (your Mac/laptop): " LOCAL_USER
-read -p "SSH port for reverse tunnel [9014]: " TUNNEL_PORT
-TUNNEL_PORT=${TUNNEL_PORT:-9014}
+read -p "SSH port for reverse tunnel [9018]: " TUNNEL_PORT
+TUNNEL_PORT=${TUNNEL_PORT:-9018}
 
 # Check for existing SSH key
 if [[ -f ~/.ssh/id_ed25519 ]]; then
