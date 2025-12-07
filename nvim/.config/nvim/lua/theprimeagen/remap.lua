@@ -96,6 +96,5 @@ vim.keymap.set("n", "<leader><leader>", function()
 end)
 
 -- Terminal mode: easier escape from terminal mode
-vim.keymap.set("t", "jk", [[<C-\><C-n>]], { desc = "exit terminal mode" })
-vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { desc = "exit terminal mode" })
+vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "exit terminal mode" })
 

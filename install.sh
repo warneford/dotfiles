@@ -349,6 +349,35 @@ else
     print_success "zsh-syntax-highlighting already installed"
 fi
 
+# Install tmux-window-name plugin (no TPM needed)
+TMUX_PLUGINS_DIR="$HOME/.tmux/plugins"
+if [ ! -d "$TMUX_PLUGINS_DIR/tmux-window-name" ]; then
+    print_info "Installing tmux-window-name..."
+    mkdir -p "$TMUX_PLUGINS_DIR"
+    git clone https://github.com/ofirgall/tmux-window-name.git "$TMUX_PLUGINS_DIR/tmux-window-name"
+    print_success "tmux-window-name installed"
+else
+    print_success "tmux-window-name already installed"
+fi
+
+# Install libtmux for tmux-window-name (in dedicated venv)
+TMUX_PYTHON_ENV="$HOME/.local/share/tmux/python-env"
+print_info "Setting up Python environment for tmux plugins..."
+if [ ! -d "$TMUX_PYTHON_ENV" ]; then
+    if command -v uv &> /dev/null; then
+        uv venv "$TMUX_PYTHON_ENV"
+    else
+        python3 -m venv "$TMUX_PYTHON_ENV"
+    fi
+    print_success "Created tmux Python venv"
+fi
+if command -v uv &> /dev/null; then
+    uv pip install --python "$TMUX_PYTHON_ENV/bin/python" libtmux
+else
+    "$TMUX_PYTHON_ENV/bin/pip" install libtmux
+fi
+print_success "libtmux installed to tmux venv"
+
 # Backup existing configs that stow would conflict with
 print_info "Backing up existing configurations..."
 backup_if_exists() {
