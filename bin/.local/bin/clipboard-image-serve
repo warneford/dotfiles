@@ -5,15 +5,21 @@
 # Requires: pngpaste (brew install pngpaste)
 # Usage: ssh mac-host clipboard-image-serve > /tmp/image.png
 
-# Check if pngpaste is available
-if ! command -v pngpaste &> /dev/null; then
+# Find pngpaste - check common Homebrew locations
+if command -v pngpaste &> /dev/null; then
+    PNGPASTE="pngpaste"
+elif [ -x "/opt/homebrew/bin/pngpaste" ]; then
+    PNGPASTE="/opt/homebrew/bin/pngpaste"
+elif [ -x "/usr/local/bin/pngpaste" ]; then
+    PNGPASTE="/usr/local/bin/pngpaste"
+else
     echo "Error: pngpaste not installed. Run: brew install pngpaste" >&2
     exit 1
 fi
 
 # Output clipboard image to stdout
 # pngpaste - outputs to stdout when given "-" as argument
-pngpaste -
+"$PNGPASTE" -
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then

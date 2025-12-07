@@ -3,6 +3,7 @@
 #
 # Uses the reverse SSH tunnel (RemoteForward 9014 localhost:22) to connect
 # back to the local Mac and fetch the clipboard image.
+# Uses ProxyCommand to jump through dockerhost to reach the tunnel.
 #
 # Usage: paste-image
 # Output: Path to the saved image file (for pasting into Claude Code)
@@ -10,8 +11,8 @@
 set -e
 
 # Configuration
-LOCAL_USER="${LOCAL_USER:-robert}"
-SSH_PORT=9014
+LOCAL_USER="${LOCAL_USER:-rwarne}"
+SSH_PORT=9018
 TEMP_DIR="/tmp/clipboard-images"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 IMAGE_PATH="${TEMP_DIR}/clipboard_${TIMESTAMP}.png"
@@ -20,14 +21,15 @@ IMAGE_PATH="${TEMP_DIR}/clipboard_${TIMESTAMP}.png"
 mkdir -p "$TEMP_DIR"
 
 # SSH back to Mac through the reverse tunnel and fetch clipboard image
-# The tunnel goes: container -> dockerhost:9014 -> Mac:22
+# Uses ProxyCommand to jump: container -> dockerhost -> localhost:9014 -> Mac
 ssh -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     -o LogLevel=ERROR \
-    -o ConnectTimeout=5 \
+    -o ConnectTimeout=10 \
+    -o "ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost" \
     -p "$SSH_PORT" \
-    "${LOCAL_USER}@dockerhost" \
-    "clipboard-image-serve" > "$IMAGE_PATH" 2>/dev/null
+    "${LOCAL_USER}@localhost" \
+    "~/.local/bin/clipboard-image-serve" > "$IMAGE_PATH" 2>/dev/null
 
 # Check if we got valid image data
 if [ ! -s "$IMAGE_PATH" ]; then
