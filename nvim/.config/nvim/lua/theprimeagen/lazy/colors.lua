@@ -6,7 +6,7 @@ function ColorMyPencils(color)
 	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 	vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
 	vim.api.nvim_set_hl(0, "WinBar", { bg = "none" })
-	vim.api.nvim_set_hl(0, "WinBarNC", { bg = "none" })
+	vim.api.nvim_set_hl(0, "WinBarNC", { bg = "none", fg = "#6e7681" })
 	vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
 	vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
 	vim.api.nvim_set_hl(0, "StatusLineTerm", { bg = "none" })
@@ -20,6 +20,10 @@ function ColorMyPencils(color)
 	vim.api.nvim_set_hl(0, "lualine_c_replace", { bg = "none" })
 	vim.api.nvim_set_hl(0, "lualine_c_inactive", { bg = "none" })
 	vim.api.nvim_set_hl(0, "lualine_c_terminal", { bg = "none" })
+
+	-- Lualine winbar backgrounds
+	vim.api.nvim_set_hl(0, "lualine_c_winbar", { bg = "none" })
+	vim.api.nvim_set_hl(0, "lualine_c_winbar_inactive", { bg = "none" })
 
 	-- Colorcolumn: subtle vertical line at 80 chars
 	-- Options to try:
@@ -115,6 +119,15 @@ return {
                 dim_inactive_windows = false,
                 styles = {
                     italic = false,
+                },
+                groups = {
+                    panel = "NONE", -- Transparent panels (fixes WinBarNC, NormalFloat, etc.)
+                },
+                highlight_groups = {
+                    StatusLine = { fg = "subtle", bg = "NONE", inherit = false },
+                    StatusLineNC = { fg = "muted", bg = "NONE", inherit = false },
+                    WinBar = { fg = "subtle", bg = "NONE", inherit = false },
+                    WinBarNC = { fg = "muted", bg = "NONE", inherit = false },
                 },
             })
 

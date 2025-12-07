@@ -51,6 +51,35 @@ return {
 
 		require("r").setup(opts)
 
+		-- Auto-start R when opening R, quarto, or Rmd files
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = { "r", "quarto", "rmd", "rmarkdown" },
+			callback = function()
+				-- Only auto-start if R is not already running
+				-- vim.g.R_Nvim_status: 3 = ready to start, 7 = R running
+				local attempts = 0
+				local max_attempts = 20
+				local function try_start_r()
+					attempts = attempts + 1
+					local status = vim.g.R_Nvim_status or 0
+					if status >= 7 then
+						return -- R already running
+					end
+					if status >= 3 then
+						-- Ready to start R
+						local ok, r_run = pcall(require, "r.run")
+						if ok then
+							r_run.start_R("R")
+						end
+					elseif attempts < max_attempts then
+						vim.defer_fn(try_start_r, 300)
+					end
+				end
+				vim.defer_fn(try_start_r, 300)
+			end,
+			once = true, -- Only run once per session
+		})
+
 		-- Wrap R.nvim's hl_code_bg function to prevent errors with special buffers
 		-- This prevents "Parser could not be created" errors when switching to netrw/harpoon
 		local quarto_module = require("r.quarto")

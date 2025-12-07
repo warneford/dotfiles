@@ -62,10 +62,39 @@ local filetype_icons = {
     default = "\xef\x8d\xaf",     -- Default: nvim icon U+F36F
 }
 
+-- Terminal icons and names for tmux window
+local terminal_icons = {
+    radian = { icon = "󰟔", name = "radian" },
+    ipython = { icon = "\xee\x9c\xbc", name = "ipython" },  -- Python icon
+    python = { icon = "\xee\x9c\xbc", name = "python" },
+    zsh = { icon = "\xee\x9e\x95", name = "zsh" },         -- U+E795 terminal icon
+    bash = { icon = "\xee\x9e\x95", name = "bash" },
+    shell = { icon = "\xee\x9e\x95", name = "shell" },
+}
+
 -- Get icon for current file extension
 local function get_filetype_icon()
     local ext = vim.fn.expand("%:e")
     return filetype_icons[ext] or filetype_icons.default
+end
+
+-- Get terminal info (icon and clean name) from buffer name
+local function get_terminal_info()
+    local bufname = vim.api.nvim_buf_get_name(0)
+    if bufname:match("[Rr]adian") then
+        return terminal_icons.radian
+    elseif bufname:match("[Ii][Pp]ython") or bufname:match("ipython") then
+        return terminal_icons.ipython
+    elseif bufname:match("python") then
+        return terminal_icons.python
+    elseif bufname:match("zsh") then
+        return terminal_icons.zsh
+    elseif bufname:match("bash") then
+        return terminal_icons.bash
+    elseif bufname:match("toggleterm") then
+        return { icon = "\xee\x9e\x95", name = "term" }  -- toggleterm icon
+    end
+    return { icon = "\xee\x9e\x95", name = "term" }  -- Default terminal icon
 end
 
 -- Helper to set tmux window name directly
@@ -81,8 +110,17 @@ if vim.env.TMUX then
 end
 
 -- Update tmux window name when switching buffers
-vim.api.nvim_create_autocmd({ "BufEnter", "BufFilePost" }, {
+vim.api.nvim_create_autocmd({ "BufEnter", "BufFilePost", "TermOpen" }, {
     callback = function()
+        -- Handle terminal buffers specially
+        if vim.bo.buftype == "terminal" then
+            local term_info = get_terminal_info()
+            local title = term_info.icon .. " " .. term_info.name
+            vim.opt.titlestring = title
+            set_tmux_window_name(title)
+            return
+        end
+
         local filename = vim.fn.expand("%:t")
         local icon = get_filetype_icon()
         if filename ~= "" then
