@@ -1,6 +1,30 @@
 # Custom shell functions
 # This file is symlinked to ~/.oh-my-zsh/custom/functions.zsh
 
+# Remote clipboard image paste for Claude Code
+# Fetches image from Mac clipboard via reverse SSH tunnel and inserts path
+# Only enabled inside the container (rwt-mind-palace)
+if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
+    paste-image-widget() {
+        local image_path
+        image_path=$(paste-image 2>/dev/null)
+        if [[ -n "$image_path" ]]; then
+            LBUFFER+="$image_path"
+            zle redisplay
+        else
+            zle -M "No image in clipboard or connection failed"
+        fi
+    }
+    zle -N paste-image-widget
+    # Bind to Ctrl+Shift+V (escape sequence may vary by terminal)
+    # Ghostty uses CSI u encoding: lowercase v (118) with modifier 6 (Ctrl+Shift)
+    bindkey '\e[118;6u' paste-image-widget
+    # Uppercase V (86) variant
+    bindkey '\e[86;6u' paste-image-widget
+    # Common legacy alternatives
+    bindkey '\e[V' paste-image-widget
+fi
+
 # Initialize a directory with direnv + uv for Python development
 # Usage: uvinit [project-name]
 #   - Creates .envrc with use_uv

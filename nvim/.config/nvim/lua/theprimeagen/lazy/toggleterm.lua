@@ -91,52 +91,118 @@ return {
 				return nil, nil
 			end
 
-			-- Toggle functions - swap between R and shell/python in same space
-			local function toggle_shell()
-				local r_buf, r_win = find_r_terminal()
-
+			-- Helper to hide all terminals (R, shell, python) without killing them
+			local function hide_all_terminals()
+				local _, r_win = find_r_terminal()
+				if r_win then
+					-- Just close the window, buffer stays alive
+					pcall(vim.api.nvim_win_close, r_win, false)
+				end
+				-- toggleterm:close() hides the window but keeps the buffer/process alive
 				if shell_term:is_open() then
-					-- Shell is open, close it and show R if available
 					shell_term:close()
-					if r_buf and not r_win then
+				end
+				if python_term and python_term:is_open() then
+					python_term:close()
+				end
+			end
+
+			-- Helper to check which terminal is currently visible
+			-- Returns: "shell", "python", "r", or nil
+			local function get_visible_terminal()
+				if shell_term:is_open() then
+					return "shell"
+				end
+				if python_term and python_term:is_open() then
+					return "python"
+				end
+				local _, r_win = find_r_terminal()
+				if r_win then
+					return "r"
+				end
+				return nil
+			end
+
+			-- Show a specific terminal (hides others first)
+			local function show_terminal(which)
+				hide_all_terminals()
+				if which == "shell" then
+					shell_term:open()
+				elseif which == "python" and python_term then
+					python_term:open()
+				elseif which == "r" then
+					local r_buf, _ = find_r_terminal()
+					if r_buf then
 						vim.cmd("botright split")
 						vim.api.nvim_win_set_buf(0, r_buf)
 						vim.cmd("resize " .. math.floor(vim.o.lines / 3))
+						vim.cmd("startinsert")
 					end
+				end
+			end
+
+			-- Cycle through available terminals: shell -> python (if init) -> R (if init) -> shell ...
+			local function cycle_terminals()
+				local r_buf, _ = find_r_terminal()
+				local has_python = python_term ~= nil
+				local has_r = r_buf ~= nil
+				local current = get_visible_terminal()
+
+				-- Build list of available terminals
+				local available = { "shell" }
+				if has_python then
+					table.insert(available, "python")
+				end
+				if has_r then
+					table.insert(available, "r")
+				end
+
+				if current == nil then
+					show_terminal(available[1])
 				else
-					-- Shell is closed, hide R and open shell
-					if r_win then
-						vim.api.nvim_win_hide(r_win)
+					for i, term in ipairs(available) do
+						if term == current then
+							local next_idx = (i % #available) + 1
+							show_terminal(available[next_idx])
+							return
+						end
 					end
+					show_terminal(available[1])
+				end
+			end
+
+			-- Direct toggle functions for specific terminals
+			local function toggle_shell()
+				if shell_term:is_open() then
+					shell_term:close()
+				else
+					hide_all_terminals()
 					shell_term:open()
 				end
 			end
 
 			local function toggle_python()
-				local r_buf, r_win = find_r_terminal()
 				local term = get_python_term()
-
-				-- Check if python terminal window is actually visible
-				local python_visible = term.bufnr and vim.api.nvim_buf_is_valid(term.bufnr)
-					and vim.fn.bufwinnr(term.bufnr) ~= -1
-
-				if python_visible then
-					-- Python is visible, close it and show R if available
+				if term:is_open() then
 					term:close()
-					if r_buf then
-						vim.cmd("botright split")
-						vim.api.nvim_win_set_buf(0, r_buf)
-						vim.cmd("resize " .. math.floor(vim.o.lines / 3))
-					end
 				else
-					-- Python is not visible, hide R and shell, open python
-					if r_win then
-						vim.api.nvim_win_hide(r_win)
-					end
-					if shell_term:is_open() then
-						shell_term:close()
-					end
+					hide_all_terminals()
 					term:open()
+				end
+			end
+
+			local function toggle_r()
+				local r_buf, r_win = find_r_terminal()
+				if r_win then
+					pcall(vim.api.nvim_win_close, r_win, false)
+				elseif r_buf then
+					hide_all_terminals()
+					vim.cmd("botright split")
+					vim.api.nvim_win_set_buf(0, r_buf)
+					vim.cmd("resize " .. math.floor(vim.o.lines / 3))
+					vim.cmd("startinsert")
+				else
+					vim.notify("R terminal not started. Use ,rf to start R.", vim.log.levels.WARN)
 				end
 			end
 
@@ -180,6 +246,14 @@ return {
 				get_term = get_python_term,
 			}
 
+			_G.toggleterm_r = {
+				toggle = toggle_r,
+				find = find_r_terminal,
+			}
+
+			_G.toggleterm_cycle = cycle_terminals
+			_G.toggleterm_hide_all = hide_all_terminals
+
 			-- Open shell terminal alongside R when R starts
 			-- This hooks into R.nvim's start event
 			vim.api.nvim_create_autocmd("User", {
@@ -197,10 +271,15 @@ return {
 			})
 
 			-- Keybindings for terminal switching
-			-- ,r2 - Toggle shell terminal
-			vim.keymap.set("n", ",r2", toggle_shell, { desc = "Toggle shell terminal" })
-			-- ,r3 - Toggle python terminal (lazy spawn)
+			-- ,r2 - Cycle through terminals (shell -> python -> R -> close)
+			vim.keymap.set("n", ",r2", cycle_terminals, { desc = "Cycle terminals (shell/python/R)" })
+			vim.keymap.set("t", ",r2", [[<C-\><C-n><Cmd>lua _G.toggleterm_cycle()<CR>]], { desc = "Cycle terminals (shell/python/R)" })
+			-- ,r3 - Toggle python terminal (lazy spawn, initializes python)
 			vim.keymap.set("n", ",r3", toggle_python, { desc = "Toggle python terminal" })
+			vim.keymap.set("t", ",r3", [[<C-\><C-n><Cmd>lua _G.toggleterm_python.toggle()<CR>]], { desc = "Toggle python terminal" })
+			-- ,r4 - Toggle R terminal directly
+			vim.keymap.set("n", ",r4", toggle_r, { desc = "Toggle R terminal" })
+			vim.keymap.set("t", ",r4", [[<C-\><C-n><Cmd>lua _G.toggleterm_r.toggle()<CR>]], { desc = "Toggle R terminal" })
 
 			-- Alternative: <C-\> based switching
 			vim.keymap.set("n", "<C-\\>2", toggle_shell, { desc = "Toggle shell terminal" })

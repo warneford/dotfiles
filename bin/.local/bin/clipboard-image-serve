@@ -1,0 +1,22 @@
+#!/bin/bash
+# clipboard-image-serve - Output clipboard image as PNG to stdout
+# Used by remote machines to fetch clipboard images over SSH
+#
+# Requires: pngpaste (brew install pngpaste)
+# Usage: ssh mac-host clipboard-image-serve > /tmp/image.png
+
+# Check if pngpaste is available
+if ! command -v pngpaste &> /dev/null; then
+    echo "Error: pngpaste not installed. Run: brew install pngpaste" >&2
+    exit 1
+fi
+
+# Output clipboard image to stdout
+# pngpaste - outputs to stdout when given "-" as argument
+pngpaste -
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+    echo "Error: No image in clipboard" >&2
+    exit 1
+fi

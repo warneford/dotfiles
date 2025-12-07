@@ -341,8 +341,14 @@ return {
 						.. " --port 9013 --host 0.0.0.0 --no-browser"
 
 					if _G.toggleterm_shell then
+						-- Hide other terminals and show shell
+						if _G.toggleterm_hide_all then
+							_G.toggleterm_hide_all()
+						end
+						if not _G.toggleterm_shell.term:is_open() then
+							_G.toggleterm_shell.term:open()
+						end
 						_G.toggleterm_shell.send(cmd)
-						vim.notify("Quarto preview sent to shell terminal", vim.log.levels.INFO)
 					else
 						vim.notify("Shell terminal not available. Press ,r2 to open.", vim.log.levels.WARN)
 						return
@@ -412,8 +418,14 @@ return {
 						.. " --cache-refresh --port 9013 --host 0.0.0.0 --no-browser"
 
 					if _G.toggleterm_shell then
+						-- Hide other terminals and show shell
+						if _G.toggleterm_hide_all then
+							_G.toggleterm_hide_all()
+						end
+						if not _G.toggleterm_shell.term:is_open() then
+							_G.toggleterm_shell.term:open()
+						end
 						_G.toggleterm_shell.send(cmd)
-						vim.notify("Quarto preview (cache refresh) sent to shell terminal", vim.log.levels.INFO)
 					else
 						vim.notify("Shell terminal not available. Press ,r2 to open.", vim.log.levels.WARN)
 					end

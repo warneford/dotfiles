@@ -233,21 +233,10 @@ return {
             end,
         })
 
-        -- Fix colors when entering/leaving special buffers (aerial, etc.)
-        local last_was_special = false
-        local special_filetypes = { "aerial", "neo-tree", "NvimTree", "Outline" }
-        vim.api.nvim_create_autocmd("BufLeave", {
+        -- Fix colors on any buffer/window change
+        vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
             callback = function()
-                last_was_special = vim.tbl_contains(special_filetypes, vim.bo.filetype)
-            end,
-        })
-        vim.api.nvim_create_autocmd("BufEnter", {
-            callback = function()
-                local is_special = vim.tbl_contains(special_filetypes, vim.bo.filetype)
-                if is_special or last_was_special then
-                    last_was_special = false
-                    fix_colors()
-                end
+                fix_colors()
             end,
         })
         end, 100) -- 100ms delay for colorscheme to fully load

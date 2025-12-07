@@ -1,0 +1,47 @@
+#!/bin/bash
+# paste-image - Fetch clipboard image from Mac via reverse SSH tunnel
+#
+# Uses the reverse SSH tunnel (RemoteForward 9014 localhost:22) to connect
+# back to the local Mac and fetch the clipboard image.
+#
+# Usage: paste-image
+# Output: Path to the saved image file (for pasting into Claude Code)
+
+set -e
+
+# Configuration
+LOCAL_USER="${LOCAL_USER:-robert}"
+SSH_PORT=9014
+TEMP_DIR="/tmp/clipboard-images"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+IMAGE_PATH="${TEMP_DIR}/clipboard_${TIMESTAMP}.png"
+
+# Ensure temp directory exists
+mkdir -p "$TEMP_DIR"
+
+# SSH back to Mac through the reverse tunnel and fetch clipboard image
+# The tunnel goes: container -> dockerhost:9014 -> Mac:22
+ssh -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    -o LogLevel=ERROR \
+    -o ConnectTimeout=5 \
+    -p "$SSH_PORT" \
+    "${LOCAL_USER}@dockerhost" \
+    "clipboard-image-serve" > "$IMAGE_PATH" 2>/dev/null
+
+# Check if we got valid image data
+if [ ! -s "$IMAGE_PATH" ]; then
+    rm -f "$IMAGE_PATH"
+    echo "Error: No image in clipboard or connection failed" >&2
+    exit 1
+fi
+
+# Verify it's actually a PNG
+if ! file "$IMAGE_PATH" | grep -q "PNG image"; then
+    rm -f "$IMAGE_PATH"
+    echo "Error: Clipboard does not contain a valid image" >&2
+    exit 1
+fi
+
+# Output the path (this gets pasted into Claude Code)
+echo "$IMAGE_PATH"

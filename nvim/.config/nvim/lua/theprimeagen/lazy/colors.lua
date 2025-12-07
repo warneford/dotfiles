@@ -10,6 +10,15 @@ function ColorMyPencils(color)
 	vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
 	vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
 
+	-- Lualine section c backgrounds (between left and right pills)
+	vim.api.nvim_set_hl(0, "lualine_c_normal", { bg = "none" })
+	vim.api.nvim_set_hl(0, "lualine_c_insert", { bg = "none" })
+	vim.api.nvim_set_hl(0, "lualine_c_visual", { bg = "none" })
+	vim.api.nvim_set_hl(0, "lualine_c_command", { bg = "none" })
+	vim.api.nvim_set_hl(0, "lualine_c_replace", { bg = "none" })
+	vim.api.nvim_set_hl(0, "lualine_c_inactive", { bg = "none" })
+	vim.api.nvim_set_hl(0, "lualine_c_terminal", { bg = "none" })
+
 	-- Colorcolumn: subtle vertical line at 80 chars
 	-- Options to try:
 	-- Subtle dark gray: { bg = "#1c1c1c" }

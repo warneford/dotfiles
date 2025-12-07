@@ -75,6 +75,10 @@ quick-terminal-screen = macos-menu-bar
 # Cmd+, to open Ghostty config (like macOS preferences)
 keybind = super+comma=open_config
 
+# Pass Ctrl+Shift+V through to terminal (used for remote image paste)
+# By default Ghostty might intercept this for paste - we want it sent to zsh
+keybind = ctrl+shift+v=unbind
+
 # ============================================================================
 # Shell Integration
 # ============================================================================
