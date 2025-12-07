@@ -22,13 +22,13 @@ mkdir -p "$TEMP_DIR"
 
 # SSH back to Mac through the reverse tunnel and fetch clipboard image
 # Detect if we're in a container (dockerhost exists) or on the host directly
-if ssh -o BatchMode=yes -o ConnectTimeout=1 dockerhost true 2>/dev/null; then
+if ssh -o BatchMode=yes -o ConnectTimeout=1 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null dockerhost true 2>/dev/null; then
     # Inside container: use ProxyCommand to jump through dockerhost
     ssh -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
         -o LogLevel=ERROR \
         -o ConnectTimeout=10 \
-        -o "ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost" \
+        -o "ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -W %h:%p dockerhost" \
         -p "$SSH_PORT" \
         "${LOCAL_USER}@localhost" \
         "~/.local/bin/clipboard-image-serve" > "$IMAGE_PATH" 2>/dev/null
