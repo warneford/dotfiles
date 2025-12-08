@@ -3,11 +3,13 @@
 
 # Ensure personal library exists and is used by default
 # This avoids the "Would you like to use a personal library?" prompt
-# Uses versioned path: ~/R/library/4.5/ for R 4.5.x
+# Uses R's default structure: ~/R/{platform}-library/{major.minor}/
+# e.g., ~/R/x86_64-pc-linux-gnu-library/4.5/
 # Minor versions can break ABI compatibility, so we version by major.minor
 local({
   r_version <- paste0(R.version$major, ".", strsplit(R.version$minor, "\\.")[[1]][1])
-  lib_path <- file.path(Sys.getenv("HOME"), "R", "library", r_version)
+  platform_lib <- paste0(R.version$platform, "-library")
+  lib_path <- file.path(Sys.getenv("HOME"), "R", platform_lib, r_version)
   if (!dir.exists(lib_path)) {
     dir.create(lib_path, recursive = TRUE)
   }
