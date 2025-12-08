@@ -78,6 +78,8 @@ RUN mkdir -p /run/sshd && \
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 ARG USERNAME=dev
+ARG DEV_PASSWORD
+RUN test -n "${DEV_PASSWORD}" || (echo "DEV_PASSWORD build arg is required" && exit 1)
 RUN if getent passwd ${USER_ID} > /dev/null; then \
         existing_user=$(getent passwd ${USER_ID} | cut -d: -f1); \
         usermod -l ${USERNAME} -d /home/${USERNAME} -m -s /bin/zsh ${existing_user}; \
@@ -86,7 +88,7 @@ RUN if getent passwd ${USER_ID} > /dev/null; then \
         groupadd -g ${GROUP_ID} ${USERNAME} && \
         useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/zsh ${USERNAME}; \
     fi && \
-    echo "${USERNAME}:REDACTED_PASSWORD" | chpasswd && \
+    echo "${USERNAME}:${DEV_PASSWORD}" | chpasswd && \
     usermod -aG sudo ${USERNAME} && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers.d/${USERNAME}
 

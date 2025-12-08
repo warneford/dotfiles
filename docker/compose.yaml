@@ -8,6 +8,7 @@ services:
         GROUP_ID: ${GID:-1000}
         USERNAME: ${USER:-dev}
         GITHUB_PAT: ${GITHUB_PAT}
+        DEV_PASSWORD: ${DEV_PASSWORD}
     image: r-dev:local
     container_name: rwt-mind-palace
     hostname: rwt-mind-palace
