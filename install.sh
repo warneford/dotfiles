@@ -73,6 +73,8 @@ if $IS_MAC; then
         "prettier"      # Code formatter for JS/TS/JSON/etc
         "stylua"        # Lua code formatter
         "pngpaste"      # Paste images from clipboard (for img-clip.nvim)
+        "fortune"       # Random quotes for nvim dashboard
+        "imagemagick"   # Image conversion for snacks.nvim image viewer
     )
 
     # macOS GUI apps (casks)

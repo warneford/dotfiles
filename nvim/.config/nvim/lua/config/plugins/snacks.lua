@@ -1,3 +1,9 @@
+-- Get a random programming quote
+local function get_fortune()
+	local fortune = require("config.fortune")
+	return table.concat(fortune(), "\n")
+end
+
 return {
 	"folke/snacks.nvim",
 	priority = 1000,
@@ -51,6 +57,40 @@ return {
 			animate = {
 				duration = { step = 10, total = 150 },
 				easing = "inOutQuad",
+			},
+		},
+
+		-- Dashboard (replaces alpha-nvim)
+		dashboard = {
+			enabled = true,
+			preset = {
+				header = [[
+
+  ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
+  ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║
+  ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║
+  ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
+  ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
+  ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
+]],
+				keys = {
+					{ icon = " ", key = "e", desc = "New file", action = ":ene | startinsert" },
+					{ icon = " ", key = "f", desc = "Find file", action = ":Telescope find_files" },
+					{ icon = " ", key = "r", desc = "Recent", action = ":Telescope oldfiles" },
+					{ icon = " ", key = "s", desc = "Settings", action = ":e $MYVIMRC | :cd %:p:h" },
+					{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
+				},
+			},
+			sections = {
+				{ section = "header" },
+				{ section = "keys", gap = 1, padding = 1 },
+				{
+					text = { { get_fortune(), hl = "SnacksDashboardFortune" } },
+					padding = 1,
+					indent = 4,
+					align = "center",
+				},
+				{ section = "startup" },
 			},
 		},
 	},

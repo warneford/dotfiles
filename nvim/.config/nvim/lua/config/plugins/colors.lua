@@ -65,6 +65,8 @@ function ColorMyPencils(color)
 	-- Just a thin line (no bg): { fg = "#6e6a86" }
 	vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#6e6a86" })
 
+	-- Snacks dashboard fortune quote styling
+	vim.api.nvim_set_hl(0, "SnacksDashboardFortune", { fg = "#f6c177", italic = true })
 end
 
 -- Run ColorMyPencils when vim starts without a file argument
