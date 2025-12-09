@@ -103,6 +103,9 @@ else
     export UV_CACHE_DIR="$HOME/projects/.cache/uv"
 fi
 
+# Load shared search directory config (used by fzf, telescope, fzf-lua)
+source ~/dotfiles/zsh/search_dirs.zsh
+
 # Source all function files from ~/dotfiles/zsh/functions/
 for func_file in ~/dotfiles/zsh/functions/*.zsh(N); do
     source "$func_file"

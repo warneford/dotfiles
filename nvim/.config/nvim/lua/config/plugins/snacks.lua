@@ -93,8 +93,9 @@ return {
 ]],
 				keys = {
 					{ icon = " ", key = "e", desc = "New file", action = ":ene | startinsert" },
-					{ icon = " ", key = "f", desc = "Find file", action = ":Telescope find_files" },
-					{ icon = " ", key = "r", desc = "Recent", action = ":Telescope oldfiles" },
+					{ icon = " ", key = "f", desc = "Find file", action = ":FzfLua files" },
+					{ icon = " ", key = "r", desc = "Recent", action = ":FzfLua oldfiles" },
+					{ icon = " ", key = "g", desc = "Live grep", action = ":FzfLua live_grep" },
 					{ icon = " ", key = "s", desc = "Settings", action = ":e $MYVIMRC | :cd %:p:h" },
 					{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
 				},
@@ -123,17 +124,6 @@ return {
 				vim.wo.rnu = true
 			end,
 			desc = "Toggle Zen Mode",
-		},
-		{
-			"<leader>zZ",
-			function()
-				Snacks.zen({ win = { width = 80 } })
-				vim.wo.wrap = false
-				vim.wo.number = false
-				vim.wo.rnu = false
-				vim.opt.colorcolumn = "0"
-			end,
-			desc = "Toggle Zen Mode (minimal)",
 		},
 		-- Image hover
 		{
