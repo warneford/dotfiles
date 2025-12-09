@@ -77,9 +77,9 @@ confirm-close-surface = false
 keybind = super+comma=open_config
 
 # Pass Ctrl+Shift+V through to terminal (used for remote image paste)
-# Ghostty default is paste_from_clipboard - override to send CSI u sequence
-# CSI u encoding: v=118, modifier 6 (Ctrl+Shift) = \x1b[118;6u
-keybind = ctrl+shift+v=text:\x1b[118;6u
+# Ghostty default is paste_from_clipboard - override to send custom sequence
+# Using esc: to send raw escape sequence for F20 (ESC [ 3 4 ~)
+keybind = ctrl+shift+v=esc:[34~
 
 # ============================================================================
 # Shell Integration
