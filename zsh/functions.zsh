@@ -16,13 +16,11 @@ if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
         fi
     }
     zle -N paste-image-widget
-    # Bind to Ctrl+Shift+V (escape sequence may vary by terminal)
-    # Ghostty uses CSI u encoding: lowercase v (118) with modifier 6 (Ctrl+Shift)
-    bindkey '\e[118;6u' paste-image-widget
-    # Uppercase V (86) variant
-    bindkey '\e[86;6u' paste-image-widget
-    # Common legacy alternatives
-    bindkey '\e[V' paste-image-widget
+    # Bind to Ctrl+Shift+V
+    # Ghostty sends \e[34~ which arrives as \e[21;2~ in tmux (see tmux.conf)
+    # Bind both sequences for direct Ghostty and through-tmux usage
+    bindkey '\e[34~' paste-image-widget    # Direct from Ghostty
+    bindkey '\e[21;2~' paste-image-widget  # Through tmux translation
 fi
 
 # Initialize a directory with direnv + uv for Python development
