@@ -48,10 +48,13 @@ return {
 			})
 
 			-- Automatically activate otter for code blocks in quarto files
+			-- Skip unlisted/scratch buffers (e.g., R.nvim's temp buffers for language detection)
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = { "quarto", "markdown" },
-				callback = function()
-					require("otter").activate({ "r", "python", "julia", "bash" })
+				callback = function(args)
+					if vim.bo[args.buf].buflisted then
+						require("otter").activate({ "r", "python", "julia", "bash" })
+					end
 				end,
 			})
 		end,

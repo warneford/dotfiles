@@ -1,0 +1,9 @@
+# R Environment Variables
+# Loaded before R starts (including --slave mode)
+# This ensures R.nvim can find the user library for nvimcom installation
+
+# Use R's default user library structure with platform prefix
+# %p = platform (e.g., x86_64-pc-linux-gnu, aarch64-apple-darwin)
+# %v = major.minor version (e.g., 4.5)
+# This matches R's default and works cross-platform (macOS, Linux)
+R_LIBS_USER=~/R/%p-library/%v

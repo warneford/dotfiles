@@ -13,7 +13,11 @@ local({
   if (!dir.exists(lib_path)) {
     dir.create(lib_path, recursive = TRUE)
   }
-  .libPaths(c(lib_path, .libPaths()))
+  # Ensure user library is FIRST (radian/rchitect may initialize paths differently)
+  # Remove any existing instance to avoid duplicates, then prepend
+  current_paths <- .libPaths()
+  current_paths <- current_paths[current_paths != lib_path]
+  .libPaths(c(lib_path, current_paths))
 })
 
 # Set default CRAN mirror - use Posit Package Manager for all platforms
