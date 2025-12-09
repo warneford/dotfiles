@@ -2,8 +2,40 @@ function ColorMyPencils(color)
 	color = color or "rose-pine-moon"
 	vim.cmd.colorscheme(color)
 
-	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	-- Helper to get hex color from highlight group
+	local function get_hl_color(name, attr)
+		local hl = vim.api.nvim_get_hl(0, { name = name, link = false })
+		if hl[attr] then
+			return string.format("#%06x", hl[attr])
+		end
+		return nil
+	end
+
+	-- Preserve fg colors before making bg transparent
+	local normal_fg = get_hl_color("Normal", "fg") or "#e0def4"
+	local float_fg = get_hl_color("NormalFloat", "fg") or normal_fg
+
+	-- Preserve Diff highlight fg colors (needed for snacks.nvim)
+	local diff_add_fg = get_hl_color("DiffAdd", "fg") or "#a3be8c"
+	local diff_delete_fg = get_hl_color("DiffDelete", "fg") or "#eb6f92"
+	local diff_change_fg = get_hl_color("DiffChange", "fg") or "#f6c177"
+	local diff_add_bg = get_hl_color("DiffAdd", "bg")
+	local diff_delete_bg = get_hl_color("DiffDelete", "bg")
+	local diff_change_bg = get_hl_color("DiffChange", "bg")
+
+	vim.api.nvim_set_hl(0, "Normal", { fg = normal_fg, bg = "none" })
+	vim.api.nvim_set_hl(0, "NormalFloat", { fg = float_fg, bg = "none" })
+
+	-- Ensure Diff highlights have fg defined (fixes snacks.nvim healthcheck)
+	if diff_add_bg then
+		vim.api.nvim_set_hl(0, "DiffAdd", { fg = diff_add_fg, bg = diff_add_bg })
+	end
+	if diff_delete_bg then
+		vim.api.nvim_set_hl(0, "DiffDelete", { fg = diff_delete_fg, bg = diff_delete_bg })
+	end
+	if diff_change_bg then
+		vim.api.nvim_set_hl(0, "DiffChange", { fg = diff_change_fg, bg = diff_change_bg })
+	end
 	vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
 	vim.api.nvim_set_hl(0, "WinBar", { bg = "none" })
 	vim.api.nvim_set_hl(0, "WinBarNC", { bg = "none", fg = "#6e7681" })

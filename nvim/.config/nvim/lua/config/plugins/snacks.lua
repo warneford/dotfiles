@@ -1,0 +1,89 @@
+return {
+	"folke/snacks.nvim",
+	priority = 1000,
+	lazy = false,
+	opts = {
+		-- Image viewer with hover support
+		image = {
+			enabled = true,
+			backend = "kitty",
+			doc = {
+				enabled = true,
+				inline = true,
+				float = true,
+				max_width = 100,
+				max_height = 12,
+			},
+		},
+
+		-- Zen mode (replaces folke/zen-mode.nvim)
+		zen = {
+			enabled = true,
+			toggles = {
+				dim = true,
+				git_signs = false,
+				diagnostics = false,
+			},
+			show = {
+				statusline = false,
+				tabline = false,
+			},
+			win = {
+				width = 90,
+			},
+		},
+
+		-- Pretty notifications
+		notifier = {
+			enabled = true,
+			timeout = 3000,
+		},
+
+		-- Disable heavy features on large files
+		bigfile = {
+			enabled = true,
+			size = 1.5 * 1024 * 1024, -- 1.5MB
+		},
+
+		-- Smooth scrolling
+		scroll = {
+			enabled = true,
+			animate = {
+				duration = { step = 10, total = 150 },
+				easing = "inOutQuad",
+			},
+		},
+	},
+	keys = {
+		-- Zen mode toggles (matching your old keymaps)
+		{
+			"<leader>zz",
+			function()
+				Snacks.zen()
+				vim.wo.wrap = false
+				vim.wo.number = true
+				vim.wo.rnu = true
+			end,
+			desc = "Toggle Zen Mode",
+		},
+		{
+			"<leader>zZ",
+			function()
+				Snacks.zen({ win = { width = 80 } })
+				vim.wo.wrap = false
+				vim.wo.number = false
+				vim.wo.rnu = false
+				vim.opt.colorcolumn = "0"
+			end,
+			desc = "Toggle Zen Mode (minimal)",
+		},
+		-- Image hover
+		{
+			"<leader>ih",
+			function()
+				Snacks.image.hover()
+			end,
+			desc = "Image hover preview",
+		},
+	},
+}
