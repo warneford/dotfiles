@@ -1,11 +1,8 @@
 -- Markdown-specific settings
 -- This file is automatically loaded when opening .md files
 
--- Tell vim-slime what defines a code cell (the ``` fence markers)
-vim.b.slime_cell_delimiter = '```'
+local ft = require("config.ftplugin")
 
--- Wrap text by word, not character
-vim.wo.wrap = true
-vim.wo.linebreak = true
-vim.wo.breakindent = true
-vim.wo.showbreak = '|'
+-- Prose wrapping and slime cell support
+ft.setup_prose_wrapping()
+ft.setup_slime_cells()

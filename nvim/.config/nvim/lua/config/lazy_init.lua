@@ -19,8 +19,8 @@ require("lazy").setup({
             priority = 1000, -- Very high priority to load before other plugins
             config = true,
         },
-        -- Load all other plugins from theprimeagen.lazy directory
-        { import = "theprimeagen.lazy" },
+        -- Load all plugins from config.plugins directory
+        { import = "config.plugins" },
     },
     change_detection = { notify = false },
     -- Disable lazy.nvim's built-in rocks support to avoid conflicts with luarocks.nvim
