@@ -51,6 +51,24 @@ return {
 			size = 1.5 * 1024 * 1024, -- 1.5MB
 		},
 
+		-- Highlight word under cursor + jump between occurrences
+		words = {
+			enabled = true,
+		},
+
+		-- Indent guide lines
+		indent = {
+			enabled = true,
+			indent = {
+				enabled = true,
+				char = "│",
+			},
+			scope = {
+				enabled = true,
+				char = "│",
+			},
+		},
+
 		-- Smooth scrolling
 		scroll = {
 			enabled = true,
@@ -124,6 +142,31 @@ return {
 				Snacks.image.hover()
 			end,
 			desc = "Image hover preview",
+		},
+		-- Lazygit
+		{
+			"<leader>lg",
+			function()
+				Snacks.lazygit()
+			end,
+			desc = "Lazygit",
+		},
+		-- Jump between word occurrences
+		{
+			"]]",
+			function()
+				Snacks.words.jump(1, true)
+			end,
+			desc = "Next word occurrence",
+			mode = { "n", "t" },
+		},
+		{
+			"[[",
+			function()
+				Snacks.words.jump(-1, true)
+			end,
+			desc = "Prev word occurrence",
+			mode = { "n", "t" },
 		},
 	},
 }

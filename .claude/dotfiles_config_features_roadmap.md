@@ -19,6 +19,7 @@
 
 ## nvim
 
+- snacks.indent scope highlight doesn't track cursor in R files (treesitter issue with R grammar)
 - address checkhealth issues
 - add popups for syntax suggestions with documentation snippets
 - render hex color codes in markdown
