@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# FZF preview script - shows file info for images, bat/head for text
+# Note: Use nvim's fzf-lua for proper image previews via kitty protocol
+
+file="$1"
+case "$file" in
+    *.png|*.jpg|*.jpeg|*.gif|*.webp|*.bmp|*.tiff|*.ico)
+        echo "Image: $(basename "$file")"
+        file "$file" 2>/dev/null | cut -d: -f2-
+        ls -lh "$file" 2>/dev/null | awk '{print "Size: " $5}'
+        ;;
+    *.pdf)
+        echo "[PDF: $file]"
+        ;;
+    *)
+        if command -v bat &>/dev/null; then
+            bat --style=numbers --color=always --line-range=:100 "$file" 2>/dev/null
+        else
+            head -100 "$file" 2>/dev/null
+        fi
+        ;;
+esac
