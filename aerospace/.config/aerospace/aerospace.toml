@@ -68,9 +68,9 @@ run = 'layout floating'
     alt-shift-k = 'move up'
     alt-shift-l = 'move right'
 
-    # Resize windows
-    alt-minus = 'resize smart -50'
-    alt-equal = 'resize smart +50'
+    # Resize windows (Alt-Shift to avoid conflict with nvim.r Alt+/-)
+    alt-shift-minus = 'resize smart -50'
+    alt-shift-equal = 'resize smart +50'
 
     # Workspaces with Cmd+1-9 (doesn't conflict with tmux Alt+1-5)
     cmd-1 = 'workspace 1'
