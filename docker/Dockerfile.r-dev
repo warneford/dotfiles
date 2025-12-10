@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     direnv \
     # Kitty terminal tools (for kitten icat image display in MOTD banner)
     kitty \
+    # Image conversion for snacks.nvim image preview in neovim
+    imagemagick \
     # SSH server for proper terminal capabilities (kitty graphics protocol)
     openssh-server \
     # Python for radian and reticulate

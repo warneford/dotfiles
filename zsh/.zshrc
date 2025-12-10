@@ -9,6 +9,10 @@
 # Load environment variables from ~/.env (secrets, tokens, etc.)
 [[ -f ~/.env ]] && source ~/.env
 
+# Force Ghostty detection for snacks.nvim image preview
+# SSH + docker exec + tmux doesn't propagate TERM_PROGRAM from local Ghostty
+export SNACKS_GHOSTTY=true
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -102,9 +106,6 @@ if [[ -d "/data/home/$USER/projects" ]]; then
 else
     export UV_CACHE_DIR="$HOME/projects/.cache/uv"
 fi
-
-# Load shared search directory config (used by fzf, telescope, fzf-lua)
-source ~/dotfiles/zsh/search_dirs.zsh
 
 # Source all function files from ~/dotfiles/zsh/functions/
 for func_file in ~/dotfiles/zsh/functions/*.zsh(N); do
