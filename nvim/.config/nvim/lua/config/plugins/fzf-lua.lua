@@ -1,18 +1,40 @@
-local function smart_files()
+local function smart_files(extensions)
 	local search_dirs = require("config.search_dirs")
 	local dirs = search_dirs.get_search_paths()
-	if dirs then
-		-- Build fd command with multiple search paths (properly quoted for spaces)
-		local quoted_dirs = {}
-		for _, dir in ipairs(dirs) do
-			table.insert(quoted_dirs, vim.fn.shellescape(dir))
+
+	-- Build extension flags if provided
+	local ext_opts = ""
+	if extensions and extensions ~= "" then
+		for ext in extensions:gmatch("[^,]+") do
+			ext = ext:match("^%s*(.-)%s*$") -- trim whitespace
+			if ext ~= "" then
+				ext_opts = ext_opts .. " -e " .. ext
+			end
 		end
-		local cmd = "fd --type f --hidden --exclude .git --exclude node_modules --exclude renv --exclude .venv --exclude __pycache__ --exclude .cache --exclude Library --exclude .dropbox . "
-			.. table.concat(quoted_dirs, " ")
-		require("fzf-lua").files({ cmd = cmd, cwd = vim.env.HOME })
-	else
-		require("fzf-lua").files()
 	end
+
+	-- Use --no-ignore when filtering by extension (user likely wants all matching files)
+	local ignore_flag = ext_opts ~= "" and "--no-ignore " or ""
+
+	-- Base fd_opts matching the setup config
+	local fd_opts = "--type f --hidden "
+		.. ignore_flag
+		.. "--exclude .git --exclude node_modules --exclude renv --exclude .venv --exclude __pycache__ --exclude .cache --exclude Library --exclude .dropbox"
+		.. ext_opts
+
+	if dirs then
+		require("fzf-lua").files({ fd_opts = fd_opts, cwd = vim.env.HOME, search_paths = dirs })
+	else
+		require("fzf-lua").files({ fd_opts = fd_opts })
+	end
+end
+
+local function smart_files_with_suffix()
+	vim.ui.input({ prompt = "File extensions (comma-separated): " }, function(input)
+		if input and input ~= "" then
+			smart_files(input)
+		end
+	end)
 end
 
 local function smart_grep()
@@ -55,6 +77,7 @@ return {
 	keys = {
 		-- File pickers (smart: curated dirs in $HOME, else cwd)
 		{ "<leader>ff", smart_files, desc = "Find files" },
+		{ "<leader>fF", smart_files_with_suffix, desc = "Find files by suffix" },
 		{ "<C-p>", "<cmd>FzfLua git_files<cr>", desc = "Git files" },
 		-- Grep
 		{ "<leader>fg", smart_grep, desc = "Live grep" },

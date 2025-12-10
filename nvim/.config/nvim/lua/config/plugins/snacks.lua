@@ -12,7 +12,6 @@ return {
 		-- Image viewer with hover support
 		image = {
 			enabled = true,
-			backend = "kitty",
 			doc = {
 				enabled = true,
 				inline = true,
@@ -113,6 +112,20 @@ return {
 			},
 		},
 	},
+	init = function()
+		-- Trigger terminal detection early for image support
+		vim.defer_fn(function()
+			if Snacks.image and Snacks.image.terminal then
+				Snacks.image.terminal.detect(function()
+					-- Ghostty doesn't support file transfer mode, force stream mode
+					local env = Snacks.image.terminal.env()
+					if env.name:find("ghostty") then
+						env.remote = true
+					end
+				end)
+			end
+		end, 100)
+	end,
 	keys = {
 		-- Zen mode toggles (matching your old keymaps)
 		{
