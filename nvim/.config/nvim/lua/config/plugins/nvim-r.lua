@@ -14,7 +14,8 @@ return {
 
 			R_args = {},  -- radian doesn't need --quiet --no-save
 			min_editor_width = 72,
-			rconsole_width = 78,
+			rconsole_width = 0,  -- 0 = horizontal split (below)
+			rconsole_height = 15,  -- height of R console
 
 			-- Enable sending complete statements (parenthesis blocks)
 			parenblock = true,  -- Send all lines from opening to closing parenthesis
