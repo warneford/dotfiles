@@ -120,22 +120,6 @@ return {
 			},
 		},
 	},
-	init = function()
-		-- Trigger terminal detection early for image support
-		vim.defer_fn(function()
-			if Snacks.image and Snacks.image.terminal then
-				Snacks.image.terminal.detect(function()
-					local env = Snacks.image.terminal.env()
-					-- Only force stream mode for remote sessions where file paths
-					-- aren't accessible to the local terminal
-					local is_remote = vim.env.SSH_CONNECTION ~= nil or vim.env.SSH_CLIENT ~= nil
-					if is_remote then
-						env.remote = true
-					end
-				end)
-			end
-		end, 100)
-	end,
 	keys = {
 		-- Zen mode toggles (matching your old keymaps)
 		{

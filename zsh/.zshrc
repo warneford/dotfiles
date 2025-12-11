@@ -13,6 +13,13 @@
 # SSH + docker exec + tmux doesn't propagate TERM_PROGRAM from local Ghostty
 export SNACKS_GHOSTTY=true
 
+# Force remote/streaming mode for snacks.nvim images when in a Docker container
+# Container file paths aren't accessible to the local terminal, so we need
+# to stream image data instead of sending file paths
+if [[ -f /.dockerenv ]]; then
+    export SNACKS_SSH=true
+fi
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
