@@ -68,6 +68,14 @@ return {
 			},
 		},
 
+		-- Scope detection config
+		scope = {
+			treesitter = {
+				-- Use indent-based scope detection (works reliably with auto-formatted code)
+				enabled = false,
+			},
+		},
+
 		-- Smooth scrolling
 		scroll = {
 			enabled = true,
