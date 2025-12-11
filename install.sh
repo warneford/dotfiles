@@ -75,6 +75,7 @@ if $IS_MAC; then
         "pngpaste"      # Paste images from clipboard (for img-clip.nvim)
         "fortune"       # Random quotes for nvim dashboard
         "imagemagick"   # Image conversion for snacks.nvim image viewer
+        "carapace"      # Multi-shell completion engine with rich descriptions
     )
 
     # macOS GUI apps (casks)
@@ -260,6 +261,19 @@ else
         print_success "direnv already installed ($(direnv --version))"
     fi
 
+    # Install carapace (multi-shell completion engine)
+    if ! command -v carapace &> /dev/null; then
+        print_info "Installing carapace..."
+        CARAPACE_VERSION=$(curl -s https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+        curl -Lo /tmp/carapace.tar.gz "https://github.com/carapace-sh/carapace-bin/releases/download/v${CARAPACE_VERSION}/carapace-bin_linux_amd64.tar.gz"
+        tar xf /tmp/carapace.tar.gz -C /tmp carapace
+        install /tmp/carapace "$HOME/.local/bin"
+        rm /tmp/carapace.tar.gz /tmp/carapace
+        print_success "carapace installed"
+    else
+        print_success "carapace already installed ($(carapace --version))"
+    fi
+
     # Install GNU Stow (symlink farm manager for dotfiles)
     if ! command -v stow &> /dev/null; then
         print_info "Installing GNU Stow..."
@@ -349,6 +363,15 @@ if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlightin
     print_success "zsh-syntax-highlighting installed"
 else
     print_success "zsh-syntax-highlighting already installed"
+fi
+
+# Install fzf-tab (fzf-powered completion menu)
+if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/fzf-tab" ]; then
+    print_info "Installing fzf-tab..."
+    git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/fzf-tab
+    print_success "fzf-tab installed"
+else
+    print_success "fzf-tab already installed"
 fi
 
 # Install tmux-window-name plugin (no TPM needed)

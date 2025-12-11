@@ -55,6 +55,12 @@ RUN curl -LO https://github.com/fastfetch-cli/fastfetch/releases/latest/download
     dpkg -i fastfetch-linux-amd64.deb && \
     rm fastfetch-linux-amd64.deb
 
+# Install carapace (multi-shell completion engine with rich descriptions)
+RUN CARAPACE_VERSION=$(curl -s https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/') && \
+    curl -Lo /tmp/carapace.tar.gz "https://github.com/carapace-sh/carapace-bin/releases/download/v${CARAPACE_VERSION}/carapace-bin_linux_amd64.tar.gz" && \
+    tar xf /tmp/carapace.tar.gz -C /usr/local/bin carapace && \
+    rm /tmp/carapace.tar.gz
+
 # Install R packages for LSP and development
 # Note: radian is installed per-project via direnv/uv to share Python with reticulate
 # httpgd installed from GitHub as CRAN version is temporarily archived

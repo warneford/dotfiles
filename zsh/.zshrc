@@ -22,7 +22,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Plugins
 # Standard plugins can be found in $ZSH/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Note: fzf-tab must be loaded BEFORE zsh-autosuggestions and zsh-syntax-highlighting
 plugins=(
+    fzf-tab
     git
     zsh-autosuggestions
     zsh-syntax-highlighting
