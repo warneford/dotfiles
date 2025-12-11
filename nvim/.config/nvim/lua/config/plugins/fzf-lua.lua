@@ -13,12 +13,8 @@ local function smart_files(extensions)
         end
     end
 
-    -- Use --no-ignore when filtering by extension (user likely wants all matching files)
-    local ignore_flag = ext_opts ~= "" and "--no-ignore " or ""
-
-    -- Base fd_opts matching the setup config
-    local fd_opts = "--type f --hidden "
-        .. ignore_flag
+    -- Base fd_opts: search all files (--no-ignore) since <C-p> handles git-only
+    local fd_opts = "--type f --hidden --no-ignore "
         .. "--exclude .git --exclude node_modules --exclude renv --exclude .venv --exclude __pycache__ --exclude .cache --exclude Library --exclude .dropbox"
         .. ext_opts
 
@@ -122,7 +118,7 @@ return {
                 },
             },
             files = {
-                fd_opts = "--type f --hidden --exclude .git --exclude node_modules --exclude renv --exclude .venv --exclude __pycache__ --exclude .cache --exclude Library --exclude .dropbox",
+                fd_opts = "--type f --hidden --no-ignore --exclude .git --exclude node_modules --exclude renv --exclude .venv --exclude __pycache__ --exclude .cache --exclude Library --exclude .dropbox",
             },
             previewers = {
                 builtin = {
