@@ -256,10 +256,15 @@ return {
 							sources = { "nvim_diagnostic", "nvim_lsp" },
 							sections = { "error", "warn", "info", "hint" },
 							symbols = { error = "󰅚 ", warn = "󰀪 ", info = "󰋽 ", hint = "󰌵 " },
-							colored = false, -- disable to use our persistent color
+							colored = true,
 							update_in_insert = false,
 							always_visible = false,
-							color = get_section_b_content,
+							diagnostics_color = {
+								error = { fg = "#f38ba8" }, -- red
+								warn = { fg = "#f9e2af" }, -- yellow
+								info = { fg = "#89dceb" }, -- cyan
+								hint = { fg = "#a6e3a1" }, -- green
+							},
 						},
 						{
 							function()
