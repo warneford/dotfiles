@@ -47,6 +47,8 @@ zstyle ':completion:*' expand 'yes'
 zstyle ':completion:*' squeeze-slashes 'yes'
 
 # Auto-complete hidden files (dotfiles)
+# Note: This doesn't work well with fzf-tab + zsh-autosuggestions combo
+# Use fzf directly (Ctrl+T) for hidden file search
 _comp_options+=(globdots)
 
 # ============================================================================
@@ -77,7 +79,7 @@ zstyle ':fzf-tab:*' prefix ''
 # Default: no preview (keeps command completions clean)
 zstyle ':fzf-tab:*' fzf-preview
 
-# Preview for file/directory navigation commands
+# Preview for file/directory navigation commands (include hidden files with -a)
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -la --color=always $realpath 2>/dev/null'
 zstyle ':fzf-tab:complete:ls:*' fzf-preview 'ls -la --color=always $realpath 2>/dev/null'
 zstyle ':fzf-tab:complete:cat:*' fzf-preview 'head -100 $realpath 2>/dev/null'
