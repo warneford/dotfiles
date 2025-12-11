@@ -455,6 +455,17 @@ if [ -f "$DOTFILES_DIR/git/config" ]; then
     fi
 fi
 
+# Enable git fsmonitor for faster git status in large repos (macOS only)
+if $IS_MAC; then
+    if [ "$(git config --global core.fsmonitor)" != "true" ]; then
+        git config --global core.fsmonitor true
+        git config --global core.untrackedCache true
+        print_success "Enabled git fsmonitor (faster git status)"
+    else
+        print_success "Git fsmonitor already enabled"
+    fi
+fi
+
 # Setup Ghostty config (only on local machines, not SSH sessions)
 if ! $IS_SSH; then
     if command -v ghostty &> /dev/null || [ -d "/Applications/Ghostty.app" ]; then
