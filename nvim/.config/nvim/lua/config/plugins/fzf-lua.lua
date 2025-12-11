@@ -77,7 +77,7 @@ return {
 	keys = {
 		-- File pickers (smart: curated dirs in $HOME, else cwd)
 		{ "<leader>ff", smart_files, desc = "Find files" },
-		{ "<leader>fF", smart_files_with_suffix, desc = "Find files by suffix" },
+		{ "<leader>fx", smart_files_with_suffix, desc = "Find files by suffix" },
 		{ "<C-p>", "<cmd>FzfLua git_files<cr>", desc = "Git files" },
 		-- Grep
 		{ "<leader>fg", smart_grep, desc = "Live grep" },
