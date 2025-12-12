@@ -46,8 +46,13 @@ EOF
   fi
   echo
 
-  # Display image centered (kitty handles sizing automatically)
-  kitten icat --align center ~/dotfiles/assets/galaxy_brain_man.jpg
+  # Display a random image from assets folder
+  local assets_dir=~/dotfiles/assets
+  local images=("$assets_dir"/*.{jpg,jpeg,png,gif}(N))
+  if (( ${#images[@]} > 0 )); then
+    local random_image=${images[$((RANDOM % ${#images[@]} + 1))]}
+    kitten icat --align center "$random_image"
+  fi
 }
 
 if [[ "$(hostname)" == "rwt-mind-palace" && -z "$NVIM_TERMINAL" ]]; then
