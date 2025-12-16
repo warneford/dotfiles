@@ -71,8 +71,8 @@ return {
 		-- Scope detection config
 		scope = {
 			treesitter = {
-				-- Use indent-based scope detection (works reliably with auto-formatted code)
-				enabled = false,
+				-- Use treesitter for scope detection (better for R piped commands)
+				enabled = true,
 			},
 		},
 
