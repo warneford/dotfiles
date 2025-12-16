@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     fd-find \
     ripgrep \
-    fzf \
     unzip \
     direnv \
     # Kitty terminal tools (for kitten icat image display in MOTD banner)
@@ -28,6 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpython3-dev \
     # R package system dependencies
     libglpk-dev \
+    # Lua + luarocks for nvim plugins that need native Lua packages
+    lua5.4 \
+    liblua5.4-dev \
+    luarocks \
     # Cleanup
     && rm -rf /var/lib/apt/lists/*
 
@@ -50,14 +53,25 @@ RUN NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/l
     ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim && \
     rm nvim-linux-x86_64.tar.gz
 
+# Install fzf (latest from GitHub release - apt version is outdated)
+RUN FZF_VERSION=$(curl -sI https://github.com/junegunn/fzf/releases/latest | grep -i "^location:" | sed -E 's|.*/v?([0-9.]+).*|\1|') && \
+    curl -fsSL "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz" | tar -xz -C /usr/local/bin
+
 # Install fastfetch (latest from GitHub release)
 RUN curl -LO https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb && \
     dpkg -i fastfetch-linux-amd64.deb && \
     rm fastfetch-linux-amd64.deb
 
+# Install AWS CLI v2
+RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip && \
+    unzip -q /tmp/awscliv2.zip -d /tmp && \
+    /tmp/aws/install && \
+    rm -rf /tmp/awscliv2.zip /tmp/aws
+
 # Install carapace (multi-shell completion engine with rich descriptions)
-RUN CARAPACE_VERSION=$(curl -s https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/') && \
-    curl -Lo /tmp/carapace.tar.gz "https://github.com/carapace-sh/carapace-bin/releases/download/v${CARAPACE_VERSION}/carapace-bin_linux_amd64.tar.gz" && \
+# Version extracted from redirect header to avoid GitHub API rate limits
+RUN CARAPACE_VERSION=$(curl -sI https://github.com/carapace-sh/carapace-bin/releases/latest | grep -i "^location:" | sed -E 's|.*/v([0-9.]+).*|\1|') && \
+    curl -Lo /tmp/carapace.tar.gz "https://github.com/carapace-sh/carapace-bin/releases/download/v${CARAPACE_VERSION}/carapace-bin_${CARAPACE_VERSION}_linux_amd64.tar.gz" && \
     tar xf /tmp/carapace.tar.gz -C /usr/local/bin carapace && \
     rm /tmp/carapace.tar.gz
 
@@ -106,8 +120,9 @@ WORKDIR /home/${USERNAME}
 # Install uv for the user (used to manage per-project Python/radian)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install Claude Code CLI (user-local for auto-update support)
-RUN npm config set prefix ~/.local && npm install -g @anthropic-ai/claude-code
+# Install Claude Code CLI and tree-sitter CLI (user-local for auto-update support)
+# tree-sitter-cli needed for nvim-treesitter to compile parsers (e.g., custom grammars like templ)
+RUN npm config set prefix ~/.local && npm install -g @anthropic-ai/claude-code tree-sitter-cli
 
 # Create .zshrc that sources dotfiles config
 # First-boot setup (dotfiles install + Lazy sync) is handled by entrypoint.sh
