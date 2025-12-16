@@ -31,6 +31,8 @@ services:
       # Git/SSH config (read-only)
       - ~/.ssh:/home/${USER:-dev}/.ssh:ro
       - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
+      # AWS credentials
+      - ~/.aws:/home/${USER:-dev}/.aws:ro
       # Terminfo for ghostty terminal
       - ~/.terminfo:/home/${USER:-dev}/.terminfo:ro
       # rclone config for Dropbox sync
@@ -73,6 +75,8 @@ services:
       - /data/home/scott/projects/argoAPI:/home/rstudio/argoAPI:ro
       - ~/.gitconfig:/home/rstudio/.gitconfig:ro
       - ~/.git-credentials:/home/rstudio/.git-credentials
+      # AWS credentials
+      - ~/.aws:/home/rstudio/.aws:ro
       # Google auth tokens for gargle/googlesheets4/googledrive
       - ~/.secrets:/home/rstudio/.secrets
       # Tentacle data directory
