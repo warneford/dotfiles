@@ -3,10 +3,11 @@
 
 -- Parsers to install on startup
 local ensure_installed = {
-    "vimdoc", "javascript", "typescript", "c", "lua", "rust",
-    "jsdoc", "bash", "go",
-    "r", "markdown", "markdown_inline", "rnoweb", "yaml", "python",
-    "latex", -- needed for quarto/rnoweb
+    "vimdoc", "c", "lua", "bash",
+    "r", "markdown", "markdown_inline", "yaml", "python",
+    "latex", -- needed for quarto equations
+    -- Uncomment if doing web development:
+    -- "javascript", "typescript", "jsdoc",
 }
 
 -- Filetypes to disable treesitter highlighting (large files handled separately)
@@ -24,6 +25,9 @@ return {
 
             -- Register custom filetype for templ
             vim.treesitter.language.register("templ", "templ")
+
+            -- Use bash parser for zsh (no dedicated zsh parser exists yet)
+            vim.treesitter.language.register("bash", "zsh")
 
             -- Auto-enable treesitter features on FileType
             vim.api.nvim_create_autocmd("FileType", {
