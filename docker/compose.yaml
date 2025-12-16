@@ -41,6 +41,8 @@ services:
       - ~/.git-credentials:/home/${USER:-dev}/.git-credentials
       # Google auth tokens for gargle/googlesheets4/googledrive
       - ~/.secrets:/home/${USER:-dev}/.secrets
+      # Environment variables (secrets, API keys, etc.)
+      - ~/.env:/home/${USER:-dev}/.env:ro
       # Persist tmux sessions across container restarts
       - r-dev-tmp:/tmp
       # Tentacle data directory
