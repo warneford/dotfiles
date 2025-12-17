@@ -68,6 +68,15 @@ RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tm
     /tmp/aws/install && \
     rm -rf /tmp/awscliv2.zip /tmp/aws
 
+# Install GitHub CLI (gh)
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y gh && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install carapace (multi-shell completion engine with rich descriptions)
 # Version extracted from redirect header to avoid GitHub API rate limits
 RUN CARAPACE_VERSION=$(curl -sI https://github.com/carapace-sh/carapace-bin/releases/latest | grep -i "^location:" | sed -E 's|.*/v([0-9.]+).*|\1|') && \

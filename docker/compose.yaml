@@ -37,6 +37,8 @@ services:
       - ~/.terminfo:/home/${USER:-dev}/.terminfo:ro
       # rclone config for Dropbox sync
       - ~/.config/rclone:/home/${USER:-dev}/.config/rclone:ro
+      # GitHub CLI auth
+      - ~/.config/gh:/home/${USER:-dev}/.config/gh:ro
       # Claude Code auth and config
       - ~/.claude.json:/home/${USER:-dev}/.claude.json
       - ~/.claude:/home/${USER:-dev}/.claude
