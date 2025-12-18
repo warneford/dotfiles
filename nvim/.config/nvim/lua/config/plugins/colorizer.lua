@@ -9,7 +9,11 @@ return {
             mode = "virtualtext", -- "background" | "foreground" | "virtualtext"
             virtualtext = "■",
             virtualtext_inline = true,
-            names = false, -- disable "Blue", "Red" etc (too many false positives)
+            names = false, -- disable CSS names like "Blue", "Red" (too many false positives)
+            names_custom = function()
+                -- R's 657 named colors (gray50, steelblue, etc)
+                return require("config.r_colors")
+            end,
             RGB = true, -- #RGB hex
             RRGGBB = true, -- #RRGGBB hex
             RRGGBBAA = true, -- #RRGGBBAA hex
