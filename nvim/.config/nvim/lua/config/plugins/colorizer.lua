@@ -20,4 +20,18 @@ return {
             tailwind = false, -- Tailwind colors
         },
     },
+    config = function(_, opts)
+        require("colorizer").setup(opts)
+
+        -- Reattach colorizer after switching windows/buffers (fixes aerial/fzf-lua clearing it)
+        -- Colorizer reattaches on ColorScheme events, so we trigger that
+        vim.api.nvim_create_autocmd({ "BufEnter" }, {
+            callback = function()
+                vim.defer_fn(function()
+                    -- Trigger ColorScheme event without changing colorscheme
+                    vim.api.nvim_exec_autocmds("ColorScheme", { modeline = false })
+                end, 1)
+            end,
+        })
+    end,
 }

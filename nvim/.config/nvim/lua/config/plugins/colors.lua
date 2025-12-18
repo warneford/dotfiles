@@ -69,12 +69,30 @@ function ColorMyPencils(color)
 	vim.api.nvim_set_hl(0, "SnacksDashboardFortune", { fg = "#f6c177", italic = true })
 end
 
--- Run ColorMyPencils when vim starts without a file argument
+-- Apply custom highlights after any colorscheme change
+vim.api.nvim_create_autocmd("ColorScheme", {
+	callback = function()
+		-- Delay slightly to ensure colorscheme is fully loaded
+		vim.defer_fn(function()
+			-- Re-apply custom highlights (without calling colorscheme again to avoid loop)
+			local normal_fg = "#e0def4"
+			vim.api.nvim_set_hl(0, "Normal", { fg = normal_fg, bg = "none" })
+			vim.api.nvim_set_hl(0, "NormalFloat", { fg = normal_fg, bg = "none" })
+			vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
+			vim.api.nvim_set_hl(0, "WinBar", { bg = "none" })
+			vim.api.nvim_set_hl(0, "WinBarNC", { bg = "none", fg = "#6e7681" })
+			vim.api.nvim_set_hl(0, "StatusLine", { bg = "none" })
+			vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
+			vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#6e6a86" })
+			vim.api.nvim_set_hl(0, "SnacksDashboardFortune", { fg = "#f6c177", italic = true })
+		end, 10)
+	end,
+})
+
+-- Run ColorMyPencils on startup
 vim.api.nvim_create_autocmd("VimEnter", {
 	callback = function()
-		if vim.fn.argc() == 0 then
-			ColorMyPencils()
-		end
+		ColorMyPencils()
 	end,
 })
 
@@ -86,10 +104,19 @@ return {
 
     {
         "folke/tokyonight.nvim",
-        lazy = false,
-        opts = {},
+        lazy = true, -- Not the active colorscheme
         config = function()
-            ColorMyPencils()
+            require("tokyonight").setup({
+                style = "storm",
+                transparent = true,
+                terminal_colors = true,
+                styles = {
+                    comments = { italic = false },
+                    keywords = { italic = false },
+                    sidebars = "dark",
+                    floats = "dark",
+                },
+            })
         end
     },
     {
@@ -122,31 +149,12 @@ return {
             })
         end,
     },
-    {
-        "folke/tokyonight.nvim",
-        config = function()
-            require("tokyonight").setup({
-                -- your configuration comes here
-                -- or leave it empty to use the default settings
-                style = "storm", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-                transparent = true, -- Enable this to disable setting the background color
-                terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
-                styles = {
-                    -- Style to be applied to different syntax groups
-                    -- Value is any valid attr-list value for `:help nvim_set_hl`
-                    comments = { italic = false },
-                    keywords = { italic = false },
-                    -- Background styles. Can be "dark", "transparent" or "normal"
-                    sidebars = "dark", -- style for sidebars, see below
-                    floats = "dark", -- style for floating windows
-                },
-            })
-        end
-    },
 
     {
         "rose-pine/neovim",
         name = "rose-pine",
+        lazy = false,
+        priority = 1000, -- Load before other plugins
         config = function()
             require('rose-pine').setup({
                 disable_background = true,
