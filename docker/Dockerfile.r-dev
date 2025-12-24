@@ -88,8 +88,9 @@ RUN CARAPACE_VERSION=$(curl -sI https://github.com/carapace-sh/carapace-bin/rele
 # Note: radian is installed per-project via direnv/uv to share Python with reticulate
 # httpgd installed from GitHub as CRAN version is temporarily archived
 # pak installed from r-lib repo for binary support on new R versions
+# renv for reproducible project environments (configured to use pak via .Renviron)
 ARG GITHUB_PAT
-RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes', 'here', 'pacman'))" && \
+RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes', 'here', 'pacman', 'renv'))" && \
     R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s', .Platform\$pkgType, R.Version()\$os, R.Version()\$arch))" && \
     R -e "remotes::install_github('nx10/httpgd')" && \
     GITHUB_PAT=${GITHUB_PAT} R -e "pak::pak('octantbio/platbiotools')"
