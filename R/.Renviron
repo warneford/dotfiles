@@ -7,3 +7,8 @@
 # %v = major.minor version (e.g., 4.5)
 # This matches R's default and works cross-platform (macOS, Linux)
 R_LIBS_USER=~/R/%p-library/%v
+
+# renv configuration
+# Use pak for faster, more reliable package installation in renv projects
+# pak provides parallel downloads, better dependency resolution, and caching
+RENV_CONFIG_PAK_ENABLED=TRUE
