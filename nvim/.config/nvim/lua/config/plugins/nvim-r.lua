@@ -96,6 +96,22 @@ return {
 			pcall(original_hl_code_bg)
 		end
 
+		-- Set R_CURRENT_FILE env var for platbiotools log directory detection
+		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
+			pattern = { "*.R", "*.Rmd", "*.qmd" },
+			callback = function()
+				local file = vim.fn.expand("%:p")
+				if file ~= "" then
+					-- Set locally in nvim (for any lua code that might check)
+					vim.env.R_CURRENT_FILE = file
+					-- Send to R console if R.nvim is running
+					if (vim.g.R_Nvim_status or 0) >= 7 then
+						require("r.send").cmd('Sys.setenv(R_CURRENT_FILE = "' .. file .. '")')
+					end
+				end
+			end,
+		})
+
 		-- R.nvim sets all keybindings automatically
 		-- See :RMapsDesc for the full list of available keybindings
 		--
