@@ -7,7 +7,11 @@
 # e.g., ~/R/x86_64-pc-linux-gnu-library/4.5/
 # Minor versions can break ABI compatibility, so we version by major.minor
 local({
-  r_version <- paste0(R.version$major, ".", strsplit(R.version$minor, "\\.")[[1]][1])
+  r_version <- paste0(
+    R.version$major,
+    ".",
+    strsplit(R.version$minor, "\\.")[[1]][1]
+  )
   platform_lib <- paste0(R.version$platform, "-library")
   lib_path <- file.path(Sys.getenv("HOME"), "R", platform_lib, r_version)
   if (!dir.exists(lib_path)) {
@@ -27,24 +31,35 @@ local({
 if (Sys.info()["sysname"] == "Linux") {
   # Linux: Use PPM binaries matching the current distro
   # Detect Ubuntu codename from /etc/os-release
-  distro_codename <- tryCatch({
-    os_release <- readLines("/etc/os-release", warn = FALSE)
-    codename_line <- grep("^VERSION_CODENAME=", os_release, value = TRUE)
-    if (length(codename_line) > 0) {
-      sub("^VERSION_CODENAME=", "", codename_line)
-    } else {
-      "jammy"  # fallback
-    }
-  }, error = function(e) "jammy")
+  distro_codename <- tryCatch(
+    {
+      os_release <- readLines("/etc/os-release", warn = FALSE)
+      codename_line <- grep("^VERSION_CODENAME=", os_release, value = TRUE)
+      if (length(codename_line) > 0) {
+        sub("^VERSION_CODENAME=", "", codename_line)
+      } else {
+        "jammy" # fallback
+      }
+    },
+    error = function(e) "jammy"
+  )
 
-  ppm_url <- paste0("https://packagemanager.posit.co/cran/__linux__/", distro_codename, "/latest")
+  ppm_url <- paste0(
+    "https://packagemanager.posit.co/cran/__linux__/",
+    distro_codename,
+    "/latest"
+  )
 
   options(
     repos = c(
       PPM = ppm_url,
       CRAN = "https://cloud.r-project.org"
     ),
-    HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
+    HTTPUserAgent = sprintf(
+      "R/%s R (%s)",
+      getRversion(),
+      paste(getRversion(), R.version$platform, R.version$arch, R.version$os)
+    )
   )
 } else {
   # macOS and Windows: Use CRAN official binaries (better R 4.5+ compatibility)
@@ -54,7 +69,11 @@ if (Sys.info()["sysname"] == "Linux") {
       CRAN = "https://cloud.r-project.org",
       PPM = "https://packagemanager.posit.co/cran/latest"
     ),
-    HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
+    HTTPUserAgent = sprintf(
+      "R/%s R (%s)",
+      getRversion(),
+      paste(getRversion(), R.version$platform, R.version$arch, R.version$os)
+    )
   )
 }
 
@@ -68,27 +87,44 @@ options(
 )
 
 # Disable automatic package loading messages for cleaner startup
-options(defaultPackages = c(getOption("defaultPackages"), "stats", "graphics", "grDevices", "utils", "datasets", "methods", "base"))
+options(
+  defaultPackages = c(
+    getOption("defaultPackages"),
+    "stats",
+    "graphics",
+    "grDevices",
+    "utils",
+    "datasets",
+    "methods",
+    "base"
+  )
+)
 
 # Auto-start httpgd for interactive sessions (web-based graphics viewer)
 # Access plots at http://localhost:35211 (requires SSH port forwarding)
 # Token disabled since we're behind VPN
 if (interactive()) {
-  invisible(tryCatch({
-    loadNamespace("httpgd")
-    options(
-      httpgd.port = 35211,
-      httpgd.token = FALSE
-    )
-    # Only start httpgd if not already running
-    if (!httpgd::hgd_active()) {
-      httpgd::hgd()
+  invisible(tryCatch(
+    {
+      loadNamespace("httpgd")
+      options(
+        httpgd.port = 35211,
+        httpgd.token = FALSE
+      )
+      # Only start httpgd if not already running
+      if (!httpgd::hgd_active()) {
+        httpgd::hgd()
+      }
+    },
+    error = function(e) {
+      # httpgd not available, skip graphics device setup
+      invisible(NULL)
     }
-  }, error = function(e) {
-    # httpgd not available, skip graphics device setup
-    invisible(NULL)
-  }))
+  ))
 }
 
 cat("R profile loaded from dotfiles\n")
 cat("→ Using CRAN official binaries (PPM fallback)\n")
+
+# load global .Renviron file (in case a local one supercedes it)
+readRenviron("~/.Renviron")

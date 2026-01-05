@@ -39,6 +39,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Node.js dev headers and Chromium for R packages (V8, chromote)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libnode-dev \
+    chromium \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install rclone for cloud storage sync (Dropbox, etc.)
 RUN curl -fsSL https://rclone.org/install.sh | bash
 
