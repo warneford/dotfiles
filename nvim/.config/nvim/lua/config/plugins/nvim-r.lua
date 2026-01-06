@@ -56,6 +56,11 @@ return {
 		vim.api.nvim_create_autocmd("FileType", {
 			pattern = { "r", "quarto", "rmd", "rmarkdown" },
 			callback = function()
+				-- Skip .md files and otter-generated buffers from .md files
+				local filename = vim.api.nvim_buf_get_name(0)
+				if filename:match("%.md$") or filename:match("%.md%.otter%.R$") then
+					return
+				end
 				-- Only auto-start if R is not already running
 				-- vim.g.R_Nvim_status: 3 = ready to start, 7 = R running
 				local attempts = 0
