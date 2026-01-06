@@ -49,18 +49,21 @@ return {
 		})
 
 		-- Auto-open aerial for Rmd and Qmd files
+		-- Delay to allow R terminal to open first (avoids layout issues)
 		vim.api.nvim_create_autocmd("FileType", {
 			pattern = { "rmd", "quarto" },
 			callback = function()
 				vim.defer_fn(function()
 					require("aerial").open()
-				end, 100)
+				end, 1500)
 			end,
 		})
 
 		-- Keybindings
 		vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle!<CR>", { desc = "[o]utline toggle" })
-		vim.keymap.set("n", "<leader>oo", "<cmd>AerialOpen<CR>", { desc = "[o]utline [o]pen" })
+		vim.keymap.set("n", "<leader>oo", function()
+			require("aerial").open({ focus = false })
+		end, { desc = "[o]utline [o]pen" })
 		vim.keymap.set("n", "<leader>oc", "<cmd>AerialClose<CR>", { desc = "[o]utline [c]lose" })
 		vim.keymap.set("n", "[s", "<cmd>AerialPrev<CR>", { desc = "Previous symbol" })
 		vim.keymap.set("n", "]s", "<cmd>AerialNext<CR>", { desc = "Next symbol" })

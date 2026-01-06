@@ -209,6 +209,7 @@ return {
 			-- Send code to shell terminal
 			local function send_to_shell(code)
 				if not shell_term:is_open() then
+					hide_all_terminals()
 					shell_term:open()
 					-- Wait a bit for terminal to be ready
 					vim.defer_fn(function()
@@ -223,6 +224,7 @@ return {
 			local function send_to_python(code)
 				local term = get_python_term()
 				if not term:is_open() then
+					hide_all_terminals()
 					term:open()
 					-- Wait a bit for ipython to start
 					vim.defer_fn(function()

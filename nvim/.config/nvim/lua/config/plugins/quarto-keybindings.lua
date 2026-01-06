@@ -15,6 +15,8 @@ local function get_current_chunk_language()
 		return "bash"
 	elseif otter_fn.is_otter_language_context("sh") then
 		return "bash"
+	elseif otter_fn.is_otter_language_context("zsh") then
+		return "bash"
 	elseif otter_fn.is_otter_language_context("python") then
 		return "python"
 	elseif otter_fn.is_otter_language_context("julia") then

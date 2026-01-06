@@ -11,7 +11,7 @@ return {
 			quarto.setup({
 				lspFeatures = {
 					enabled = true,
-					languages = { "r", "python", "julia", "bash" },
+					languages = { "r", "python", "julia", "bash", "zsh" },
 					chunks = "curly", -- 'curly' or 'all'
 					diagnostics = {
 						enabled = true,
@@ -53,7 +53,7 @@ return {
 				pattern = { "quarto", "markdown" },
 				callback = function(args)
 					if vim.bo[args.buf].buflisted then
-						require("otter").activate({ "r", "python", "julia", "bash" })
+						require("otter").activate({ "r", "python", "julia", "bash", "zsh" })
 					end
 				end,
 			})
