@@ -31,6 +31,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lua5.4 \
     liblua5.4-dev \
     luarocks \
+    # V8 engine and Chromium for R packages (V8, chromote)
+    # Must be installed before nodesource nodejs to avoid dependency conflicts
+    libv8-dev \
+    chromium \
     # Cleanup
     && rm -rf /var/lib/apt/lists/*
 
@@ -39,11 +43,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Node.js dev headers and Chromium for R packages (V8, chromote)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libnode-dev \
-    chromium \
-    && rm -rf /var/lib/apt/lists/*
 
 # Install rclone for cloud storage sync (Dropbox, etc.)
 RUN curl -fsSL https://rclone.org/install.sh | bash

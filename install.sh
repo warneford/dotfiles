@@ -265,7 +265,7 @@ else
     if ! command -v carapace &> /dev/null; then
         print_info "Installing carapace..."
         CARAPACE_VERSION=$(curl -s https://api.github.com/repos/carapace-sh/carapace-bin/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
-        curl -Lo /tmp/carapace.tar.gz "https://github.com/carapace-sh/carapace-bin/releases/download/v${CARAPACE_VERSION}/carapace-bin_linux_amd64.tar.gz"
+        curl -Lo /tmp/carapace.tar.gz "https://github.com/carapace-sh/carapace-bin/releases/download/v${CARAPACE_VERSION}/carapace-bin_${CARAPACE_VERSION}_linux_amd64.tar.gz"
         tar xf /tmp/carapace.tar.gz -C /tmp carapace
         install /tmp/carapace "$HOME/.local/bin"
         rm /tmp/carapace.tar.gz /tmp/carapace

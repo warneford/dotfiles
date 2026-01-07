@@ -32,13 +32,13 @@ services:
       - ~/.ssh:/home/${USER:-dev}/.ssh:ro
       - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
       # AWS credentials
-      - ~/.aws:/home/${USER:-dev}/.aws:ro
+      - ~/.aws:/home/${USER:-dev}/.aws
       # Terminfo for ghostty terminal
       - ~/.terminfo:/home/${USER:-dev}/.terminfo:ro
       # rclone config for Dropbox sync
       - ~/.config/rclone:/home/${USER:-dev}/.config/rclone:ro
       # GitHub CLI auth
-      - ~/.config/gh:/home/${USER:-dev}/.config/gh:ro
+      - ~/.config/gh:/home/${USER:-dev}/.config/gh
       # Claude Code auth and config
       - ~/.claude.json:/home/${USER:-dev}/.claude.json
       - ~/.claude:/home/${USER:-dev}/.claude
