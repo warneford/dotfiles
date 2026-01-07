@@ -274,6 +274,32 @@ else
         print_success "carapace already installed ($(carapace --version))"
     fi
 
+    # Install fzf (fuzzy finder - required for fzf-lua nvim plugin)
+    if ! command -v fzf &> /dev/null; then
+        print_info "Installing fzf..."
+        FZF_VERSION=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/')
+        curl -Lo /tmp/fzf.tar.gz "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_amd64.tar.gz"
+        tar xf /tmp/fzf.tar.gz -C /tmp fzf
+        install /tmp/fzf "$HOME/.local/bin"
+        rm /tmp/fzf.tar.gz /tmp/fzf
+        print_success "fzf installed"
+    else
+        print_success "fzf already installed ($(fzf --version | head -1))"
+    fi
+
+    # Install fd (fast file finder - required for fzf-lua file search)
+    if ! command -v fd &> /dev/null; then
+        print_info "Installing fd..."
+        FD_VERSION=$(curl -s https://api.github.com/repos/sharkdp/fd/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+        curl -Lo /tmp/fd.tar.gz "https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd-v${FD_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+        tar xf /tmp/fd.tar.gz -C /tmp
+        install /tmp/fd-v${FD_VERSION}-x86_64-unknown-linux-gnu/fd "$HOME/.local/bin"
+        rm -rf /tmp/fd.tar.gz /tmp/fd-v${FD_VERSION}-x86_64-unknown-linux-gnu
+        print_success "fd installed"
+    else
+        print_success "fd already installed ($(fd --version))"
+    fi
+
     # Install GNU Stow (symlink farm manager for dotfiles)
     if ! command -v stow &> /dev/null; then
         print_info "Installing GNU Stow..."
