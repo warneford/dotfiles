@@ -20,8 +20,13 @@ return {
         lazy = false,
         build = ":TSUpdate",
         config = function()
-            -- Install parsers (no-op if already installed)
-            require("nvim-treesitter").install(ensure_installed)
+            -- Install parsers using TSInstall command (handles already installed gracefully)
+            for _, lang in ipairs(ensure_installed) do
+                local ok = pcall(vim.treesitter.language.add, lang)
+                if not ok then
+                    vim.cmd("TSInstall " .. lang)
+                end
+            end
 
             -- Register custom filetype for templ
             vim.treesitter.language.register("templ", "templ")
@@ -73,14 +78,8 @@ return {
         branch = "main",
         dependencies = { "nvim-treesitter/nvim-treesitter" },
         config = function()
-            require("nvim-treesitter-textobjects").setup({
-                select = {
-                    lookahead = true,
-                },
-            })
-
             -- Textobject keymaps (select mode)
-            local select = require("nvim-treesitter-textobjects.select")
+            local select = require("nvim-treesitter.textobjects.select")
             local function map_select(key, capture)
                 vim.keymap.set({ "x", "o" }, key, function()
                     select.select_textobject(capture, "textobjects")
