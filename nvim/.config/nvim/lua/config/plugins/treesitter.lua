@@ -79,7 +79,7 @@ return {
         dependencies = { "nvim-treesitter/nvim-treesitter" },
         config = function()
             -- Textobject keymaps (select mode)
-            local select = require("nvim-treesitter.textobjects.select")
+            local select = require("nvim-treesitter-textobjects.select")
             local function map_select(key, capture)
                 vim.keymap.set({ "x", "o" }, key, function()
                     select.select_textobject(capture, "textobjects")
