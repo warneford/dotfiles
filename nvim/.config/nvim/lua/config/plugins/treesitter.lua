@@ -4,7 +4,7 @@
 -- Parsers to install on startup
 local ensure_installed = {
     "vimdoc", "c", "lua", "bash",
-    "r", "markdown", "markdown_inline", "yaml", "python",
+    "r", "markdown", "markdown_inline", "rnoweb", "yaml", "python",
     "latex", -- needed for quarto equations
     -- Uncomment if doing web development:
     -- "javascript", "typescript", "jsdoc",
@@ -20,13 +20,16 @@ return {
         lazy = false,
         build = ":TSUpdate",
         config = function()
-            -- Install parsers using TSInstall command (handles already installed gracefully)
-            for _, lang in ipairs(ensure_installed) do
-                local ok = pcall(vim.treesitter.language.add, lang)
-                if not ok then
-                    vim.cmd("TSInstall " .. lang)
+            -- Install missing parsers (deferred to avoid blocking startup)
+            vim.defer_fn(function()
+                for _, lang in ipairs(ensure_installed) do
+                    -- Check if parser .so file exists in runtime path
+                    local parser_installed = #vim.api.nvim_get_runtime_file("parser/" .. lang .. ".so", false) > 0
+                    if not parser_installed then
+                        vim.cmd("TSInstall " .. lang)
+                    end
                 end
-            end
+            end, 100)
 
             -- Register custom filetype for templ
             vim.treesitter.language.register("templ", "templ")
