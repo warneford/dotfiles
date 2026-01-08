@@ -36,7 +36,7 @@ services:
       # Terminfo for ghostty terminal
       - ~/.terminfo:/home/${USER:-dev}/.terminfo:ro
       # rclone config for Dropbox sync
-      - ~/.config/rclone:/home/${USER:-dev}/.config/rclone:ro
+      - ~/.config/rclone:/home/${USER:-dev}/.config/rclone
       # GitHub CLI auth
       - ~/.config/gh:/home/${USER:-dev}/.config/gh
       # Claude Code auth and config
