@@ -51,6 +51,9 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export EDITOR='nvim'
 export VISUAL='nvim'
 
+# Claude Code environment file (sources PATH etc. for LSP servers)
+export CLAUDE_ENV_FILE="$HOME/.claude/env.sh"
+
 # Custom PATH management - add directories only if not already in PATH
 # This function prevents PATH pollution when .zshrc is sourced multiple times
 add_to_path() {

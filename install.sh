@@ -480,6 +480,7 @@ stow_package "direnv"
 stow_package "radian"
 stow_package "bin"
 stow_package "terminfo"
+stow_package "claude"
 
 # Remove old .radian_profile if it exists and isn't a symlink
 if [ -f "$HOME/.radian_profile" ] && [ ! -L "$HOME/.radian_profile" ]; then

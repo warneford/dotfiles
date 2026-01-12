@@ -1,0 +1,48 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "r-lsp-marketplace",
+  "description": "R language server plugin for Claude Code",
+  "owner": {
+    "name": "Robert",
+    "email": ""
+  },
+  "plugins": [
+    {
+      "name": "r-lsp",
+      "version": "1.0.0",
+      "description": "R language server for code intelligence, diagnostics, and navigation",
+      "author": {
+        "name": "Robert",
+        "email": ""
+      },
+      "source": "./",
+      "category": "development",
+      "keywords": ["r", "rlang", "statistics", "data-science", "lsp", "language-server"],
+      "lspServers": {
+        "r": {
+          "command": "/home/robert/.local/share/nvim/mason/bin/r-languageserver",
+          "extensionToLanguage": {
+            ".R": "r",
+            ".r": "r",
+            ".Rmd": "rmd",
+            ".rmd": "rmd",
+            ".Rmarkdown": "rmd",
+            ".rmarkdown": "rmd",
+            ".qmd": "quarto",
+            ".Qmd": "quarto"
+          },
+          "settings": {
+            "r": {
+              "lsp": {
+                "rich_documentation": true
+              }
+            }
+          },
+          "startupTimeout": 30000,
+          "restartOnCrash": true,
+          "maxRestarts": 3
+        }
+      }
+    }
+  ]
+}

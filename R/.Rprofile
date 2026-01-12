@@ -123,8 +123,10 @@ if (interactive()) {
   ))
 }
 
-cat("R profile loaded from dotfiles\n")
-cat("→ Using CRAN official binaries (PPM fallback)\n")
+if (interactive()) {
+  cat("R profile loaded from dotfiles\n")
+  cat("→ Using CRAN official binaries (PPM fallback)\n")
+}
 
 # load global .Renviron file (in case a local one supercedes it)
 readRenviron("~/.Renviron")
