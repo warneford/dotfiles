@@ -1,4 +1,5 @@
 vim.opt.guicursor = ""
+vim.opt.showmode = false -- Mode shown in lualine instead
 
 vim.opt.nu = true
 vim.opt.relativenumber = true

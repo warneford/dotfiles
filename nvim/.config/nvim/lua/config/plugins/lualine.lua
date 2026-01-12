@@ -15,6 +15,8 @@ return {
 				surface = "#1e2030",
 				gold = "#fbbf24",
 				gold_dark = "#92400e",
+				purple = "#c4b5fd",
+				purple_dark = "#5b21b6",
 			}
 			-- Terminal type themes
 			local terminal_themes = {
@@ -58,13 +60,29 @@ return {
 			local mode_colors = {
 				n = colors.teal,
 				i = colors.gold,
-				v = colors.aqua,
-				V = colors.aqua,
-				["\22"] = colors.aqua,
+				v = colors.purple,
+				V = colors.purple,
+				["\22"] = colors.purple,
 				c = "#fb7185",
 				R = "#f97316",
 				t = colors.teal,
 			}
+
+			-- Update line number colors based on mode
+			local function update_gutter_mode_colors()
+				local mode = vim.fn.mode()
+				local color = mode_colors[mode] or colors.teal
+				vim.api.nvim_set_hl(0, "LineNr", { fg = color })
+				vim.api.nvim_set_hl(0, "CursorLineNr", { fg = color, bold = true })
+			end
+
+			vim.api.nvim_create_autocmd("ModeChanged", {
+				pattern = "*",
+				callback = update_gutter_mode_colors,
+			})
+
+			-- Set initial gutter colors
+			update_gutter_mode_colors()
 
 			local function get_mode_color()
 				local mode = vim.fn.mode()
@@ -81,9 +99,9 @@ return {
 			local section_b_bg = {
 				n = colors.deep,
 				i = colors.gold_dark,
-				v = colors.deep,
-				V = colors.deep,
-				["\22"] = colors.deep,
+				v = colors.purple_dark,
+				V = colors.purple_dark,
+				["\22"] = colors.purple_dark,
 				c = "#9f1239",
 				R = "#7c2d12",
 				t = colors.deep,
@@ -98,9 +116,9 @@ return {
 			local section_b_fg = {
 				n = colors.aqua,
 				i = colors.gold,
-				v = colors.aqua,
-				V = colors.aqua,
-				["\22"] = colors.aqua,
+				v = colors.purple,
+				V = colors.purple,
+				["\22"] = colors.purple,
 				c = "#1e1e2e",
 				R = "#fb923c",
 				t = colors.aqua,
@@ -151,8 +169,8 @@ return {
 					c = { bg = "none", fg = colors.muted },
 				},
 				visual = {
-					a = { bg = colors.aqua, fg = colors.surface, gui = "bold" },
-					b = { bg = colors.deep, fg = colors.aqua },
+					a = { bg = colors.purple, fg = colors.surface, gui = "bold" },
+					b = { bg = colors.purple_dark, fg = colors.purple },
 					c = { bg = "none", fg = colors.muted },
 				},
 				replace = {
@@ -284,7 +302,19 @@ return {
 							padding = { left = 0, right = 0 },
 							cond = is_not_terminal,
 						},
-						{ "filetype", color = get_section_b_content, cond = is_not_terminal },
+						{
+							function()
+								local ft = vim.bo.filetype
+								if ft == "" then return "" end
+								local devicons = require("nvim-web-devicons")
+								local filename = vim.fn.expand("%:t")
+								local ext = vim.fn.expand("%:e")
+								local icon = devicons.get_icon(filename, ext, { default = true })
+								return (icon and icon .. " " or "") .. ft
+							end,
+							color = get_section_b_content,
+							cond = is_not_terminal,
+						},
 						{
 							function()
 								return right_sep
