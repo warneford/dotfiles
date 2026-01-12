@@ -81,6 +81,17 @@ return {
 				callback = update_gutter_mode_colors,
 			})
 
+			-- Ensure gutter colors update for command-line mode (with redraw to refresh while focused on cmdline)
+			vim.api.nvim_create_autocmd("CmdlineEnter", {
+				callback = function()
+					update_gutter_mode_colors()
+					vim.cmd("redraw")
+				end,
+			})
+			vim.api.nvim_create_autocmd("CmdlineLeave", {
+				callback = update_gutter_mode_colors,
+			})
+
 			-- Set initial gutter colors
 			update_gutter_mode_colors()
 
