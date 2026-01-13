@@ -30,7 +30,7 @@ services:
       - /data/home/scott/projects/argoAPI:/home/${USER:-dev}/argoAPI:ro
       # Git/SSH config (read-only)
       - ~/.ssh:/home/${USER:-dev}/.ssh:ro
-      - ~/.gitconfig:/home/${USER:-dev}/.gitconfig:ro
+      - ~/.gitconfig:/home/${USER:-dev}/.gitconfig
       # AWS credentials
       - ~/.aws:/home/${USER:-dev}/.aws
       # Terminfo for ghostty terminal
