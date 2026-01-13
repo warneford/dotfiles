@@ -23,6 +23,7 @@ alias tk='tmux kill-session'
 
 # Convenience
 alias new_alias='vim ~/dotfiles/zsh/aliases.zsh'
+alias ls='ls -1'
 
 # =============================================================================
 # Platform-specific aliases
