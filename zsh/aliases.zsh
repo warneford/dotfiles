@@ -60,12 +60,18 @@ if [[ "$OSTYPE" == darwin* ]]; then
         if [[ -n "$win_id" ]]; then
             aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
             aerospace focus --window-id "$win_id"
-            osascript -e 'tell application "Orion" to activate'
+            osascript -e 'tell application "Orion - Work" to activate'
             sleep 0.5
             osascript -e 'tell application "System Events" to tell process "Orion"
-                try
-                    click menu item "Enable Focus Mode" of menu "View" of menu bar 1
-                end try
+                set viewMenu to menu "View" of menu bar 1
+                -- Enable Focus Mode if not already enabled
+                if exists menu item "Enable Focus Mode" of viewMenu then
+                    click menu item "Enable Focus Mode" of viewMenu
+                end if
+                -- Hide Sidebar if visible
+                if exists menu item "Hide Sidebar" of viewMenu then
+                    click menu item "Hide Sidebar" of viewMenu
+                end if
             end tell'
         fi
     }
