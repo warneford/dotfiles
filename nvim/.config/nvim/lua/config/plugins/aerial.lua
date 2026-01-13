@@ -9,6 +9,11 @@ return {
       -- Attach to any buffer with supported filetype
       attach_mode = "global",
 
+      -- Ignore special buffers (terminals, etc.)
+      ignore = {
+        buftypes = "special",
+      },
+
       -- Show line numbers in aerial window
       show_guides = true,
 
@@ -46,6 +51,13 @@ return {
         -- Show all heading levels (# ## ### etc)
         update_events = "TextChanged,InsertLeave",
       },
+
+      -- Use treesitter for quarto/rmd (parses markdown headers for TOC)
+      backends = {
+        quarto = { "treesitter" },
+        rmd = { "treesitter" },
+        _ = { "treesitter", "lsp", "markdown", "asciidoc", "man" },
+      },
     })
 
     -- Auto-open aerial for Rmd and Qmd files
@@ -54,7 +66,7 @@ return {
       pattern = { "rmd", "quarto" },
       callback = function()
         vim.defer_fn(function()
-          require("aerial").open()
+          require("aerial").open({ focus = false })
         end, 1500)
       end,
     })
