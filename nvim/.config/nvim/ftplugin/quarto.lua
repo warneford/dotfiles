@@ -10,5 +10,5 @@ ft.setup_slime_cells()
 -- R console keymaps (Quarto often embeds R code)
 -- Skip for .md files (e.g., quarto-generated markdown)
 if vim.fn.expand("%:e") ~= "md" then
-	ft.setup_r_keymaps()
+  ft.setup_r_keymaps()
 end
