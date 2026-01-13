@@ -39,7 +39,13 @@ if [[ "$OSTYPE" == darwin* ]]; then
         if ! pgrep -q "Orion"; then
             open -a "Orion - Work"
             while ! pgrep -q "Orion"; do sleep 0.1; done
-            sleep 1
+            # Wait for Orion to be scriptable
+            for i in {1..30}; do
+                if osascript -e 'tell application "Orion - Work" to return name' &>/dev/null; then
+                    break
+                fi
+                sleep 0.2
+            done
         fi
         osascript -e 'tell application "Orion - Work" to make new document with properties {URL:"http://localhost:9013"}'
         sleep 0.2
