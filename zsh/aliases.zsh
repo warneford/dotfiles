@@ -47,7 +47,7 @@ if [[ "$OSTYPE" == darwin* ]]; then
                 sleep 0.2
             done
         fi
-        osascript -e 'tell application "Orion - Work" to make new document with properties {URL:"http://localhost:9013"}'
+        osascript -e 'tell application "Orion - Work" to open location "http://localhost:9013"'
         sleep 0.2
         aerospace workspace "$ws" 2>/dev/null
         # Wait for window to appear
