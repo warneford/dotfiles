@@ -105,6 +105,8 @@ run = 'layout floating'
     alt-s = 'exec-and-forget open -a Slack'
     alt-o = 'exec-and-forget open -a "Orion - Work"'
     alt-w = 'exec-and-forget open -a "Windows App"'
+    alt-z = 'exec-and-forget open -a "zoom.us"'
+    alt-n = 'exec-and-forget open -a Notion'
 
     # Service mode for less common operations
     alt-shift-semicolon = 'mode service'
@@ -122,11 +124,15 @@ run = 'layout floating'
     alt-shift-k = ['join-with up', 'mode main']
     alt-shift-l = ['join-with right', 'mode main']
 
-# Auto-move specific apps to workspaces (optional - uncomment and customize)
-# [[on-window-detected]]
-#     if.app-id = 'com.apple.Safari'
-#     run = 'move-node-to-workspace 2'
-#
-# [[on-window-detected]]
-#     if.app-id = 'com.apple.mail'
-#     run = 'move-node-to-workspace 3'
+# Auto-move specific apps to workspaces
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'notion.id'
+run = 'move-node-to-workspace 4'
