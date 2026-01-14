@@ -10,7 +10,7 @@ fi
 
 # Ensure Orion is active and wait
 /usr/bin/osascript -e 'tell application "Orion - Work" to activate'
-sleep 1
+sleep 0.3
 
 # Apply menu settings with retries
 for i in 1 2 3; do

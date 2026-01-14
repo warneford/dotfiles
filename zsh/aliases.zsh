@@ -55,13 +55,12 @@ if [[ "$OSTYPE" == darwin* ]]; then
                 sleep 0.2
             done
         fi
-        sleep 0.5
         # Wait for localhost window and move to target workspace
         local win_id=""
         for i in {1..15}; do
-            sleep 0.2
             win_id=$(aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
             [[ -n "$win_id" ]] && break
+            sleep 0.1
         done
         if [[ -n "$win_id" ]]; then
             aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
@@ -69,7 +68,6 @@ if [[ "$OSTYPE" == darwin* ]]; then
         fi
         osascript -e 'tell application "Orion - Work" to activate'
         # Apply menu settings via app bundle (has accessibility permissions)
-        sleep 0.5
         open -g ~/dotfiles/macos/Applications/OrionFocusMode.app 2>/dev/null
     }
 fi
