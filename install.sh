@@ -579,6 +579,14 @@ if $IS_MAC && ! $IS_SSH; then
         print_info "JankyBorders not found - skipping borders configuration"
         print_info "Install with: brew install FelixKratz/formulae/borders"
     fi
+
+    # OrionFocusMode.app (for quarto-preview SSH accessibility)
+    if [ -d "$DOTFILES_DIR/macos/Applications/OrionFocusMode.app" ]; then
+        print_success "OrionFocusMode.app found in dotfiles"
+        print_info "MANUAL STEP: Grant accessibility permissions:"
+        echo "    System Settings → Privacy & Security → Accessibility → Add:"
+        echo "    ~/dotfiles/macos/Applications/OrionFocusMode.app"
+    fi
 fi
 
 echo ""
