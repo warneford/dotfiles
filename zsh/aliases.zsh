@@ -36,11 +36,15 @@ if [[ "$OSTYPE" == darwin* ]]; then
     function quarto-preview() {
         local uid=$(id -u)
         local ws=$(aerospace list-workspaces --focused 2>/dev/null)
+        local orion_was_running=true
+        # Close any existing localhost:9013 Orion window first
+        local old_win=$(aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | awk '{print $1}')
+        [[ -n "$old_win" ]] && aerospace close --window-id "$old_win" 2>/dev/null
         # Launch Orion if not running
         if ! pgrep -q "Orion"; then
+            orion_was_running=false
             open -a "Orion - Work"
             while ! pgrep -q "Orion"; do sleep 0.1; done
-            # Wait for Orion to be scriptable
             for i in {1..30}; do
                 if osascript -e 'tell application "Orion - Work" to return name' &>/dev/null; then
                     break
@@ -48,10 +52,14 @@ if [[ "$OSTYPE" == darwin* ]]; then
                 sleep 0.2
             done
         fi
+        # Open new window with URL
+        osascript -e 'tell application "Orion - Work" to activate'
+        # Only Cmd+N if Orion was already running (fresh launch already has a window)
+        $orion_was_running && osascript -e 'tell application "System Events" to keystroke "n" using command down' && sleep 0.3
         osascript -e 'tell application "Orion - Work" to open location "http://localhost:9013"'
-        sleep 0.2
+        sleep 0.3
         aerospace workspace "$ws" 2>/dev/null
-        # Wait for window to appear
+        # Wait for localhost window to appear
         local win_id=""
         for i in {1..10}; do
             sleep 0.2
@@ -61,18 +69,13 @@ if [[ "$OSTYPE" == darwin* ]]; then
         if [[ -n "$win_id" ]]; then
             aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
             aerospace focus --window-id "$win_id" 2>/dev/null
-            osascript -e 'tell application "Orion - Work" to activate'
-            # Retry menu manipulation with launchctl for GUI session access (needed for SSH)
-            for attempt in {1..5}; do
-                sleep 0.5
-                if launchctl asuser $uid osascript -e 'tell application "System Events" to tell process "Orion"
-                    set viewMenu to menu "View" of menu bar 1
-                    if exists menu item "Enable Focus Mode" of viewMenu then click menu item "Enable Focus Mode" of viewMenu
-                    if exists menu item "Hide Sidebar" of viewMenu then click menu item "Hide Sidebar" of viewMenu
-                end tell' 2>/dev/null; then
-                    break
-                fi
-            done
         fi
+        osascript -e 'tell application "Orion - Work" to activate'
+        # Apply menu settings (retry for SSH access)
+        for attempt in {1..5}; do
+            sleep 0.5
+            launchctl asuser $uid osascript -e 'tell application "System Events" to tell process "Orion" to click menu item "Enable Focus Mode" of menu "View" of menu bar 1' 2>/dev/null
+            launchctl asuser $uid osascript -e 'tell application "System Events" to tell process "Orion" to click menu item "Hide Sidebar" of menu "View" of menu bar 1' 2>/dev/null && break
+        done
     }
 fi
