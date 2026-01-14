@@ -1,0 +1,23 @@
+#!/bin/bash
+AEROSPACE=/opt/homebrew/bin/aerospace
+
+# Move localhost window to workspace 1
+win_id=$($AEROSPACE list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
+if [[ -n "$win_id" ]]; then
+    $AEROSPACE move-node-to-workspace --window-id "$win_id" 1 2>/dev/null
+    $AEROSPACE focus --window-id "$win_id" 2>/dev/null
+fi
+
+# Ensure Orion is active and wait
+/usr/bin/osascript -e 'tell application "Orion - Work" to activate'
+sleep 1
+
+# Apply menu settings with retries
+for i in 1 2 3; do
+    /usr/bin/osascript -e 'tell application "System Events" to tell process "Orion"
+        set viewMenu to menu "View" of menu bar 1
+        if exists menu item "Enable Focus Mode" of viewMenu then click menu item "Enable Focus Mode" of viewMenu
+        if exists menu item "Hide Sidebar" of viewMenu then click menu item "Hide Sidebar" of viewMenu
+    end tell' 2>/dev/null && break
+    sleep 0.5
+done

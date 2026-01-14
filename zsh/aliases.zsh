@@ -70,6 +70,6 @@ if [[ "$OSTYPE" == darwin* ]]; then
         osascript -e 'tell application "Orion - Work" to activate'
         # Apply menu settings via app bundle (has accessibility permissions)
         sleep 0.5
-        open -g ~/Applications/OrionFocusMode.app 2>/dev/null
+        open -g ~/dotfiles/macos/Applications/OrionFocusMode.app 2>/dev/null
     }
 fi
