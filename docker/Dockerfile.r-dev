@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpython3-dev \
     # R package system dependencies
     libglpk-dev \
+    libnlopt-dev \
     # Lua + luarocks for nvim plugins that need native Lua packages
     lua5.4 \
     liblua5.4-dev \
@@ -98,7 +99,8 @@ ARG GITHUB_PAT
 RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes', 'here', 'pacman', 'renv'))" && \
     R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s', .Platform\$pkgType, R.Version()\$os, R.Version()\$arch))" && \
     R -e "remotes::install_github('nx10/httpgd')" && \
-    GITHUB_PAT=${GITHUB_PAT} R -e "pak::pak('octantbio/platbiotools')"
+    GITHUB_PAT=${GITHUB_PAT} R -e "pak::pak('octantbio/platbiotools')" && \
+    R -e "install.packages('cmdstanr', repos = c('https://stan-dev.r-universe.dev', getOption('repos')))"
 
 # Copy entrypoint script (as root, before user switch)
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
@@ -112,6 +114,10 @@ RUN mkdir -p /run/sshd && \
 
 # Create non-root user matching host UID (configurable at build time)
 # Rocker images have rstudio user with UID/GID 1000, so we rename if conflict exists
+# TODO: DEV_PASSWORD is exposed in build layers/history. Use BuildKit secrets instead:
+#       RUN --mount=type=secret,id=dev_password \
+#           echo "${USERNAME}:$(cat /run/secrets/dev_password)" | chpasswd
+#       Build with: docker build --secret id=dev_password,src=.env ...
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 ARG USERNAME=dev
@@ -134,6 +140,10 @@ WORKDIR /home/${USERNAME}
 
 # Install uv for the user (used to manage per-project Python/radian)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install CmdStan binaries for Bayesian modeling (brms/cmdstanr)
+# cmdstanr R package is installed system-wide as root; CmdStan binaries go in user's ~/.cmdstan/
+RUN R -e "cmdstanr::install_cmdstan()"
 
 # Install Claude Code CLI and tree-sitter CLI (user-local for auto-update support)
 # tree-sitter-cli needed for nvim-treesitter to compile parsers (e.g., custom grammars like templ)
