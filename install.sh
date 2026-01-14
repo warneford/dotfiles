@@ -76,6 +76,7 @@ if $IS_MAC; then
         "fortune"       # Random quotes for nvim dashboard
         "imagemagick"   # Image conversion for snacks.nvim image viewer
         "carapace"      # Multi-shell completion engine with rich descriptions
+        "tree-sitter-cli"  # Required for nvim-treesitter to compile parsers
     )
 
     # macOS GUI apps (casks)
@@ -170,6 +171,15 @@ else
             print_success "ripgrep installed"
         else
             print_success "ripgrep already installed"
+        fi
+
+        # Install tree-sitter CLI via cargo (required for nvim-treesitter to compile parsers)
+        if ! command -v tree-sitter &> /dev/null; then
+            print_info "Installing tree-sitter CLI..."
+            cargo install tree-sitter-cli
+            print_success "tree-sitter CLI installed"
+        else
+            print_success "tree-sitter CLI already installed"
         fi
 
         # Install nvm (Node Version Manager) if not already installed

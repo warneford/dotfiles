@@ -37,6 +37,9 @@ return {
             -- Use bash parser for zsh (no dedicated zsh parser exists yet)
             vim.treesitter.language.register("bash", "zsh")
 
+            -- Use markdown parser for quarto (no dedicated quarto parser in nvim-treesitter)
+            vim.treesitter.language.register("markdown", "quarto")
+
             -- Auto-enable treesitter features on FileType
             vim.api.nvim_create_autocmd("FileType", {
                 group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true }),
