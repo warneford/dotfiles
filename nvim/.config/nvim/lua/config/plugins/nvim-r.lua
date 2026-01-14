@@ -102,15 +102,19 @@ return {
     end
 
     -- Set R_CURRENT_FILE env var for platbiotools log directory detection
+    -- Track the last file sent to R to avoid redundant Sys.setenv calls
+    local last_r_current_file = nil
+
     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
       pattern = { "*.R", "*.Rmd", "*.qmd" },
       callback = function()
         local file = vim.fn.expand("%:p")
         if file ~= "" then
-          -- Set locally in nvim (for any lua code that might check)
+          -- Always set locally in nvim (for any lua code that might check)
           vim.env.R_CURRENT_FILE = file
-          -- Send to R console if R.nvim is running
-          if (vim.g.R_Nvim_status or 0) >= 7 then
+          -- Only send to R console if the file changed (avoid scrolling radian on every buffer switch)
+          if file ~= last_r_current_file and (vim.g.R_Nvim_status or 0) >= 7 then
+            last_r_current_file = file
             require("r.send").cmd('Sys.setenv(R_CURRENT_FILE = "' .. file .. '")')
           end
         end
