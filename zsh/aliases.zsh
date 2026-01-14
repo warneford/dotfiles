@@ -34,7 +34,8 @@ if [[ "$OSTYPE" == darwin* ]]; then
     alias R='/Library/Frameworks/R.framework/Resources/bin/R'
     alias down='cd ~/Downloads'
     function quarto-preview() {
-        local ws=$(aerospace list-workspaces --focused)
+        local uid=$(id -u)
+        local ws=$(aerospace list-workspaces --focused 2>/dev/null)
         # Launch Orion if not running
         if ! pgrep -q "Orion"; then
             open -a "Orion - Work"
@@ -54,25 +55,24 @@ if [[ "$OSTYPE" == darwin* ]]; then
         local win_id=""
         for i in {1..10}; do
             sleep 0.2
-            win_id=$(aerospace list-windows --all | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
+            win_id=$(aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
             [[ -n "$win_id" ]] && break
         done
         if [[ -n "$win_id" ]]; then
             aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
-            aerospace focus --window-id "$win_id"
+            aerospace focus --window-id "$win_id" 2>/dev/null
             osascript -e 'tell application "Orion - Work" to activate'
-            sleep 0.5
-            osascript -e 'tell application "System Events" to tell process "Orion"
-                set viewMenu to menu "View" of menu bar 1
-                -- Enable Focus Mode if not already enabled
-                if exists menu item "Enable Focus Mode" of viewMenu then
-                    click menu item "Enable Focus Mode" of viewMenu
-                end if
-                -- Hide Sidebar if visible
-                if exists menu item "Hide Sidebar" of viewMenu then
-                    click menu item "Hide Sidebar" of viewMenu
-                end if
-            end tell'
+            # Retry menu manipulation with launchctl for GUI session access (needed for SSH)
+            for attempt in {1..5}; do
+                sleep 0.5
+                if launchctl asuser $uid osascript -e 'tell application "System Events" to tell process "Orion"
+                    set viewMenu to menu "View" of menu bar 1
+                    if exists menu item "Enable Focus Mode" of viewMenu then click menu item "Enable Focus Mode" of viewMenu
+                    if exists menu item "Hide Sidebar" of viewMenu then click menu item "Hide Sidebar" of viewMenu
+                end tell' 2>/dev/null; then
+                    break
+                fi
+            done
         fi
     }
 fi
