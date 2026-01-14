@@ -35,33 +35,30 @@ if [[ "$OSTYPE" == darwin* ]]; then
     alias down='cd ~/Downloads'
     function quarto-preview() {
         local uid=$(id -u)
-        local ws=$(aerospace list-workspaces --focused 2>/dev/null)
-        local orion_was_running=true
+        local ws="1"  # Dev workspace
         # Close any existing localhost:9013 Orion window first
         local old_win=$(aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | awk '{print $1}')
         [[ -n "$old_win" ]] && aerospace close --window-id "$old_win" 2>/dev/null
         # Launch Orion if not running
-        if ! pgrep -q "Orion"; then
-            orion_was_running=false
-            open -a "Orion - Work"
+        if pgrep -q "Orion"; then
+            # Orion already running - Cmd+N for new window, then navigate
+            osascript -e 'tell application "Orion - Work" to activate'
+            osascript -e 'tell application "System Events" to keystroke "n" using command down'
+            sleep 0.3
+            osascript -e 'tell application "Orion - Work" to open location "http://localhost:9013"'
+        else
+            # Launch Orion fresh with URL (single window)
+            open "http://localhost:9013" -a "Orion - Work"
             while ! pgrep -q "Orion"; do sleep 0.1; done
             for i in {1..30}; do
-                if osascript -e 'tell application "Orion - Work" to return name' &>/dev/null; then
-                    break
-                fi
+                osascript -e 'tell application "Orion - Work" to return name' &>/dev/null && break
                 sleep 0.2
             done
         fi
-        # Open new window with URL
-        osascript -e 'tell application "Orion - Work" to activate'
-        # Only Cmd+N if Orion was already running (fresh launch already has a window)
-        $orion_was_running && osascript -e 'tell application "System Events" to keystroke "n" using command down' && sleep 0.3
-        osascript -e 'tell application "Orion - Work" to open location "http://localhost:9013"'
-        sleep 0.3
-        aerospace workspace "$ws" 2>/dev/null
-        # Wait for localhost window to appear
+        sleep 0.5
+        # Wait for localhost window and move to target workspace
         local win_id=""
-        for i in {1..10}; do
+        for i in {1..15}; do
             sleep 0.2
             win_id=$(aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
             [[ -n "$win_id" ]] && break
@@ -71,11 +68,8 @@ if [[ "$OSTYPE" == darwin* ]]; then
             aerospace focus --window-id "$win_id" 2>/dev/null
         fi
         osascript -e 'tell application "Orion - Work" to activate'
-        # Apply menu settings (retry for SSH access)
-        for attempt in {1..5}; do
-            sleep 0.5
-            launchctl asuser $uid osascript -e 'tell application "System Events" to tell process "Orion" to click menu item "Enable Focus Mode" of menu "View" of menu bar 1' 2>/dev/null
-            launchctl asuser $uid osascript -e 'tell application "System Events" to tell process "Orion" to click menu item "Hide Sidebar" of menu "View" of menu bar 1' 2>/dev/null && break
-        done
+        # Apply menu settings via app bundle (has accessibility permissions)
+        sleep 0.5
+        open -g ~/Applications/OrionFocusMode.app 2>/dev/null
     }
 fi
