@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     kitty \
     # Image conversion for snacks.nvim image preview in neovim
     imagemagick \
+    # System resource monitor
+    btop \
     # SSH server for proper terminal capabilities (kitty graphics protocol)
     openssh-server \
     # Python for radian and reticulate

@@ -77,6 +77,7 @@ if $IS_MAC; then
         "imagemagick"   # Image conversion for snacks.nvim image viewer
         "carapace"      # Multi-shell completion engine with rich descriptions
         "tree-sitter-cli"  # Required for nvim-treesitter to compile parsers
+        "btop"          # System resource monitor
     )
 
     # macOS GUI apps (casks)
@@ -173,10 +174,14 @@ else
             print_success "ripgrep already installed"
         fi
 
-        # Install tree-sitter CLI via cargo (required for nvim-treesitter to compile parsers)
+        # Install tree-sitter CLI (required for nvim-treesitter to compile parsers)
         if ! command -v tree-sitter &> /dev/null; then
             print_info "Installing tree-sitter CLI..."
-            cargo install tree-sitter-cli
+            TS_VERSION=$(curl -sI https://github.com/tree-sitter/tree-sitter/releases/latest | grep -i "^location:" | sed -E 's|.*/v([0-9.]+).*|\1|')
+            curl -Lo /tmp/tree-sitter.gz "https://github.com/tree-sitter/tree-sitter/releases/download/v${TS_VERSION}/tree-sitter-linux-x64.gz"
+            gunzip /tmp/tree-sitter.gz
+            install /tmp/tree-sitter "$HOME/.local/bin"
+            rm /tmp/tree-sitter
             print_success "tree-sitter CLI installed"
         else
             print_success "tree-sitter CLI already installed"
@@ -308,6 +313,19 @@ else
         print_success "fd installed"
     else
         print_success "fd already installed ($(fd --version))"
+    fi
+
+    # Install btop (system resource monitor)
+    if ! command -v btop &> /dev/null; then
+        print_info "Installing btop..."
+        BTOP_VERSION=$(curl -sI https://github.com/aristocratos/btop/releases/latest | grep -i "^location:" | sed -E 's|.*/v([0-9.]+).*|\1|')
+        curl -Lo /tmp/btop.tbz "https://github.com/aristocratos/btop/releases/download/v${BTOP_VERSION}/btop-x86_64-unknown-linux-musl.tbz"
+        tar xjf /tmp/btop.tbz -C /tmp
+        install /tmp/btop/bin/btop "$HOME/.local/bin"
+        rm -rf /tmp/btop.tbz /tmp/btop
+        print_success "btop installed"
+    else
+        print_success "btop already installed ($(btop --version))"
     fi
 
     # Install GNU Stow (symlink farm manager for dotfiles)
