@@ -83,14 +83,16 @@ if $IS_MAC; then
     # macOS GUI apps (casks)
     CASK_DEPENDENCIES=(
         "karabiner-elements"  # Keyboard customization
+        "nikitabobko/tap/aerospace"  # Tiling window manager
     )
 
     # macOS tools from custom taps
     TAP_DEPENDENCIES=(
         "FelixKratz/formulae/borders"  # JankyBorders - window border highlights
+        "FelixKratz/formulae/sketchybar"  # Status bar for aerospace workspaces
     )
     # Note: We use CRAN R (not Homebrew R) for better package compatibility
-    # Download from: https://cloud.r-project.org/bin/macosx/
+    # CRAN R will be installed separately below (not via Homebrew)
 
     for dep in "${DEPENDENCIES[@]}"; do
         if brew list "$dep" &> /dev/null; then
@@ -129,6 +131,39 @@ if $IS_MAC; then
     if [ -d "/Applications/Karabiner-Elements.app" ]; then
         open -a "Karabiner-Elements"
         print_success "Karabiner-Elements started (will auto-start on login)"
+    fi
+
+    # Install CRAN R (official R build for macOS)
+    if ! command -v R &> /dev/null || ! [ -d "/Library/Frameworks/R.framework" ]; then
+        print_info "Installing R from CRAN..."
+
+        # Fetch latest R version for macOS ARM64
+        R_VERSION=$(curl -s https://cloud.r-project.org/bin/macosx/ | grep -o 'R-[0-9.]*-arm64.pkg' | head -1 | sed 's/R-\(.*\)-arm64.pkg/\1/')
+
+        if [ -z "$R_VERSION" ]; then
+            print_error "Failed to fetch R version"
+            print_info "Please manually install R from: https://cloud.r-project.org/bin/macosx/"
+        else
+            R_PKG_URL="https://cloud.r-project.org/bin/macosx/big-sur-arm64/base/R-${R_VERSION}-arm64.pkg"
+            print_info "Downloading R ${R_VERSION} for ARM64..."
+
+            curl -L "$R_PKG_URL" -o /tmp/R-installer.pkg
+
+            print_info "Installing R ${R_VERSION} (requires password)..."
+            sudo installer -pkg /tmp/R-installer.pkg -target /
+            rm /tmp/R-installer.pkg
+
+            print_success "R ${R_VERSION} installed from CRAN"
+        fi
+    else
+        # Check if it's CRAN R (not Homebrew R)
+        if [ -d "/Library/Frameworks/R.framework" ]; then
+            R_VERSION=$(R --version | head -1 | awk '{print $3}')
+            print_success "CRAN R already installed (version ${R_VERSION})"
+        else
+            print_error "R is installed but not from CRAN"
+            print_info "Please manually install CRAN R from: https://cloud.r-project.org/bin/macosx/"
+        fi
     fi
 else
     # Linux: Install all dependencies without root access (batteries included!)
@@ -592,6 +627,7 @@ if $IS_MAC && ! $IS_SSH; then
         backup_if_exists "$HOME/.config/sketchybar"
         stow_package "sketchybar"
         brew services restart sketchybar 2>/dev/null || true
+        print_success "SketchyBar service started"
     else
         print_info "SketchyBar not found - skipping SketchyBar configuration"
         print_info "Install with: brew tap FelixKratz/formulae && brew install sketchybar"
