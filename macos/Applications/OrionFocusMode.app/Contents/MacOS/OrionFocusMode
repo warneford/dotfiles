@@ -9,7 +9,7 @@ if [[ -n "$win_id" ]]; then
 fi
 
 # Ensure Orion is active and wait
-/usr/bin/osascript -e 'tell application "Orion - Work" to activate'
+/usr/bin/osascript -e 'tell application "Orion" to activate'
 sleep 0.3
 
 # Apply menu settings with retries

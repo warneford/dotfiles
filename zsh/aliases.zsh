@@ -42,16 +42,16 @@ if [[ "$OSTYPE" == darwin* ]]; then
         # Launch Orion if not running
         if pgrep -q "Orion"; then
             # Orion already running - Cmd+N for new window, then navigate
-            osascript -e 'tell application "Orion - Work" to activate'
+            osascript -e 'tell application "Orion" to activate'
             osascript -e 'tell application "System Events" to keystroke "n" using command down'
             sleep 0.3
-            osascript -e 'tell application "Orion - Work" to open location "http://localhost:9013"'
+            osascript -e 'tell application "Orion" to open location "http://localhost:9013"'
         else
             # Launch Orion fresh with URL (single window)
-            open "http://localhost:9013" -a "Orion - Work"
+            open "http://localhost:9013" -a "Orion"
             while ! pgrep -q "Orion"; do sleep 0.1; done
             for i in {1..30}; do
-                osascript -e 'tell application "Orion - Work" to return name' &>/dev/null && break
+                osascript -e 'tell application "Orion" to return name' &>/dev/null && break
                 sleep 0.2
             done
         fi
@@ -66,7 +66,7 @@ if [[ "$OSTYPE" == darwin* ]]; then
             aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
             aerospace focus --window-id "$win_id" 2>/dev/null
         fi
-        osascript -e 'tell application "Orion - Work" to activate'
+        osascript -e 'tell application "Orion" to activate'
         # Apply menu settings via app bundle (has accessibility permissions)
         open -g ~/dotfiles/macos/Applications/OrionFocusMode.app 2>/dev/null
     }

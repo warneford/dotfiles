@@ -103,7 +103,7 @@ run = 'layout floating'
 
     # App launchers
     alt-s = 'exec-and-forget open -a Slack'
-    alt-o = 'exec-and-forget open -a "Orion - Work"'
+    alt-o = 'exec-and-forget open -a Orion'
     alt-w = 'exec-and-forget open -a "Windows App"'
     alt-z = 'exec-and-forget open -a "zoom.us"'
     alt-n = 'exec-and-forget open -a Notion'

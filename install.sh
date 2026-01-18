@@ -419,6 +419,19 @@ EOF
     print_info "Continuing with configuration setup..."
 fi
 
+# Install Claude Code (native installer with auto-updates)
+# Skip in containers - should be installed in Dockerfile instead
+if ! $IS_CONTAINER; then
+    if ! command -v claude &> /dev/null; then
+        print_info "Installing Claude Code..."
+        curl -fsSL https://claude.ai/install.sh | bash
+        print_success "Claude Code installed"
+    else
+        CLAUDE_VERSION=$(claude --version 2>/dev/null | head -1 || echo "unknown")
+        print_success "Claude Code already installed ($CLAUDE_VERSION)"
+    fi
+fi
+
 # Install oh-my-zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     print_info "Installing oh-my-zsh..."
@@ -648,9 +661,6 @@ if $IS_MAC && ! $IS_SSH; then
     # OrionFocusMode.app (for quarto-preview SSH accessibility)
     if [ -d "$DOTFILES_DIR/macos/Applications/OrionFocusMode.app" ]; then
         print_success "OrionFocusMode.app found in dotfiles"
-        print_info "MANUAL STEP: Grant accessibility permissions:"
-        echo "    System Settings → Privacy & Security → Accessibility → Add:"
-        echo "    ~/dotfiles/macos/Applications/OrionFocusMode.app"
     fi
 fi
 
@@ -752,3 +762,40 @@ echo "  - Undotree (undo history)"
 echo "  - Trouble (diagnostics)"
 echo "  - And more from ThePrimeagen's config!"
 echo ""
+
+# Permissions Summary (macOS only)
+if $IS_MAC && ! $IS_SSH; then
+    echo ""
+    print_info "⚠️  PERMISSIONS REQUIRED (macOS)"
+    echo ""
+    echo "To enable all features, grant the following permissions in System Settings:"
+    echo ""
+    echo "1. Accessibility Permissions:"
+    echo "   System Settings → Privacy & Security → Accessibility"
+    echo ""
+
+    # Check if OrionFocusMode exists
+    if [ -d "$DOTFILES_DIR/macos/Applications/OrionFocusMode.app" ]; then
+        echo "   • Add: ~/dotfiles/macos/Applications/OrionFocusMode.app"
+        echo "     (Enables quarto-preview to hide Orion's menu bar)"
+        echo ""
+    fi
+
+    # Check if Terminal or other terminal apps need permissions
+    echo "   • Add your Terminal app (e.g., Terminal.app, Ghostty.app, iTerm.app)"
+    echo "     (Enables quarto-preview function to control Orion windows)"
+    echo ""
+
+    # Check if AeroSpace is installed
+    if command -v aerospace &> /dev/null || [ -d "/Applications/AeroSpace.app" ]; then
+        echo "2. Screen Recording Permission (for AeroSpace):"
+        echo "   System Settings → Privacy & Security → Screen Recording"
+        echo "   • Enable: AeroSpace.app"
+        echo "     (Required for window management and workspace detection)"
+        echo ""
+    fi
+
+    echo "Note: You'll be prompted to grant these permissions when first using the features."
+    echo "      Restart the affected applications after granting permissions."
+    echo ""
+fi
