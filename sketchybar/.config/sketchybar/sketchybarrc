@@ -6,7 +6,7 @@ source "$HOME/.config/sketchybar/icons.sh" # Loads all defined icons
 ITEM_DIR="$HOME/.config/sketchybar/items" # Directory where the items are configured
 PLUGIN_DIR="$HOME/.config/sketchybar/plugins" # Directory where all the plugin scripts are stored
 
-FONT="Hack Nerd Font" # Nerd Font with icons
+FONT="FiraCode Nerd Font" # Nerd Font with icons
 SPACE_CLICK_SCRIPT="aerospace workspace \$SID" # The script that is run for clicking on space components
 
 PADDINGS=3 # All paddings use this value (icon, label, background)

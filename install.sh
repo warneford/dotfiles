@@ -84,6 +84,7 @@ if $IS_MAC; then
     CASK_DEPENDENCIES=(
         "karabiner-elements"  # Keyboard customization
         "nikitabobko/tap/aerospace"  # Tiling window manager
+        "font-fira-code-nerd-font"  # Nerd Font for terminal/SketchyBar icons
     )
 
     # macOS tools from custom taps
