@@ -5,6 +5,9 @@
 Sys.setenv(PYTHONMULTIPROCESSING_START_METHOD = "spawn")
 
 options(
+    # Prevent truncation when echoing code sent from nvim
+    deparse.max.lines = -1,
+
     # Editing mode - vi to match nvim
     radian.editing_mode = "vi",
     radian.show_vi_mode_prompt = TRUE,
