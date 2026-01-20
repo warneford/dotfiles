@@ -2,7 +2,7 @@ require("config.set")
 require("config.remap")
 
 -- Disable air as LSP (use it only as formatter via conform)
--- This prevents position encoding conflicts with r_ls
+-- This prevents position encoding conflicts with R.nvim's LSP
 -- Re-enable when air gains more LSP features beyond formatting
 vim.lsp.enable('air', false)
 

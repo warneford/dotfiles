@@ -34,11 +34,11 @@ return {
       -- Disable Quarto code chunk highlighting to prevent errors with special buffers
       hl_term = false,
 
-      -- Disable R.nvim's built-in LSP (use r_language_server from Mason instead)
+      -- Use R.nvim's built-in LSP (r_language_server was crashing with signal 11)
       r_ls = {
-        completion = false,
-        hover = false,
-        signature = false,
+        completion = true,
+        hover = true,
+        signature = true,
       },
     }
 

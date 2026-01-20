@@ -53,7 +53,7 @@ return {
             ensure_installed = {
                 "lua_ls",        -- Lua (for Neovim config)
                 "pyright",       -- Python
-                "r_language_server",  -- R (installed globally via R package manager)
+                -- r_language_server removed: crashes with signal 11, using R.nvim's built-in LSP instead
                 "ts_ls",         -- JavaScript/TypeScript
                 "yamlls",        -- YAML (for Quarto frontmatter)
             },
@@ -64,23 +64,8 @@ return {
                     }
                 end,
 
-                -- R Language Server with rich documentation
-                -- Note: quarto files use otter.nvim for LSP features in code blocks
-                ["r_language_server"] = function()
-                    local lspconfig = require("lspconfig")
-                    lspconfig.r_language_server.setup({
-                        capabilities = capabilities,
-                        cmd = { vim.fn.stdpath("data") .. "/mason/bin/r-languageserver" },
-                        filetypes = { "r", "rmd", "rmarkdown" },
-                        settings = {
-                            r = {
-                                lsp = {
-                                    rich_documentation = true,
-                                },
-                            },
-                        },
-                    })
-                end,
+                -- R: using R.nvim's built-in LSP (rnvimserver) instead of r_language_server
+                -- r_language_server was crashing with signal 11 on R 4.5.2
 
                 -- Python (Pyright) with workspace analysis
                 ["pyright"] = function()
