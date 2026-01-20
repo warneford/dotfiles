@@ -98,6 +98,40 @@ end)
 -- Terminal mode: easier escape from terminal mode
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "exit terminal mode" })
 
+-- Window resizing with Ctrl+Arrow keys
+-- Uses smart resizing: arrows move the separator in screen direction
+vim.keymap.set("n", "<C-Up>", function()
+    if vim.fn.winnr() == vim.fn.winnr("k") then
+        vim.cmd("resize -2")
+    else
+        vim.cmd("resize +2")
+    end
+end, { desc = "Move horizontal separator up" })
+
+vim.keymap.set("n", "<C-Down>", function()
+    if vim.fn.winnr() == vim.fn.winnr("j") then
+        vim.cmd("resize -2")
+    else
+        vim.cmd("resize +2")
+    end
+end, { desc = "Move horizontal separator down" })
+
+vim.keymap.set("n", "<C-Left>", function()
+    if vim.fn.winnr() == vim.fn.winnr("l") then
+        vim.cmd("vertical resize +2")
+    else
+        vim.cmd("vertical resize -2")
+    end
+end, { desc = "Move vertical separator left" })
+
+vim.keymap.set("n", "<C-Right>", function()
+    if vim.fn.winnr() == vim.fn.winnr("h") then
+        vim.cmd("vertical resize +2")
+    else
+        vim.cmd("vertical resize -2")
+    end
+end, { desc = "Move vertical separator right" })
+
 -- Terminal mode: window navigation with Ctrl+hjkl (for radian, ipython, etc.)
 vim.api.nvim_create_autocmd("TermOpen", {
     pattern = "*",
