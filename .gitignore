@@ -16,3 +16,4 @@ aerc/accounts.conf
 docker/.env
 karabiner/.config/karabiner/automatic_backups/
 dotfiles_features_to_add.md
+bin/.local/bin/claude
