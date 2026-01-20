@@ -98,3 +98,15 @@ end)
 -- Terminal mode: easier escape from terminal mode
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "exit terminal mode" })
 
+-- Terminal mode: window navigation with Ctrl+hjkl (for radian, ipython, etc.)
+vim.api.nvim_create_autocmd("TermOpen", {
+    pattern = "*",
+    callback = function()
+        local opts = { buffer = 0, silent = true }
+        vim.keymap.set("t", "<C-h>", [[<C-\><C-n><cmd>TmuxNavigateLeft<cr>]], opts)
+        vim.keymap.set("t", "<C-j>", [[<C-\><C-n><cmd>TmuxNavigateDown<cr>]], opts)
+        vim.keymap.set("t", "<C-k>", [[<C-\><C-n><cmd>TmuxNavigateUp<cr>]], opts)
+        vim.keymap.set("t", "<C-l>", [[<C-\><C-n><cmd>TmuxNavigateRight<cr>]], opts)
+    end,
+})
+
