@@ -77,3 +77,18 @@ autocmd('LspAttach', {
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
+
+-- Quit R cleanly before exiting nvim to prevent orphaned rnvimserver processes
+autocmd('VimLeavePre', {
+    group = ConfigGroup,
+    callback = function()
+        -- Only attempt if R.nvim is loaded and R is running (status >= 7)
+        if (vim.g.R_Nvim_status or 0) >= 7 then
+            pcall(function()
+                require("r.run").quit_R("nosave")
+            end)
+            -- Give R a moment to shutdown
+            vim.loop.sleep(100)
+        end
+    end,
+})
