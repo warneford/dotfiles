@@ -8,7 +8,9 @@
 
 - **Tested in**: `~/projects/marimo_test/`
 - **Working version combo**: marimo 0.13.x + quarto-marimo 0.4.3
-- **Known issue**: marimo 0.19.x breaks the extension (internal API changed)
+- **Known issues**:
+  - marimo 0.19.x breaks the extension (internal API changed - ModuleNotFoundError)
+  - marimo 0.18.x UI widgets don't render (slider shows label but no widget)
 
 ## Project Setup Pattern
 
