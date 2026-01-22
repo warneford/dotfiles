@@ -34,39 +34,57 @@ if [[ "$OSTYPE" == darwin* ]]; then
     alias R='/Library/Frameworks/R.framework/Resources/bin/R'
     alias down='cd ~/Downloads'
     function quarto-preview() {
-        local uid=$(id -u)
         local ws="1"  # Dev workspace
-        # Close any existing localhost:9013 Orion window first
-        local old_win=$(aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | awk '{print $1}')
-        [[ -n "$old_win" ]] && aerospace close --window-id "$old_win" 2>/dev/null
-        # Launch Orion if not running
-        if pgrep -q "Orion"; then
-            # Orion already running - Cmd+N for new window, then navigate
+        local url="http://localhost:9013"
+        local aerospace="/opt/homebrew/bin/aerospace"
+
+        # Check for existing Orion window in dev workspace (includes error states like "Failed to open page")
+        local existing_win=$($aerospace list-windows --workspace "$ws" 2>/dev/null | grep -iE "Orion.*(localhost|Failed to open)" | head -1 | awk '{print $1}')
+
+        if [[ -n "$existing_win" ]]; then
+            # Reuse existing localhost window - just focus and refresh
+            $aerospace move-node-to-workspace --window-id "$existing_win" "$ws" 2>/dev/null
+            $aerospace focus --window-id "$existing_win" 2>/dev/null
+            osascript -e 'tell application "Orion" to activate'
+            # Refresh the page
+            osascript -e 'tell application "System Events" to keystroke "r" using command down'
+        elif pgrep -q "Orion"; then
+            # Orion running but no localhost window - open URL in new window
             osascript -e 'tell application "Orion" to activate'
             osascript -e 'tell application "System Events" to keystroke "n" using command down'
             sleep 0.3
-            osascript -e 'tell application "Orion" to open location "http://localhost:9013"'
+            osascript -e "tell application \"Orion\" to open location \"$url\""
+            # Wait for localhost window and move to workspace
+            local win_id=""
+            for i in {1..15}; do
+                win_id=$($aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
+                [[ -n "$win_id" ]] && break
+                sleep 0.1
+            done
+            if [[ -n "$win_id" ]]; then
+                $aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
+                $aerospace focus --window-id "$win_id" 2>/dev/null
+            fi
         else
-            # Launch Orion fresh with URL (single window)
-            open "http://localhost:9013" -a "Orion"
+            # Launch Orion fresh with URL
+            open "$url" -a "Orion"
             while ! pgrep -q "Orion"; do sleep 0.1; done
             for i in {1..30}; do
                 osascript -e 'tell application "Orion" to return name' &>/dev/null && break
                 sleep 0.2
             done
+            # Wait for localhost window and move to workspace
+            local win_id=""
+            for i in {1..15}; do
+                win_id=$($aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
+                [[ -n "$win_id" ]] && break
+                sleep 0.1
+            done
+            if [[ -n "$win_id" ]]; then
+                $aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
+                $aerospace focus --window-id "$win_id" 2>/dev/null
+            fi
         fi
-        # Wait for localhost window and move to target workspace
-        local win_id=""
-        for i in {1..15}; do
-            win_id=$(aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
-            [[ -n "$win_id" ]] && break
-            sleep 0.1
-        done
-        if [[ -n "$win_id" ]]; then
-            aerospace move-node-to-workspace --window-id "$win_id" "$ws" 2>/dev/null
-            aerospace focus --window-id "$win_id" 2>/dev/null
-        fi
-        osascript -e 'tell application "Orion" to activate'
         # Apply menu settings via app bundle (has accessibility permissions)
         open -g ~/dotfiles/macos/Applications/OrionFocusMode.app 2>/dev/null
     }

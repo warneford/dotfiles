@@ -382,7 +382,7 @@ return {
                   vim.fn.jobstart(
                     "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9018 "
                       .. local_user
-                      .. "@localhost 'source ~/.zshrc && quarto-preview'",
+                      .. "@localhost 'source ~/dotfiles/zsh/aliases.zsh && quarto-preview'",
                     {
                       detach = true,
                       on_exit = function(_, code)
