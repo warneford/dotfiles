@@ -52,12 +52,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lua5.4 \
     liblua5.4-dev \
     luarocks \
-    # V8 engine and Chromium for R packages (V8, chromote)
-    # Must be installed before nodesource nodejs to avoid dependency conflicts
+    # V8 engine for R packages (V8)
     libv8-dev \
-    chromium \
     # Cleanup
     && rm -rf /var/lib/apt/lists/*
+
+# Install Google Chrome (for mermaid-cli/puppeteer and R chromote)
+# Note: Ubuntu's chromium apt package is just a snap stub that doesn't work in Docker
+RUN curl -fsSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /tmp/chrome.deb && \
+    apt-get update && \
+    apt-get install -y /tmp/chrome.deb && \
+    rm /tmp/chrome.deb && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Node.js (pre-built binary, avoids nvm compiling from source)
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
@@ -164,7 +170,14 @@ RUN R -e "cmdstanr::install_cmdstan()"
 # Install tree-sitter CLI and mermaid-cli (user-local)
 # tree-sitter-cli: needed for nvim-treesitter to compile parsers (e.g., custom grammars)
 # mermaid-cli: needed for snacks.nvim to render Mermaid diagrams
+# PUPPETEER_SKIP_DOWNLOAD=1 skips bundled Chromium (~500MB) - uses system Chrome instead
+ENV PUPPETEER_SKIP_DOWNLOAD=1
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 RUN npm config set prefix ~/.local && npm install -g tree-sitter-cli @mermaid-js/mermaid-cli
+
+# Configure puppeteer/mermaid for Docker (no-sandbox required for Chrome in containers)
+RUN mkdir -p ~/.config/puppeteer && \
+    echo '{"executablePath": "/usr/bin/google-chrome-stable", "args": ["--no-sandbox", "--disable-setuid-sandbox"]}' > ~/.config/puppeteer/mermaid.json
 
 # Install Claude Code CLI (native installer with auto-updates)
 RUN curl -fsSL https://claude.ai/install.sh | bash

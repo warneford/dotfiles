@@ -19,6 +19,18 @@ return {
         max_width = 100,
         max_height = 12,
       },
+      convert = {
+        -- Custom mermaid args for Docker (--no-sandbox required for Chrome)
+        mermaid = function()
+          local theme = vim.o.background == "light" and "neutral" or "dark"
+          -- Add puppeteer config for Docker compatibility
+          local puppeteer_config = vim.fn.expand("~/.config/puppeteer/mermaid.json")
+          if vim.fn.filereadable(puppeteer_config) == 1 then
+            return { "-p", puppeteer_config, "-i", "{src}", "-o", "{file}", "-b", "transparent", "-t", theme, "-s", "{scale}" }
+          end
+          return { "-i", "{src}", "-o", "{file}", "-b", "transparent", "-t", theme, "-s", "{scale}" }
+        end,
+      },
     },
 
     -- Zen mode (replaces folke/zen-mode.nvim)
