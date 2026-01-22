@@ -78,6 +78,8 @@ if $IS_MAC; then
         "carapace"      # Multi-shell completion engine with rich descriptions
         "tree-sitter-cli"  # Required for nvim-treesitter to compile parsers
         "btop"          # System resource monitor
+        "ghostscript"   # PDF rendering for snacks.nvim image viewer
+        "tectonic"      # LaTeX rendering for snacks.nvim (lightweight TeX)
     )
 
     # macOS GUI apps (casks)
@@ -127,6 +129,17 @@ if $IS_MAC; then
             print_success "$dep_name installed"
         fi
     done
+
+    # Install npm global packages (for snacks.nvim features)
+    if command -v npm &> /dev/null; then
+        if ! command -v mmdc &> /dev/null; then
+            print_info "Installing mermaid-cli (for snacks.nvim diagram rendering)..."
+            npm install -g @mermaid-js/mermaid-cli
+            print_success "mermaid-cli installed"
+        else
+            print_success "mermaid-cli already installed"
+        fi
+    fi
 
     # Start Karabiner-Elements on login (it manages its own login item)
     if [ -d "/Applications/Karabiner-Elements.app" ]; then
@@ -364,6 +377,34 @@ else
         print_success "btop already installed ($(btop --version))"
     fi
 
+    # Install tectonic (lightweight LaTeX for snacks.nvim math rendering)
+    if ! command -v tectonic &> /dev/null; then
+        print_info "Installing tectonic..."
+        # Tectonic uses tag format "tectonic@VERSION" and includes version in filename
+        TECTONIC_VERSION=$(curl -s https://api.github.com/repos/tectonic-typesetting/tectonic/releases/latest | grep '"tag_name"' | sed -E 's/.*"tectonic@([^"]+)".*/\1/')
+        if [ -n "$TECTONIC_VERSION" ]; then
+            curl -Lo /tmp/tectonic.tar.gz "https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%40${TECTONIC_VERSION}/tectonic-${TECTONIC_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+            tar xf /tmp/tectonic.tar.gz -C /tmp
+            install /tmp/tectonic "$HOME/.local/bin"
+            rm -rf /tmp/tectonic.tar.gz /tmp/tectonic
+            print_success "tectonic ${TECTONIC_VERSION} installed"
+        else
+            print_error "Failed to fetch tectonic version"
+            print_info "Manual installation: https://tectonic-typesetting.github.io/book/latest/installation/"
+        fi
+    else
+        print_success "tectonic already installed ($(tectonic --version | head -1))"
+    fi
+
+    # Note: ghostscript (gs) requires system packages for PDF rendering in snacks.nvim
+    # Install with: sudo apt-get install ghostscript (Debian/Ubuntu)
+    if ! command -v gs &> /dev/null; then
+        print_info "ghostscript (gs) not found - PDF rendering in snacks.nvim requires system package"
+        print_info "Install with: sudo apt-get install ghostscript"
+    else
+        print_success "ghostscript already installed"
+    fi
+
     # Install GNU Stow (symlink farm manager for dotfiles)
     if ! command -v stow &> /dev/null; then
         print_info "Installing GNU Stow..."
@@ -414,6 +455,17 @@ EOF
         print_success "tmux-256color terminfo installed"
     else
         print_success "tmux-256color terminfo already installed"
+    fi
+
+    # Install mermaid-cli for snacks.nvim diagram rendering (requires npm)
+    if command -v npm &> /dev/null; then
+        if ! command -v mmdc &> /dev/null; then
+            print_info "Installing mermaid-cli (for snacks.nvim diagram rendering)..."
+            npm install -g @mermaid-js/mermaid-cli
+            print_success "mermaid-cli installed"
+        else
+            print_success "mermaid-cli already installed"
+        fi
     fi
 
     print_info "Continuing with configuration setup..."
@@ -499,8 +551,12 @@ if [ ! -d "$TMUX_PYTHON_ENV" ]; then
     fi
     print_success "Created tmux Python venv"
 fi
+# In containers, uv can't hardlink across filesystems - use copy mode
+UV_LINK_MODE_FLAG=""
+$IS_CONTAINER && UV_LINK_MODE_FLAG="--link-mode=copy"
+
 if command -v uv &> /dev/null; then
-    uv pip install --python "$TMUX_PYTHON_ENV/bin/python" libtmux
+    uv pip install $UV_LINK_MODE_FLAG --python "$TMUX_PYTHON_ENV/bin/python" libtmux
 else
     "$TMUX_PYTHON_ENV/bin/pip" install libtmux
 fi
@@ -514,7 +570,12 @@ backup_if_exists() {
         mv "$target" "${target}.backup.$(date +%Y%m%d_%H%M%S)"
         print_success "Backed up $(basename "$target")"
     elif [ -L "$target" ]; then
-        rm "$target"  # Remove old symlinks so stow can recreate them
+        # Only remove symlinks that don't point into dotfiles (stow-managed)
+        local link_target
+        link_target=$(readlink "$target" 2>/dev/null || true)
+        if [[ "$link_target" != *"dotfiles"* ]]; then
+            rm "$target"  # Remove old symlinks so stow can recreate them
+        fi
     fi
 }
 
@@ -526,6 +587,10 @@ backup_if_exists "$HOME/.Rprofile"
 backup_if_exists "$HOME/.config/nvim"
 backup_if_exists "$HOME/.config/direnv"
 backup_if_exists "$HOME/.config/radian"
+
+# Handle terminfo files that may have been created manually (e.g., by Ghostty)
+backup_if_exists "$HOME/.terminfo/x/xterm-ghostty"
+backup_if_exists "$HOME/.terminfo/g/ghostty"
 
 # Stow packages
 print_info "Stowing dotfiles..."
@@ -572,7 +637,8 @@ ln -sf "$DOTFILES_DIR/zsh/functions.zsh" "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}
 print_success "Linked functions"
 
 # Git config include (not a symlink - uses git's include mechanism)
-if [ -f "$DOTFILES_DIR/git/config" ]; then
+# Skip in containers - .gitconfig is bind-mounted from host and already configured
+if [ -f "$DOTFILES_DIR/git/config" ] && ! $IS_CONTAINER; then
     INCLUDE_PATH="$DOTFILES_DIR/git/config"
     if ! grep -q "path = $INCLUDE_PATH" "$HOME/.gitconfig" 2>/dev/null; then
         git config --global include.path "$INCLUDE_PATH"
@@ -709,7 +775,7 @@ if [ ! -d "$NVIM_PYTHON_ENV" ]; then
     uv venv "$NVIM_PYTHON_ENV"
     print_success "Created neovim Python venv"
 fi
-uv pip install --python "$NVIM_PYTHON_ENV/bin/python" pynvim cairosvg pillow
+uv pip install $UV_LINK_MODE_FLAG --python "$NVIM_PYTHON_ENV/bin/python" pynvim cairosvg pillow
 print_success "Python packages installed to nvim venv"
 
 # Install R packages for nvim-r and reproducibility (if R is available)
@@ -730,6 +796,19 @@ if command -v nvim &> /dev/null; then
     print_info "Installing Mason packages (air formatter)..."
     nvim --headless "+MasonInstall air" "+qa"
     print_success "Mason packages installed"
+fi
+
+# Create symlinks for Mason LSP binaries (makes them available to Claude Code)
+MASON_BIN="$HOME/.local/share/nvim/mason/bin"
+if [ -d "$MASON_BIN" ]; then
+    print_info "Creating LSP symlinks for Claude Code..."
+    mkdir -p "$HOME/.local/bin"
+    for lsp in lua-language-server pyright-langserver; do
+        if [ -x "$MASON_BIN/$lsp" ]; then
+            ln -sf "$MASON_BIN/$lsp" "$HOME/.local/bin/$lsp"
+            print_success "Linked $lsp"
+        fi
+    done
 fi
 
 print_info "Next steps:"
