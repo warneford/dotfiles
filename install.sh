@@ -778,17 +778,18 @@ fi
 uv pip install $UV_LINK_MODE_FLAG --python "$NVIM_PYTHON_ENV/bin/python" pynvim cairosvg pillow
 print_success "Python packages installed to nvim venv"
 
-# Install R packages for nvim-r and reproducibility (if R is available)
+# Install R packages for LSP and development (if R is available)
+# Data science packages (tidyverse, etc.) are installed per-project via renv
 if command -v Rscript &> /dev/null; then
-    print_info "Installing R packages (languageserver, pak, renv)..."
+    print_info "Installing R packages (pak, languageserver, lintr, styler, devtools, here, renv)..."
     # Install pak from r-lib repo for binary support on new R versions
     Rscript -e 'if (!require("pak")) install.packages("pak", repos = sprintf("https://r-lib.github.io/p/pak/stable/%s/%s/%s", .Platform$pkgType, R.Version()$os, R.Version()$arch))'
-    # Install languageserver and renv via pak for speed
-    Rscript -e 'pak::pak(c("languageserver", "renv"))'
-    print_success "R packages installed (languageserver, pak, renv)"
+    # Install dev tooling via pak for speed
+    Rscript -e 'pak::pak(c("languageserver", "lintr", "styler", "devtools", "here", "renv"))'
+    print_success "R packages installed"
 else
     print_info "R not found - skipping R package installation"
-    print_info "After installing R, run: Rscript -e 'install.packages(c(\"pak\", \"languageserver\", \"renv\"))'"
+    print_info "After installing R, run: Rscript -e 'pak::pak(c(\"languageserver\", \"lintr\", \"styler\", \"devtools\", \"here\", \"renv\"))'"
 fi
 
 # Install Mason packages for neovim (LSP servers, formatters, etc.)

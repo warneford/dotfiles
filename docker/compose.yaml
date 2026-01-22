@@ -7,7 +7,6 @@ services:
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
         USERNAME: ${USER:-dev}
-        GITHUB_PAT: ${GITHUB_PAT}
         DEV_PASSWORD: ${DEV_PASSWORD}
     image: r-dev:local
     container_name: rwt-mind-palace
@@ -16,7 +15,6 @@ services:
     tty: true
     restart: unless-stopped
     ports:
-      - "9012:35211" # httpgd
       - "9013:9013" # quarto preview
       - "9015:9015" # SSH
     volumes:

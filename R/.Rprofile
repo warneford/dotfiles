@@ -100,29 +100,6 @@ options(
   )
 )
 
-# Auto-start httpgd for interactive sessions (web-based graphics viewer)
-# Access plots at http://localhost:35211 (requires SSH port forwarding)
-# Token disabled since we're behind VPN
-if (interactive()) {
-  invisible(tryCatch(
-    {
-      loadNamespace("httpgd")
-      options(
-        httpgd.port = 35211,
-        httpgd.token = FALSE
-      )
-      # Only start httpgd if not already running
-      if (!httpgd::hgd_active()) {
-        httpgd::hgd()
-      }
-    },
-    error = function(e) {
-      # httpgd not available, skip graphics device setup
-      invisible(NULL)
-    }
-  ))
-}
-
 if (interactive()) {
   cat("R profile loaded from dotfiles\n")
   cat("→ Using CRAN official binaries (PPM fallback)\n")

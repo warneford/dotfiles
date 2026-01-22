@@ -1,9 +1,10 @@
-FROM rocker/tidyverse:4.5.2
+FROM rocker/r-ver:4.5.2
 
 # System dependencies for R packages and dev tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Build tools (gfortran included in rocker base)
+    # Build tools
     build-essential \
+    gfortran \
     # Terminal/editor (neovim installed later via bob for latest version)
     tmux \
     zsh \
@@ -18,18 +19,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     kitty \
     # Image conversion for snacks.nvim image preview in neovim
     imagemagick \
+    # PDF rendering for snacks.nvim image viewer
+    ghostscript \
+    # LaTeX rendering for snacks.nvim (provides pdflatex)
+    texlive-latex-base \
     # System resource monitor
     btop \
     # SSH server for proper terminal capabilities (kitty graphics protocol)
     openssh-server \
+    # sudo for user permissions (not in r-ver base)
+    sudo \
     # Python for radian and reticulate
     python3 \
     python3-pip \
     python3-venv \
     libpython3-dev \
-    # R package system dependencies
+    # R package system dependencies (for tidyverse, devtools, etc.)
+    cmake \
     libglpk-dev \
     libnlopt-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
     # Lua + luarocks for nvim plugins that need native Lua packages
     lua5.4 \
     liblua5.4-dev \
@@ -92,16 +110,13 @@ RUN CARAPACE_VERSION=$(curl -sI https://github.com/carapace-sh/carapace-bin/rele
     tar xf /tmp/carapace.tar.gz -C /usr/local/bin carapace && \
     rm /tmp/carapace.tar.gz
 
+# Install pak first (for fast binary package installs)
+RUN R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s', .Platform\$pkgType, R.Version()\$os, R.Version()\$arch))"
+
 # Install R packages for LSP and development
 # Note: radian is installed per-project via direnv/uv to share Python with reticulate
-# httpgd installed from GitHub as CRAN version is temporarily archived
-# pak installed from r-lib repo for binary support on new R versions
-# renv for reproducible project environments (configured to use pak via .Renviron)
-ARG GITHUB_PAT
-RUN R -e "install.packages(c('languageserver', 'lintr', 'styler', 'remotes', 'here', 'pacman', 'renv'))" && \
-    R -e "install.packages('pak', repos = sprintf('https://r-lib.github.io/p/pak/stable/%s/%s/%s', .Platform\$pkgType, R.Version()\$os, R.Version()\$arch))" && \
-    R -e "remotes::install_github('nx10/httpgd')" && \
-    GITHUB_PAT=${GITHUB_PAT} R -e "pak::pak('octantbio/platbiotools')" && \
+# Data science packages (tidyverse, etc.) are installed per-project via renv
+RUN R -e "pak::pak(c('languageserver', 'lintr', 'styler', 'devtools', 'here', 'renv'))" && \
     R -e "install.packages('cmdstanr', repos = c('https://stan-dev.r-universe.dev', getOption('repos')))"
 
 # Copy entrypoint script (as root, before user switch)
@@ -115,7 +130,6 @@ RUN mkdir -p /run/sshd && \
     echo "AcceptEnv TERM COLORTERM" >> /etc/ssh/sshd_config
 
 # Create non-root user matching host UID (configurable at build time)
-# Rocker images have rstudio user with UID/GID 1000, so we rename if conflict exists
 # TODO: DEV_PASSWORD is exposed in build layers/history. Use BuildKit secrets instead:
 #       RUN --mount=type=secret,id=dev_password \
 #           echo "${USERNAME}:$(cat /run/secrets/dev_password)" | chpasswd
@@ -147,17 +161,21 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 # cmdstanr R package is installed system-wide as root; CmdStan binaries go in user's ~/.cmdstan/
 RUN R -e "cmdstanr::install_cmdstan()"
 
-# Install Claude Code CLI and tree-sitter CLI (user-local for auto-update support)
-# tree-sitter-cli needed for nvim-treesitter to compile parsers (e.g., custom grammars like templ)
-RUN npm config set prefix ~/.local && npm install -g @anthropic-ai/claude-code tree-sitter-cli
+# Install tree-sitter CLI and mermaid-cli (user-local)
+# tree-sitter-cli: needed for nvim-treesitter to compile parsers (e.g., custom grammars)
+# mermaid-cli: needed for snacks.nvim to render Mermaid diagrams
+RUN npm config set prefix ~/.local && npm install -g tree-sitter-cli @mermaid-js/mermaid-cli
+
+# Install Claude Code CLI (native installer with auto-updates)
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Create .zshrc that sources dotfiles config
 # First-boot setup (dotfiles install + Lazy sync) is handled by entrypoint.sh
 RUN echo '# Source dotfiles zsh config\n\
 [[ -f "$HOME/dotfiles/zsh/.zshrc" ]] && source "$HOME/dotfiles/zsh/.zshrc"' > ~/.zshrc
 
-# Expose ports: httpgd, SSH
-EXPOSE 35211 9015
+# Expose SSH port
+EXPOSE 9015
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["zsh"]

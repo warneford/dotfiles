@@ -177,7 +177,6 @@ For Python chunks in Quarto notebooks:
 Global R configuration includes:
 
 - Posit Package Manager (fast binary packages) with CRAN fallback
-- httpgd for web-based graphics (SSH-friendly)
 - Google auth for gargle/googledrive packages
 
 > **Escape hatch**: For quick one-off R sessions where reticulate compatibility doesn't matter, you _can_ run `uv tool install radian` to get a global radian. Just understand it won't see your project's Python packages.
@@ -192,10 +191,10 @@ A containerized R development environment for when you want reproducibility with
 
 **r-dev container** includes:
 
-- rocker/tidyverse base
+- rocker/r-ver base (minimal R, no RStudio overhead)
 - Neovim (latest), Node.js, deno, ripgrep, fzf, direnv
 - Your dotfiles mounted and ready
-- httpgd (port 9012), Quarto preview (9013), RStudio (9010)
+- Quarto preview (port 9013), SSH (9015)
 
 ### macOS Window Management
 
