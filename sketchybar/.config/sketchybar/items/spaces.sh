@@ -12,7 +12,7 @@ for sid in $(aerospace list-workspaces --all); do
         --subscribe "space.$sid" aerospace_workspace_change \
         --set "space.$sid" \
             icon="$sid" \
-            icon.font="Hack Nerd Font:Bold:16.0" \
+            icon.font="sketchybar-app-font:Regular:16.0" \
             icon.padding_left=8 \
             icon.padding_right=4 \
             icon.highlight_color=$HIGHLIGHT_COLOR \
