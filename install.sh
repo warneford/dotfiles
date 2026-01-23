@@ -131,11 +131,11 @@ if $IS_MAC; then
         fi
     done
 
-    # Install npm global packages (for snacks.nvim features)
-    if command -v npm &> /dev/null; then
+    # Install pnpm global packages (for snacks.nvim features)
+    if command -v pnpm &> /dev/null; then
         if ! command -v mmdc &> /dev/null; then
             print_info "Installing mermaid-cli (for snacks.nvim diagram rendering)..."
-            npm install -g @mermaid-js/mermaid-cli
+            pnpm add -g @mermaid-js/mermaid-cli
             print_success "mermaid-cli installed"
         else
             print_success "mermaid-cli already installed"
@@ -458,11 +458,11 @@ EOF
         print_success "tmux-256color terminfo already installed"
     fi
 
-    # Install mermaid-cli for snacks.nvim diagram rendering (requires npm)
-    if command -v npm &> /dev/null; then
+    # Install mermaid-cli for snacks.nvim diagram rendering (requires pnpm)
+    if command -v pnpm &> /dev/null; then
         if ! command -v mmdc &> /dev/null; then
             print_info "Installing mermaid-cli (for snacks.nvim diagram rendering)..."
-            npm install -g @mermaid-js/mermaid-cli
+            pnpm add -g @mermaid-js/mermaid-cli
             print_success "mermaid-cli installed"
         else
             print_success "mermaid-cli already installed"

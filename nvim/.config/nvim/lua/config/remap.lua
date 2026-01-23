@@ -90,8 +90,10 @@ end, { desc = "Scramble animation" })
 vim.keymap.set("n", "<leader><leader>", function()
     if vim.bo.filetype == "lua" and vim.fn.expand("%:p"):match("nvim") then
         vim.cmd("so")
+        vim.notify("Reloaded: " .. vim.fn.expand("%:t"), vim.log.levels.INFO)
     else
         vim.cmd("source $MYVIMRC")
+        vim.notify("Reloaded init.lua", vim.log.levels.INFO)
     end
 end)
 

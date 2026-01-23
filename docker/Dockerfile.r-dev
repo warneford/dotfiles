@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ripgrep \
     unzip \
     direnv \
+    psmisc \
     # Kitty terminal tools (for kitten icat image display in MOTD banner)
     kitty \
     # Image conversion for snacks.nvim image preview in neovim
@@ -157,6 +158,9 @@ RUN if getent passwd ${USER_ID} > /dev/null; then \
     usermod -aG sudo ${USERNAME} && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers.d/${USERNAME}
 
+# Install pnpm via corepack (needs root for symlinks in /usr/bin)
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
 
@@ -173,7 +177,11 @@ RUN R -e "cmdstanr::install_cmdstan()"
 # PUPPETEER_SKIP_DOWNLOAD=1 skips bundled Chromium (~500MB) - uses system Chrome instead
 ENV PUPPETEER_SKIP_DOWNLOAD=1
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
-RUN npm config set prefix ~/.local && npm install -g tree-sitter-cli @mermaid-js/mermaid-cli
+ENV PNPM_HOME="/home/${USERNAME}/.local/share/pnpm"
+ENV PATH="${PNPM_HOME}:${PATH}"
+RUN pnpm add -g tree-sitter-cli @mermaid-js/mermaid-cli && \
+    # Ensure tree-sitter binary is downloaded (postinstall sometimes fails silently)
+    node "$(pnpm root -g)/tree-sitter-cli/install.js"
 
 # Configure puppeteer/mermaid for Docker (no-sandbox required for Chrome in containers)
 RUN mkdir -p ~/.config/puppeteer && \
