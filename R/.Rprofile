@@ -1,6 +1,12 @@
 # R Profile - loaded on R startup
 # This file is symlinked to ~/.Rprofile
 
+# Configure renv to use PPM on Linux only (PPM causes segfaults with radian on macOS)
+# This env var is read when renv activates from project .Rprofile
+if (Sys.info()["sysname"] == "Linux") {
+  Sys.setenv(RENV_CONFIG_PPM_ENABLED = "TRUE")
+}
+
 # Ensure personal library exists and is used by default
 # This avoids the "Would you like to use a personal library?" prompt
 # Uses R's default structure: ~/R/{platform}-library/{major.minor}/

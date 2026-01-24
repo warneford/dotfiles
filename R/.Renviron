@@ -12,3 +12,6 @@ R_LIBS_USER=~/R/%p-library/%v
 # Use pak for faster, more reliable package installation in renv projects
 # pak provides parallel downloads, better dependency resolution, and caching
 RENV_CONFIG_PAK_ENABLED=TRUE
+
+# Note: RENV_CONFIG_PPM_ENABLED is set conditionally in .Rprofile (Linux only)
+# PPM binaries cause segfaults with radian on macOS
