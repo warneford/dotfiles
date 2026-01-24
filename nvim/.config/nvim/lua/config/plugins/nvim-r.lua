@@ -1,6 +1,10 @@
 return {
   {
     "R-nvim/R.nvim",
+    -- Pin to v0.99.1 - v0.99.2 has rnvimserver segfault bug
+    -- See: https://github.com/R-nvim/R.nvim/issues/492
+    -- Remove this pin once the issue is fixed upstream
+    commit = "b40fca2",
     lazy = false,
     config = function()
     -- Create a table with the options to be passed to setup()
