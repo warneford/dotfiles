@@ -272,6 +272,31 @@ return {
         end,
       })
 
+      -- Keep terminal buffers scrolled to the bottom
+      local function scroll_terminal_to_bottom()
+        local bufnr = vim.api.nvim_get_current_buf()
+        if vim.bo[bufnr].buftype ~= "terminal" then
+          return
+        end
+        local win = vim.api.nvim_get_current_win()
+        local line_count = vim.api.nvim_buf_line_count(bufnr)
+        local win_height = vim.api.nvim_win_get_height(win)
+        -- Calculate topline so last line appears at bottom of window
+        local topline = math.max(1, line_count - win_height + 1)
+        vim.fn.winrestview({ topline = topline, lnum = line_count, col = 0 })
+      end
+
+      vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+        pattern = "term://*",
+        callback = function()
+          -- Only scroll if in normal mode (not terminal/insert mode)
+          local mode = vim.fn.mode()
+          if mode == "n" then
+            vim.defer_fn(scroll_terminal_to_bottom, 10)
+          end
+        end,
+      })
+
       -- Keybindings for terminal switching
       -- ,r2 - Cycle through terminals (shell -> python -> R -> close)
       vim.keymap.set("n", ",r2", cycle_terminals, { desc = "Cycle terminals (shell/python/R)" })
