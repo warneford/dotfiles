@@ -72,8 +72,7 @@ if (Sys.info()["sysname"] == "Linux") {
   # PPM binaries have linking issues with R 4.5+ and radian
   options(
     repos = c(
-      CRAN = "https://cloud.r-project.org",
-      PPM = "https://packagemanager.posit.co/cran/latest"
+      CRAN = "https://cloud.r-project.org"
     ),
     HTTPUserAgent = sprintf(
       "R/%s R (%s)",
@@ -108,7 +107,11 @@ options(
 
 if (interactive()) {
   cat("R profile loaded from dotfiles\n")
-  cat("→ Using CRAN official binaries (PPM fallback)\n")
+  if (Sys.info()["sysname"] == "Linux") {
+    cat("→ Using PPM binaries (CRAN fallback)\n")
+  } else {
+    cat("→ Using CRAN official binaries\n")
+  }
 }
 
 # load global .Renviron file (in case a local one supercedes it)
