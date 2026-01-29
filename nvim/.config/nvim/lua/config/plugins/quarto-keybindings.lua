@@ -338,7 +338,10 @@ return {
         if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
           -- Send quarto preview command to shell terminal (keeps R console free)
           -- Kill any existing process on port 9013 first, then start preview
-          local cmd = "fuser -k 9013/tcp 2>/dev/null; quarto preview "
+          local kill_port = vim.fn.has("mac") == 1
+              and "lsof -ti :9013 | xargs kill -9 2>/dev/null"
+            or "fuser -k 9013/tcp 2>/dev/null"
+          local cmd = kill_port .. "; quarto preview "
             .. current_file
             .. " --port 9013 --host 0.0.0.0 --no-browser"
 
@@ -372,7 +375,10 @@ return {
               vim.schedule_wrap(function()
                 attempts = attempts + 1
                 -- Check if port 9013 is listening
-                local handle = io.popen("fuser 9013/tcp 2>/dev/null")
+                local fuser_cmd = vim.fn.has("mac") == 1
+                    and "lsof -ti :9013 2>/dev/null"
+                  or "fuser 9013/tcp 2>/dev/null"
+                local handle = io.popen(fuser_cmd)
                 local result = handle:read("*a")
                 handle:close()
                 if result and result ~= "" then
@@ -415,7 +421,10 @@ return {
         if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
           -- Send quarto preview command with --cache-refresh to shell terminal
           -- Kill any existing process on port 9013 first, then start preview
-          local cmd = "fuser -k 9013/tcp 2>/dev/null; quarto preview "
+          local kill_port = vim.fn.has("mac") == 1
+              and "lsof -ti :9013 | xargs kill -9 2>/dev/null"
+            or "fuser -k 9013/tcp 2>/dev/null"
+          local cmd = kill_port .. "; quarto preview "
             .. current_file
             .. " --cache-refresh --port 9013 --host 0.0.0.0 --no-browser"
 
