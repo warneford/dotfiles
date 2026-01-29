@@ -117,58 +117,12 @@ The `start_libs` fix only changed delimiters (`\003`→`,`, `\004`→`#`) and ad
 ==2701189== ERROR SUMMARY: 2704189 errors from 11 contexts (suppressed: 0 from 0)
 ```
 
-## macOS ASan Log (2026-01-29, commit `d4d00a8`)
+## macOS Valgrind Log (TODO)
 
-AddressSanitizer was used instead of Valgrind (Valgrind unavailable on Apple Silicon). ASan **confirms the same race condition crashes macOS too** — it was previously masked by macOS's allocator leaving freed pages readable.
-
-```
-==29963==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x607000003864
-  at pc 0x00010487faf0 bp 0x00016b589a00 sp 0x00016b5899f8
-READ of size 1 at 0x607000003864 thread T0
-
-    #0 finish_updating_loaded_libs+0x290 (rnvimserver:arm64+0x10000baec)
-    #1 handle_exe_cmd+0x81c (rnvimserver:arm64+0x10001158c)
-    #2 lsp_loop+0x6b4 (rnvimserver:arm64+0x1000105d0)
-    #3 main+0x20 (rnvimserver:arm64+0x10000ff08)
-
-0x607000003864 is located 0 bytes after 68-byte region [0x607000003820,0x607000003864)
-allocated by thread T1 here:
-    #0 malloc+0x78 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x3d330)
-    #1 update_loaded_libs+0x6c (rnvimserver:arm64+0x10000bf8c)
-    #2 ParseMsg+0x214 (rnvimserver:arm64+0x100016afc)
-    #3 get_whole_msg+0x5cc (rnvimserver:arm64+0x100016848)
-    #4 receive_msg+0x1b0 (rnvimserver:arm64+0x1000155c4)
-
-Thread T1 created by T0 here:
-    #0 pthread_create+0x5c (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x359f8)
-    #1 start_server+0x24 (rnvimserver:arm64+0x1000153dc)
-    #2 handle_exe_cmd+0x448 (rnvimserver:arm64+0x1000111b8)
-    #3 lsp_loop+0x6b4 (rnvimserver:arm64+0x1000105d0)
-    #4 main+0x20 (rnvimserver:arm64+0x10000ff08)
-
-SUMMARY: AddressSanitizer: heap-buffer-overflow in finish_updating_loaded_libs+0x290
-==29963==ABORTING
-```
-
-Also noted before the crash:
-```
-Error opening '/Users/rwarne/.cache/R.nvim/args_prettyunits'
-Error opening '/Users/rwarne/.cache/R.nvim/args_lme4'
-```
-
-### Comparison: macOS ASan vs Linux Valgrind
-
-| | macOS (ASan) | Linux (Valgrind) |
-|---|---|---|
-| **Error type** | heap-buffer-overflow | use-after-free / heap-use-after-free |
-| **Location** | `finish_updating_loaded_libs` T0 | `finish_updating_loaded_libs` T0 |
-| **Allocator** | T1 `update_loaded_libs` → `malloc` (68 bytes) | T1 `update_loaded_libs` → `malloc` (68 bytes) |
-| **Interpretation** | Read past end of new smaller buffer | Read from old freed buffer |
-| **Outcome** | ABORTING (ASan kills process) | SIGSEGV (signal 11) |
-| **Error count** | 1 (ASan aborts on first) | 2,704,189 errors before SIGSEGV |
-| **Root cause** | Same: no mutex on `lib_names` between T0 and T1 | Same |
-
-Both platforms confirm: `lib_names` is freed and reallocated by T1 (`update_loaded_libs` in the TCP receive thread) while T0 (`finish_updating_loaded_libs` in the main LSP loop) is iterating over it. The fix requires a mutex or copying `lib_names` before iteration.
+Run the same Valgrind setup on macOS to compare. macOS may not crash because:
+- Different memory allocator (libmalloc vs glibc malloc) — freed pages may remain readable longer
+- Different thread scheduling — the race window may be smaller on Apple Silicon
+- Fewer installed R packages — fewer iterations through the buggy loop
 
 ## Troubleshooting Steps for Linux
 
