@@ -117,12 +117,58 @@ The `start_libs` fix only changed delimiters (`\003`→`,`, `\004`→`#`) and ad
 ==2701189== ERROR SUMMARY: 2704189 errors from 11 contexts (suppressed: 0 from 0)
 ```
 
-## macOS Valgrind Log (TODO)
+## macOS ASan Log (2026-01-29, commit `d4d00a8`)
 
-Run the same Valgrind setup on macOS to compare. macOS may not crash because:
-- Different memory allocator (libmalloc vs glibc malloc) — freed pages may remain readable longer
-- Different thread scheduling — the race window may be smaller on Apple Silicon
-- Fewer installed R packages — fewer iterations through the buggy loop
+AddressSanitizer was used instead of Valgrind (Valgrind unavailable on Apple Silicon). ASan **confirms the same race condition crashes macOS too** — it was previously masked by macOS's allocator leaving freed pages readable.
+
+```
+==29963==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x607000003864
+  at pc 0x00010487faf0 bp 0x00016b589a00 sp 0x00016b5899f8
+READ of size 1 at 0x607000003864 thread T0
+
+    #0 finish_updating_loaded_libs+0x290 (rnvimserver:arm64+0x10000baec)
+    #1 handle_exe_cmd+0x81c (rnvimserver:arm64+0x10001158c)
+    #2 lsp_loop+0x6b4 (rnvimserver:arm64+0x1000105d0)
+    #3 main+0x20 (rnvimserver:arm64+0x10000ff08)
+
+0x607000003864 is located 0 bytes after 68-byte region [0x607000003820,0x607000003864)
+allocated by thread T1 here:
+    #0 malloc+0x78 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x3d330)
+    #1 update_loaded_libs+0x6c (rnvimserver:arm64+0x10000bf8c)
+    #2 ParseMsg+0x214 (rnvimserver:arm64+0x100016afc)
+    #3 get_whole_msg+0x5cc (rnvimserver:arm64+0x100016848)
+    #4 receive_msg+0x1b0 (rnvimserver:arm64+0x1000155c4)
+
+Thread T1 created by T0 here:
+    #0 pthread_create+0x5c (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x359f8)
+    #1 start_server+0x24 (rnvimserver:arm64+0x1000153dc)
+    #2 handle_exe_cmd+0x448 (rnvimserver:arm64+0x1000111b8)
+    #3 lsp_loop+0x6b4 (rnvimserver:arm64+0x1000105d0)
+    #4 main+0x20 (rnvimserver:arm64+0x10000ff08)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow in finish_updating_loaded_libs+0x290
+==29963==ABORTING
+```
+
+Also noted before the crash:
+```
+Error opening '/Users/rwarne/.cache/R.nvim/args_prettyunits'
+Error opening '/Users/rwarne/.cache/R.nvim/args_lme4'
+```
+
+### Comparison: macOS ASan vs Linux Valgrind
+
+| | macOS (ASan) | Linux (Valgrind) |
+|---|---|---|
+| **Error type** | heap-buffer-overflow | use-after-free / heap-use-after-free |
+| **Location** | `finish_updating_loaded_libs` T0 | `finish_updating_loaded_libs` T0 |
+| **Allocator** | T1 `update_loaded_libs` → `malloc` (68 bytes) | T1 `update_loaded_libs` → `malloc` (68 bytes) |
+| **Interpretation** | Read past end of new smaller buffer | Read from old freed buffer |
+| **Outcome** | ABORTING (ASan kills process) | SIGSEGV (signal 11) |
+| **Error count** | 1 (ASan aborts on first) | 2,704,189 errors before SIGSEGV |
+| **Root cause** | Same: no mutex on `lib_names` between T0 and T1 | Same |
+
+Both platforms confirm: `lib_names` is freed and reallocated by T1 (`update_loaded_libs` in the TCP receive thread) while T0 (`finish_updating_loaded_libs` in the main LSP loop) is iterating over it. The fix requires a mutex or copying `lib_names` before iteration.
 
 ## Troubleshooting Steps for Linux
 
@@ -296,3 +342,120 @@ brew install valgrind
 - Whether it actually crashes (SIGSEGV) or survives despite the errors
 - Error count comparison (Linux had 2.7M errors)
 - If using ASan instead of Valgrind, paste the ASan report
+
+## Proposed Fix: `strdup` in `finish_updating_loaded_libs`
+
+### Problem recap
+
+`lib_names` is a shared `static char *` (line 19). Two threads access it without synchronization:
+
+| Thread | Function | Action |
+|--------|----------|--------|
+| TCP (pthread) | `update_loaded_libs` (line 368) | `free(lib_names)` then `malloc` + `strcpy` a new one |
+| Main (LSP loop) | `finish_updating_loaded_libs` (line 327) | Iterates `lib_names` via pointer `p`, writes NUL terminators |
+
+When the TCP thread receives a new library list while the main thread is still iterating the old one, the main thread dereferences freed memory → SIGSEGV.
+
+### Fix option A: `strdup` local copy (minimal, recommended)
+
+Work on a local copy in `finish_updating_loaded_libs` so the TCP thread can safely replace `lib_names`:
+
+```c
+void finish_updating_loaded_libs(int has_new_lib) {
+    Log("finish_updating_loaded_libs");
+
+    if (has_new_lib) {
+        load_cached_data();
+    }
+
+    delete_lib_list(loaded_libs);
+    loaded_libs = NULL;
+
+    // Take a local copy — lib_names may be freed by TCP thread mid-iteration
+    char *local_names = strdup(lib_names);
+
+    char *msg = calloc(128 + strlen(local_names), sizeof(char));
+    sprintf(msg, "require('r.server').update_Rhelp_list('%s')", local_names);
+
+    char *p = local_names;
+    while (*p && *p != '#' && *p != '\n') {
+        const char *nm = p;
+        while (*p != ',' && *p != '#')
+            p++;
+        *p = 0;
+        p++;
+        PkgData *pkg = get_pkg(nm);
+        if (pkg) {
+            LibList *tmp = calloc(1, sizeof(LibList));
+            tmp->pkg = pkg;
+            tmp->next = loaded_libs;
+            loaded_libs = tmp;
+        }
+    }
+
+    // Message to Neovim: Update Rhelp_list
+    p = msg;
+    while (*p) {
+        if (*p == '#' || *p == '\n')
+            *p = ' ';
+        p++;
+    }
+    send_cmd_to_nvim(msg);
+    free(msg);
+    free(local_names);  // Free our local copy
+}
+```
+
+**Pros:** One-line addition (`strdup`), no new threading primitives, no architectural changes.
+**Cons:** Doesn't prevent the race entirely — `strdup(lib_names)` itself could race with `free(lib_names)` if timing is very unlucky, but the window is a single pointer read vs the current window of iterating hundreds of entries.
+
+### Fix option B: `pthread_mutex_t` (comprehensive)
+
+Add a mutex to protect all `lib_names` access:
+
+```c
+#include <pthread.h>
+static pthread_mutex_t lib_names_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+// Internal unlocked version (called with mutex held)
+static void _finish_updating_loaded_libs(int has_new_lib) {
+    // ... existing body unchanged ...
+}
+
+void finish_updating_loaded_libs(int has_new_lib) {
+    pthread_mutex_lock(&lib_names_mutex);
+    _finish_updating_loaded_libs(has_new_lib);
+    pthread_mutex_unlock(&lib_names_mutex);
+}
+
+void update_loaded_libs(char *libnms) {
+    pthread_mutex_lock(&lib_names_mutex);
+    if (lib_names)
+        free(lib_names);
+    lib_names = malloc(sizeof(char) * strlen(libnms) + 1);
+    strcpy(lib_names, libnms);
+
+    while (*libnms && *libnms != '#' && *libnms != '\n') {
+        const char *nm = libnms;
+        while (*libnms != ',' && *libnms != '#')
+            libnms++;
+        *libnms = 0;
+        libnms++;
+        const PkgData *pkg = get_pkg(nm);
+        if (!pkg) {
+            pthread_mutex_unlock(&lib_names_mutex);
+            send_cmd_to_nvim("require('r.server').build_cache_files()");
+            return;
+        }
+    }
+    _finish_updating_loaded_libs(0);
+    pthread_mutex_unlock(&lib_names_mutex);
+}
+```
+
+**Pros:** Fully eliminates the race. Correct by construction.
+**Cons:** More invasive. Requires splitting `finish_updating_loaded_libs` into locked/unlocked variants to avoid recursive locking. Already links `-pthread` so no new build deps.
+
+### Recommendation
+
+Option A (`strdup`) is the right first suggestion for the issue — it's the smallest change that addresses the crash. Option B is the proper long-term fix if the maintainer wants to make the threading model robust.
