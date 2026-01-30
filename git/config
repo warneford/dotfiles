@@ -1,5 +1,8 @@
 # Portable git settings (included from ~/.gitconfig)
-# Machine-specific settings (user, credential) stay in ~/.gitconfig
+# Machine-specific settings (user) stay in ~/.gitconfig
+
+[credential]
+	helper = !gh auth git-credential
 
 [push]
 	autoSetupRemote = true

@@ -40,7 +40,6 @@ services:
       # Claude Code auth and config
       - ~/.claude.json:/home/${USER:-dev}/.claude.json
       - ~/.claude:/home/${USER:-dev}/.claude
-      - ~/.git-credentials:/home/${USER:-dev}/.git-credentials
       # Google auth tokens for gargle/googlesheets4/googledrive
       - ~/.secrets:/home/${USER:-dev}/.secrets
       # Environment variables (secrets, API keys, etc.)
@@ -74,7 +73,6 @@ services:
       - ~/projects:/home/rstudio/projects:rw
       - /data/home/scott/projects/argoAPI:/home/rstudio/argoAPI:ro
       - ~/.gitconfig:/home/rstudio/.gitconfig:ro
-      - ~/.git-credentials:/home/rstudio/.git-credentials
       # AWS credentials
       - ~/.aws:/home/rstudio/.aws:ro
       # Google auth tokens for gargle/googlesheets4/googledrive
