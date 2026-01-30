@@ -181,7 +181,8 @@ ENV PNPM_HOME="/home/${USERNAME}/.local/share/pnpm"
 ENV PATH="${PNPM_HOME}:${PATH}"
 RUN pnpm add -g tree-sitter-cli @mermaid-js/mermaid-cli && \
     # Ensure tree-sitter binary is downloaded (postinstall sometimes fails silently)
-    node "$(pnpm root -g)/tree-sitter-cli/install.js"
+    # install.js writes to cwd, so cd into the package directory first
+    cd "$(pnpm root -g)/tree-sitter-cli" && node install.js
 
 # Configure puppeteer/mermaid for Docker (no-sandbox required for Chrome in containers)
 RUN mkdir -p ~/.config/puppeteer && \
