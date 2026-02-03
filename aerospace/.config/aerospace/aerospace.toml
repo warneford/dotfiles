@@ -23,8 +23,8 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
 ]
 
-# Only keep workspaces 1-9 persistent (cleaner than A-Z)
-persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+# Only keep workspaces 1-9 and 10 persistent
+persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
 # Gaps between windows
 [gaps]
@@ -82,8 +82,9 @@ run = 'layout floating'
     cmd-7 = 'workspace 7'
     cmd-8 = 'workspace 8'
     cmd-9 = 'workspace 9'
+    cmd-0 = 'workspace 10'
 
-    # Move windows to workspaces with Cmd+Shift+1-9
+    # Move windows to workspaces with Cmd+Shift+1-9 and Cmd+Shift+0 for A
     cmd-shift-1 = 'move-node-to-workspace 1'
     cmd-shift-2 = 'move-node-to-workspace 2'
     cmd-shift-3 = 'move-node-to-workspace 3'
@@ -93,6 +94,7 @@ run = 'layout floating'
     cmd-shift-7 = 'move-node-to-workspace 7'
     cmd-shift-8 = 'move-node-to-workspace 8'
     cmd-shift-9 = 'move-node-to-workspace 9'
+    cmd-shift-0 = 'move-node-to-workspace 10'
 
     # Workspace navigation
     alt-tab = 'workspace-back-and-forth'
