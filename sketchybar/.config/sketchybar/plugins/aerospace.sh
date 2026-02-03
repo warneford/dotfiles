@@ -12,11 +12,17 @@ FOCUSED=$(aerospace list-workspaces --focused 2>/dev/null)
 WINDOW_LIST=$(aerospace list-windows --workspace "$WORKSPACE_ID" 2>/dev/null)
 WINDOW_COUNT=$(echo "$WINDOW_LIST" | grep -c . 2>/dev/null || echo "0")
 
-# Get the first app name in this workspace
+# Get the app icon for this workspace
 if [ "$WINDOW_COUNT" -gt 0 ]; then
-    # Extract app name (3rd column after window-id and workspace)
-    FIRST_APP=$(echo "$WINDOW_LIST" | head -1 | awk -F'|' '{print $2}' | xargs)
-    APP_ICON=$("$PLUGIN_DIR/icon_map.sh" "$FIRST_APP")
+    if [ "$WORKSPACE_ID" = "$FOCUSED" ]; then
+        # For focused workspace, show the currently focused app's icon
+        FOCUSED_APP=$(aerospace list-windows --focused 2>/dev/null | awk -F'|' '{print $2}' | xargs)
+        APP_ICON=$("$PLUGIN_DIR/icon_map.sh" "$FOCUSED_APP")
+    else
+        # For unfocused workspaces, show the first app
+        FIRST_APP=$(echo "$WINDOW_LIST" | head -1 | awk -F'|' '{print $2}' | xargs)
+        APP_ICON=$("$PLUGIN_DIR/icon_map.sh" "$FIRST_APP")
+    fi
 else
     APP_ICON="$WORKSPACE_ID"
 fi

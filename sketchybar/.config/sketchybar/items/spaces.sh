@@ -9,7 +9,7 @@ AEROSPACE_SCRIPT="$HOME/.config/sketchybar/plugins/aerospace.sh"
 
 for sid in $(aerospace list-workspaces --all); do
     sketchybar --add item "space.$sid" left \
-        --subscribe "space.$sid" aerospace_workspace_change \
+        --subscribe "space.$sid" aerospace_workspace_change front_app_switched \
         --set "space.$sid" \
             icon="$sid" \
             icon.font="sketchybar-app-font:Regular:16.0" \
