@@ -9,6 +9,12 @@
 # Load environment variables from ~/.env (secrets, tokens, etc.)
 [[ -f ~/.env ]] && source ~/.env
 
+# Set GITHUB_PAT from gh CLI oauth token (used by R pak/remotes for GitHub API)
+# Resolves fresh on each shell so it stays valid even if gh refreshes the token
+if command -v gh &> /dev/null && gh auth status &> /dev/null; then
+    export GITHUB_PAT="$(gh auth token 2>/dev/null)"
+fi
+
 # Force Ghostty detection for snacks.nvim image preview
 # SSH + docker exec + tmux doesn't propagate TERM_PROGRAM from local Ghostty
 export SNACKS_GHOSTTY=true
