@@ -673,6 +673,19 @@ if ! $IS_SSH; then
 
         backup_if_exists "$HOME/.config/ghostty"
         stow_package "ghostty"
+
+        # Install/update ghostty shaders from external repos
+        GHOSTTY_SHADERS_DIR="$DOTFILES_DIR/ghostty/.config/ghostty/shaders"
+        mkdir -p "$GHOSTTY_SHADERS_DIR"
+
+        # In-Game CRT shader (sarphiv/ghostty-shader-in-game-crt)
+        print_info "Updating in-game CRT shaders..."
+        TEMP_CRT_DIR="/tmp/ghostty-shader-in-game-crt"
+        rm -rf "$TEMP_CRT_DIR"
+        git clone --depth=1 https://github.com/sarphiv/ghostty-shader-in-game-crt.git "$TEMP_CRT_DIR"
+        cp "$TEMP_CRT_DIR/src/"*.glsl "$GHOSTTY_SHADERS_DIR/"
+        rm -rf "$TEMP_CRT_DIR"
+        print_success "In-game CRT shaders updated"
     else
         print_info "Ghostty not found - skipping Ghostty configuration"
         if $IS_MAC; then
