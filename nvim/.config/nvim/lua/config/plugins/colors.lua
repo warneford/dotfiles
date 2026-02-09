@@ -15,27 +15,19 @@ function ColorMyPencils(color)
   local normal_fg = get_hl_color("Normal", "fg") or "#e0def4"
   local float_fg = get_hl_color("NormalFloat", "fg") or normal_fg
 
-  -- Preserve Diff highlight fg colors (needed for snacks.nvim)
-  local diff_add_fg = get_hl_color("DiffAdd", "fg") or "#a3be8c"
-  local diff_delete_fg = get_hl_color("DiffDelete", "fg") or "#eb6f92"
-  local diff_change_fg = get_hl_color("DiffChange", "fg") or "#f6c177"
-  local diff_add_bg = get_hl_color("DiffAdd", "bg")
-  local diff_delete_bg = get_hl_color("DiffDelete", "bg")
-  local diff_change_bg = get_hl_color("DiffChange", "bg")
-
   vim.api.nvim_set_hl(0, "Normal", { fg = normal_fg, bg = "none" })
   vim.api.nvim_set_hl(0, "NormalFloat", { fg = float_fg, bg = "none" })
 
-  -- Ensure Diff highlights have fg defined (fixes snacks.nvim healthcheck)
-  if diff_add_bg then
-    vim.api.nvim_set_hl(0, "DiffAdd", { fg = diff_add_fg, bg = diff_add_bg })
-  end
-  if diff_delete_bg then
-    vim.api.nvim_set_hl(0, "DiffDelete", { fg = diff_delete_fg, bg = diff_delete_bg })
-  end
-  if diff_change_bg then
-    vim.api.nvim_set_hl(0, "DiffChange", { fg = diff_change_fg, bg = diff_change_bg })
-  end
+  -- Diff highlights: visible backgrounds for transparent bg (tokyonight-inspired)
+  -- fg = "NONE" preserves syntax highlighting inside diff hunks
+  vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#2b485a" })
+  vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#52313f" })
+  vim.api.nvim_set_hl(0, "DiffChange", { bg = "#272d43" })
+  vim.api.nvim_set_hl(0, "DiffText", { bg = "#394b70" })
+
+  -- Diffview-specific highlights
+  vim.api.nvim_set_hl(0, "DiffviewDiffAddAsDelete", { bg = "#52313f" })
+  vim.api.nvim_set_hl(0, "DiffviewDiffDelete", { fg = "#6e6a86", bg = "none" })
   vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
   vim.api.nvim_set_hl(0, "WinBar", { bg = "none" })
   vim.api.nvim_set_hl(0, "WinBarNC", { bg = "none", fg = "#6e7681" })
@@ -85,6 +77,13 @@ vim.api.nvim_create_autocmd("ColorScheme", {
       vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
       vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#6e6a86" })
       vim.api.nvim_set_hl(0, "SnacksDashboardFortune", { fg = "#f6c177", italic = true })
+      -- Diff highlights
+      vim.api.nvim_set_hl(0, "DiffAdd", { bg = "#2b485a" })
+      vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#52313f" })
+      vim.api.nvim_set_hl(0, "DiffChange", { bg = "#272d43" })
+      vim.api.nvim_set_hl(0, "DiffText", { bg = "#394b70" })
+      vim.api.nvim_set_hl(0, "DiffviewDiffAddAsDelete", { bg = "#52313f" })
+      vim.api.nvim_set_hl(0, "DiffviewDiffDelete", { fg = "#6e6a86", bg = "none" })
     end, 10)
   end,
 })

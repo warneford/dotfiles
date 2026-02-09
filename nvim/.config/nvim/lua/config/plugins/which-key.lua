@@ -16,6 +16,10 @@ return {
     wk.add({
       { "<leader>c", group = "[c]ode / terminal" },
       { "<leader>g", group = "[g]it" },
+      { "<leader>gd", desc = "Git [d]iff view" },
+      { "<leader>gh", desc = "Git file [h]istory" },
+      { "<leader>gH", desc = "Git repo [H]istory" },
+      { "<leader>gx", desc = "Close diff / e[x]it" },
       { "<leader>h", group = "[h]arpoon" },
       { "<leader>o", group = "[o]tter / c[o]de chunk" },
       { "<leader>q", group = "[q]uarto" },
