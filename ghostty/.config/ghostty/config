@@ -138,6 +138,9 @@ unfocused-split-opacity = 0.7
 # Gradient Background (animated gradient)
 # custom-shader = shaders/animated-gradient-shader.glsl
 
+# Gradient Background (static gradient)
+# custom-shader = shaders/gradient-background.glsl
+
 # ===== COOL EFFECTS (May be distracting) =====
 
 # RGB Split + Glow (retro/cyberpunk pulsing chromatic aberration)
