@@ -336,25 +336,26 @@ return {
       vim.keymap.set("n", "<leader>qp", function()
         local current_file = vim.fn.expand("%:p")
         if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
-          -- Send quarto preview command to shell terminal (keeps R console free)
-          -- Kill any existing process on port 9013 first, then start preview
-          local cmd = "fuser -k 9013/tcp 2>/dev/null; quarto preview "
+          -- Run quarto preview in a dedicated detached tmux session for persistence
+          -- Kills any previous quarto session, then creates a fresh one
+          local preview_cmd = "quarto preview "
             .. current_file
             .. " --port 9013 --host 0.0.0.0 --no-browser"
-
-          if _G.toggleterm_shell then
-            -- Hide other terminals and show shell
-            if _G.toggleterm_hide_all then
-              _G.toggleterm_hide_all()
-            end
-            if not _G.toggleterm_shell.term:is_open() then
-              _G.toggleterm_shell.term:open()
-            end
-            _G.toggleterm_shell.send(cmd)
-          else
-            vim.notify("Shell terminal not available. Press ,r2 to open.", vim.log.levels.WARN)
-            return
-          end
+          local cmd = "tmux kill-session -t quarto 2>/dev/null; "
+            .. "tmux new-session -d -s quarto '"
+            .. preview_cmd:gsub("'", "'\\''")
+            .. "'"
+          vim.fn.jobstart(cmd, {
+            on_exit = function(_, code)
+              vim.schedule(function()
+                if code == 0 then
+                  vim.notify("Quarto preview started in tmux session 'quarto'", vim.log.levels.INFO)
+                else
+                  vim.notify("Failed to start quarto preview (exit " .. code .. ")", vim.log.levels.ERROR)
+                end
+              end)
+            end,
+          })
 
           -- Only trigger reverse SSH tunnel if running inside a Docker container
           local is_docker = vim.fn.filereadable("/.dockerenv") == 1
@@ -413,24 +414,25 @@ return {
       vim.keymap.set("n", "<leader>qP", function()
         local current_file = vim.fn.expand("%:p")
         if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
-          -- Send quarto preview command with --cache-refresh to shell terminal
-          -- Kill any existing process on port 9013 first, then start preview
-          local cmd = "fuser -k 9013/tcp 2>/dev/null; quarto preview "
+          -- Run quarto preview with --cache-refresh in a dedicated detached tmux session
+          local preview_cmd = "quarto preview "
             .. current_file
             .. " --cache-refresh --port 9013 --host 0.0.0.0 --no-browser"
-
-          if _G.toggleterm_shell then
-            -- Hide other terminals and show shell
-            if _G.toggleterm_hide_all then
-              _G.toggleterm_hide_all()
-            end
-            if not _G.toggleterm_shell.term:is_open() then
-              _G.toggleterm_shell.term:open()
-            end
-            _G.toggleterm_shell.send(cmd)
-          else
-            vim.notify("Shell terminal not available. Press ,r2 to open.", vim.log.levels.WARN)
-          end
+          local cmd = "tmux kill-session -t quarto 2>/dev/null; "
+            .. "tmux new-session -d -s quarto '"
+            .. preview_cmd:gsub("'", "'\\''")
+            .. "'"
+          vim.fn.jobstart(cmd, {
+            on_exit = function(_, code)
+              vim.schedule(function()
+                if code == 0 then
+                  vim.notify("Quarto preview started in tmux session 'quarto' (cache refresh)", vim.log.levels.INFO)
+                else
+                  vim.notify("Failed to start quarto preview (exit " .. code .. ")", vim.log.levels.ERROR)
+                end
+              end)
+            end,
+          })
         else
           vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
         end
