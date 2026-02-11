@@ -34,11 +34,12 @@ if [[ "$OSTYPE" == darwin* ]]; then
     alias down='cd ~/Downloads'
     function quarto-preview() {
         local ws="1"  # Dev workspace
-        local url="http://localhost:9013"
+        local host="${1:-localhost}"
+        local url="http://${host}:9013"
         local aerospace="/opt/homebrew/bin/aerospace"
 
         # Check for existing Orion window in dev workspace (includes error states like "Failed to open page")
-        local existing_win=$($aerospace list-windows --workspace "$ws" 2>/dev/null | grep -iE "Orion.*(localhost|Failed to open)" | head -1 | awk '{print $1}')
+        local existing_win=$($aerospace list-windows --workspace "$ws" 2>/dev/null | grep -iE "Orion.*(${host}|Failed to open)" | head -1 | awk '{print $1}')
 
         if [[ -n "$existing_win" ]]; then
             # Reuse existing localhost window - just focus and refresh
@@ -48,15 +49,15 @@ if [[ "$OSTYPE" == darwin* ]]; then
             # Refresh the page
             osascript -e 'tell application "System Events" to keystroke "r" using command down'
         elif pgrep -q "Orion"; then
-            # Orion running but no localhost window - open URL in new window
+            # Orion running but no matching window - open URL in new window
             osascript -e 'tell application "Orion" to activate'
             osascript -e 'tell application "System Events" to keystroke "n" using command down'
             sleep 0.3
             osascript -e "tell application \"Orion\" to open location \"$url\""
-            # Wait for localhost window and move to workspace
+            # Wait for window and move to workspace
             local win_id=""
             for i in {1..15}; do
-                win_id=$($aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
+                win_id=$($aerospace list-windows --all 2>/dev/null | grep -i "Orion.*${host}" | head -1 | awk '{print $1}')
                 [[ -n "$win_id" ]] && break
                 sleep 0.1
             done
@@ -72,10 +73,10 @@ if [[ "$OSTYPE" == darwin* ]]; then
                 osascript -e 'tell application "Orion" to return name' &>/dev/null && break
                 sleep 0.2
             done
-            # Wait for localhost window and move to workspace
+            # Wait for window and move to workspace
             local win_id=""
             for i in {1..15}; do
-                win_id=$($aerospace list-windows --all 2>/dev/null | grep -i "Orion.*localhost" | head -1 | awk '{print $1}')
+                win_id=$($aerospace list-windows --all 2>/dev/null | grep -i "Orion.*${host}" | head -1 | awk '{print $1}')
                 [[ -n "$win_id" ]] && break
                 sleep 0.1
             done

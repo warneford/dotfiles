@@ -55,6 +55,8 @@ services:
       - TZ=America/Los_Angeles
       # Local username for reverse SSH tunnel (nvim quarto-preview → local browser)
       - LOCAL_USER=${LOCAL_USER:-}
+      # Docker host FQDN for opening quarto preview URLs in browser
+      - DOCKER_HOST_FQDN=${DOCKER_HOST_FQDN:-tentacle.octantbio.net}
 
   rstudio:
     image: rocker/tidyverse:4.5.2
