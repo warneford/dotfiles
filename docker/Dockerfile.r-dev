@@ -53,6 +53,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lua5.4 \
     liblua5.4-dev \
     luarocks \
+    # Spatial libraries for R packages (sf, units)
+    libudunits2-dev \
+    libproj-dev \
+    libgdal-dev \
+    libgeos-dev \
     # V8 engine for R packages (V8)
     libv8-dev \
     # Cleanup
