@@ -332,164 +332,130 @@ return {
       -- Note: R-specific keybindings are provided by R.nvim
       -- Use ,ro for object browser, ,rv for dataframe viewer, etc.
 
-      -- Quarto rendering
-      vim.keymap.set("n", "<leader>qp", function()
+      -- Quarto rendering: starts quarto in a persistent tmux session,
+      -- then opens a toggleterm attached to it so you can see progress/errors.
+      -- Closing the toggleterm doesn't kill quarto; it keeps running in tmux.
+      local function start_quarto_preview(extra_args)
         local current_file = vim.fn.expand("%:p")
-        if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
-          -- Run quarto preview in a dedicated detached tmux session for persistence
-          -- Kills any previous quarto session, then creates a fresh one
-          local preview_cmd = "quarto preview "
-            .. current_file
-            .. " --port 9013 --host 0.0.0.0 --no-browser"
-          local cmd = "tmux kill-session -t quarto 2>/dev/null; "
-            .. "tmux new-session -d -s quarto '"
-            .. preview_cmd:gsub("'", "'\\''")
-            .. "'"
-          vim.fn.jobstart(cmd, {
-            on_exit = function(_, code)
-              vim.schedule(function()
-                if code == 0 then
-                  vim.notify("Quarto preview started in tmux session 'quarto'", vim.log.levels.INFO)
-                else
-                  vim.notify("Failed to start quarto preview (exit " .. code .. ")", vim.log.levels.ERROR)
-                end
-              end)
-            end,
-          })
-
-          -- Only trigger reverse SSH tunnel if running inside a Docker container
-          local is_docker = vim.fn.filereadable("/.dockerenv") == 1
-          if is_docker then
-            -- Wait for quarto preview to start (poll for port 9013)
-            -- Then trigger local machine's browser via reverse SSH tunnel
-            local local_user_env = vim.fn.getenv("LOCAL_USER")
-            local local_user = (local_user_env ~= vim.NIL and local_user_env) or "rwarne"
-            local host_fqdn_env = vim.fn.getenv("DOCKER_HOST_FQDN")
-            local host_fqdn = (host_fqdn_env ~= vim.NIL and host_fqdn_env) or "localhost"
-            local attempts = 0
-            local max_attempts = 180 -- 3 minutes max wait
-            local timer = vim.loop.new_timer()
-            timer:start(
-              1000,
-              1000,
-              vim.schedule_wrap(function()
-                attempts = attempts + 1
-                -- Check if port 9013 is listening
-                local handle = io.popen("fuser 9013/tcp 2>/dev/null")
-                local result = handle:read("*a")
-                handle:close()
-                if result and result ~= "" then
-                  -- Port is ready, trigger browser
-                  timer:stop()
-                  timer:close()
-                  vim.fn.jobstart(
-                    "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9011 "
-                      .. local_user
-                      .. "@localhost 'source ~/dotfiles/zsh/aliases.zsh && quarto-preview " .. host_fqdn .. "'",
-                    {
-                      detach = true,
-                      on_exit = function(_, code)
-                        if code ~= 0 then
-                          vim.schedule(function()
-                            vim.notify(
-                              "Failed to open browser on Mac (exit " .. code .. ")",
-                              vim.log.levels.WARN
-                            )
-                          end)
-                        end
-                      end,
-                    }
-                  )
-                elseif attempts >= max_attempts then
-                  timer:stop()
-                  timer:close()
-                  vim.notify("Timeout waiting for quarto preview to start", vim.log.levels.WARN)
-                end
-              end)
-            )
-          end
-        else
+        if not (current_file:match("%.qmd$") or current_file:match("%.Rmd$")) then
           vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
+          return
         end
-      end, { desc = "[q]uarto [p]review in shell terminal" })
+
+        local Terminal = require("toggleterm.terminal").Terminal
+
+        -- Shutdown existing quarto toggleterm if any
+        if _G.toggleterm_quarto_term then
+          _G.toggleterm_quarto_term:shutdown()
+          _G.toggleterm_quarto_term = nil
+        end
+
+        -- Build the quarto preview command
+        local preview_cmd = "quarto preview "
+          .. current_file
+          .. (extra_args or "")
+          .. " --port 9013 --host 0.0.0.0 --no-browser"
+
+        -- Kill existing tmux session and start a fresh detached one.
+        -- remain-on-exit keeps the pane alive after quarto exits so errors stay visible.
+        local tmux_cmd = "tmux kill-session -t quarto 2>/dev/null; "
+          .. "tmux new-session -d -s quarto \\; "
+          .. "set-option remain-on-exit on \\; "
+          .. "send-keys '"
+          .. preview_cmd:gsub("'", "'\\''")
+          .. "' Enter"
+
+        vim.fn.jobstart(tmux_cmd, {
+          on_exit = function(_, code)
+            vim.schedule(function()
+              if code == 0 then
+                -- Open a toggleterm that attaches to the tmux session
+                local quarto_term = Terminal:new({
+                  cmd = "tmux attach -t quarto",
+                  count = 5,
+                  direction = "horizontal",
+                  display_name = "quarto",
+                  close_on_exit = true,
+                  on_open = function(term)
+                    vim.cmd("stopinsert")
+                    local opts = { buffer = term.bufnr, noremap = true, silent = true }
+                    vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], opts)
+                    vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], opts)
+                    vim.keymap.set("t", "<C-k>", [[<Cmd>wincmd k<CR>]], opts)
+                    vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], opts)
+                    vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], opts)
+                  end,
+                })
+                _G.toggleterm_quarto_term = quarto_term
+                -- Hide other terminals so quarto shares the same pane
+                if _G.toggleterm_hide_all then
+                  _G.toggleterm_hide_all()
+                end
+                quarto_term:open()
+                -- Return focus to editor
+                vim.cmd("wincmd p")
+              else
+                vim.notify("Failed to start quarto preview (exit " .. code .. ")", vim.log.levels.ERROR)
+              end
+            end)
+          end,
+        })
+
+        -- Only trigger reverse SSH tunnel if running inside a Docker container
+        local is_docker = vim.fn.filereadable("/.dockerenv") == 1
+        if is_docker then
+          local local_user_env = vim.fn.getenv("LOCAL_USER")
+          local local_user = (local_user_env ~= vim.NIL and local_user_env) or "rwarne"
+          local host_fqdn_env = vim.fn.getenv("DOCKER_HOST_FQDN")
+          local host_fqdn = (host_fqdn_env ~= vim.NIL and host_fqdn_env) or "localhost"
+          local attempts = 0
+          local max_attempts = 180 -- 3 minutes max wait
+          local timer = vim.loop.new_timer()
+          timer:start(
+            1000,
+            1000,
+            vim.schedule_wrap(function()
+              attempts = attempts + 1
+              local handle = io.popen("fuser 9013/tcp 2>/dev/null")
+              local result = handle:read("*a")
+              handle:close()
+              if result and result ~= "" then
+                timer:stop()
+                timer:close()
+                vim.fn.jobstart(
+                  "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9011 "
+                    .. local_user
+                    .. "@localhost 'source ~/dotfiles/zsh/aliases.zsh && quarto-preview " .. host_fqdn .. "'",
+                  {
+                    detach = true,
+                    on_exit = function(_, exit_code)
+                      if exit_code ~= 0 then
+                        vim.schedule(function()
+                          vim.notify(
+                            "Failed to open browser on Mac (exit " .. exit_code .. ")",
+                            vim.log.levels.WARN
+                          )
+                        end)
+                      end
+                    end,
+                  }
+                )
+              elseif attempts >= max_attempts then
+                timer:stop()
+                timer:close()
+                vim.notify("Timeout waiting for quarto preview to start", vim.log.levels.WARN)
+              end
+            end)
+          )
+        end
+      end
+
+      vim.keymap.set("n", "<leader>qp", function()
+        start_quarto_preview("")
+      end, { desc = "[q]uarto [p]review" })
 
       vim.keymap.set("n", "<leader>qP", function()
-        local current_file = vim.fn.expand("%:p")
-        if current_file:match("%.qmd$") or current_file:match("%.Rmd$") then
-          -- Run quarto preview with --cache-refresh in a dedicated detached tmux session
-          local preview_cmd = "quarto preview "
-            .. current_file
-            .. " --cache-refresh --port 9013 --host 0.0.0.0 --no-browser"
-          local cmd = "tmux kill-session -t quarto 2>/dev/null; "
-            .. "tmux new-session -d -s quarto '"
-            .. preview_cmd:gsub("'", "'\\''")
-            .. "'"
-          vim.fn.jobstart(cmd, {
-            on_exit = function(_, code)
-              vim.schedule(function()
-                if code == 0 then
-                  vim.notify("Quarto preview started in tmux session 'quarto' (cache refresh)", vim.log.levels.INFO)
-                else
-                  vim.notify("Failed to start quarto preview (exit " .. code .. ")", vim.log.levels.ERROR)
-                end
-              end)
-            end,
-          })
-
-          -- Only trigger reverse SSH tunnel if running inside a Docker container
-          local is_docker = vim.fn.filereadable("/.dockerenv") == 1
-          if is_docker then
-            -- Wait for quarto preview to start (poll for port 9013)
-            -- Then trigger local machine's browser via reverse SSH tunnel
-            local local_user_env = vim.fn.getenv("LOCAL_USER")
-            local local_user = (local_user_env ~= vim.NIL and local_user_env) or "rwarne"
-            local host_fqdn_env = vim.fn.getenv("DOCKER_HOST_FQDN")
-            local host_fqdn = (host_fqdn_env ~= vim.NIL and host_fqdn_env) or "localhost"
-            local attempts = 0
-            local max_attempts = 180 -- 3 minutes max wait
-            local timer = vim.loop.new_timer()
-            timer:start(
-              1000,
-              1000,
-              vim.schedule_wrap(function()
-                attempts = attempts + 1
-                -- Check if port 9013 is listening
-                local handle = io.popen("fuser 9013/tcp 2>/dev/null")
-                local result = handle:read("*a")
-                handle:close()
-                if result and result ~= "" then
-                  -- Port is ready, trigger browser
-                  timer:stop()
-                  timer:close()
-                  vim.fn.jobstart(
-                    "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9011 "
-                      .. local_user
-                      .. "@localhost 'source ~/dotfiles/zsh/aliases.zsh && quarto-preview " .. host_fqdn .. "'",
-                    {
-                      detach = true,
-                      on_exit = function(_, code)
-                        if code ~= 0 then
-                          vim.schedule(function()
-                            vim.notify(
-                              "Failed to open browser on Mac (exit " .. code .. ")",
-                              vim.log.levels.WARN
-                            )
-                          end)
-                        end
-                      end,
-                    }
-                  )
-                elseif attempts >= max_attempts then
-                  timer:stop()
-                  timer:close()
-                  vim.notify("Timeout waiting for quarto preview to start", vim.log.levels.WARN)
-                end
-              end)
-            )
-          end
-        else
-          vim.notify("Not a Quarto/RMarkdown file", vim.log.levels.WARN)
-        end
+        start_quarto_preview(" --cache-refresh")
       end, { desc = "[q]uarto [P]review with cache refresh" })
 
       vim.keymap.set("n", "<leader>qr", function()
