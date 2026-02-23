@@ -91,7 +91,7 @@ return {
         return nil, nil
       end
 
-      -- Helper to hide all terminals (R, shell, python) without killing them
+      -- Helper to hide all terminals (R, shell, python, quarto) without killing them
       local function hide_all_terminals()
         local _, r_win = find_r_terminal()
         if r_win then
@@ -105,10 +105,13 @@ return {
         if python_term and python_term:is_open() then
           python_term:close()
         end
+        if _G.toggleterm_quarto_term and _G.toggleterm_quarto_term:is_open() then
+          _G.toggleterm_quarto_term:close()
+        end
       end
 
       -- Helper to check which terminal is currently visible
-      -- Returns: "shell", "python", "r", or nil
+      -- Returns: "shell", "python", "r", "quarto", or nil
       local function get_visible_terminal()
         if shell_term:is_open() then
           return "shell"
@@ -119,6 +122,9 @@ return {
         local _, r_win = find_r_terminal()
         if r_win then
           return "r"
+        end
+        if _G.toggleterm_quarto_term and _G.toggleterm_quarto_term:is_open() then
+          return "quarto"
         end
         return nil
       end
@@ -138,14 +144,17 @@ return {
             vim.cmd("resize " .. math.floor(vim.o.lines / 3))
             vim.cmd("startinsert")
           end
+        elseif which == "quarto" and _G.toggleterm_quarto_term then
+          _G.toggleterm_quarto_term:open()
         end
       end
 
-      -- Cycle through available terminals: shell -> python (if init) -> R (if init) -> shell ...
+      -- Cycle through available terminals: shell -> python (if init) -> R (if init) -> quarto (if init) -> shell ...
       local function cycle_terminals()
         local r_buf, _ = find_r_terminal()
         local has_python = python_term ~= nil
         local has_r = r_buf ~= nil
+        local has_quarto = _G.toggleterm_quarto_term ~= nil
         local current = get_visible_terminal()
 
         -- Build list of available terminals
@@ -155,6 +164,9 @@ return {
         end
         if has_r then
           table.insert(available, "r")
+        end
+        if has_quarto then
+          table.insert(available, "quarto")
         end
 
         if current == nil then

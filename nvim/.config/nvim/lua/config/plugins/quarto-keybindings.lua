@@ -360,8 +360,8 @@ return {
         -- remain-on-exit keeps the pane alive after quarto exits so errors stay visible.
         local tmux_cmd = "tmux kill-session -t quarto 2>/dev/null; "
           .. "tmux new-session -d -s quarto \\; "
-          .. "set-option remain-on-exit on \\; "
-          .. "send-keys '"
+          .. "set-option -t quarto remain-on-exit on \\; "
+          .. "send-keys -t quarto '"
           .. preview_cmd:gsub("'", "'\\''")
           .. "' Enter"
 

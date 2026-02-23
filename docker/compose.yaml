@@ -24,6 +24,8 @@ services:
       - ~/projects:/data/home/${USER:-dev}/projects
       # R package library (R default structure: ~/R/{platform}-library/{version})
       - ~/R:/home/${USER:-dev}/R
+      # R cache (renv, pkgcache, etc.)
+      - ~/.cache/R:/home/${USER:-dev}/.cache/R
       # Mount ArgoAPI
       - /data/home/scott/projects/argoAPI:/home/${USER:-dev}/argoAPI:ro
       # Git/SSH config (read-only)
@@ -31,6 +33,8 @@ services:
       - ~/.gitconfig:/home/${USER:-dev}/.gitconfig
       # AWS credentials
       - ~/.aws:/home/${USER:-dev}/.aws
+      # Databricks credentials
+      - ~/.databrickscfg:/home/${USER:-dev}/.databrickscfg
       # Terminfo for ghostty terminal
       - ~/.terminfo:/home/${USER:-dev}/.terminfo:ro
       # rclone config for Dropbox sync
