@@ -194,7 +194,7 @@ A containerized R development environment for when you want reproducibility with
 - rocker/r-ver base (minimal R, no RStudio overhead)
 - Neovim (latest), Node.js, deno, ripgrep, fzf, direnv
 - Your dotfiles mounted and ready
-- Quarto preview (port 9013), SSH (9015)
+- Quarto preview (port 9142), SSH (9143)
 
 ### macOS Window Management
 

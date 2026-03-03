@@ -172,7 +172,7 @@ end, { desc = "[m]arimo toggle [e]cho" })
 
 ### Preview with Port (integrate with existing <leader>qp)
 
-The existing `<leader>qp` in quarto-keybindings.lua already handles preview with port 9013. Marimo notebooks work with this.
+The existing `<leader>qp` in quarto-keybindings.lua already handles preview with port 9142. Marimo notebooks work with this.
 
 ## LSP Considerations
 
@@ -188,7 +188,7 @@ No changes needed to LSP config.
 2. **cd into project**: direnv auto-activates venv
 3. **Add extension**: `quarto add marimo-team/quarto-marimo` (if not using init script)
 4. **Write notebook**: Use `{.marimo}` blocks with `#| echo: true`
-5. **Preview**: `<leader>qp` or `quarto preview file.qmd --port 9013`
+5. **Preview**: `<leader>qp` or `quarto preview file.qmd --port 9142`
 6. **Iterate**: Code is editable in browser, reactively updates
 
 ## Known Limitations
