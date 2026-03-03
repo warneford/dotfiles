@@ -184,7 +184,7 @@ ENV PUPPETEER_SKIP_DOWNLOAD=1
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 ENV PNPM_HOME="/home/${USERNAME}/.local/share/pnpm"
 ENV PATH="${PNPM_HOME}:${PATH}"
-RUN pnpm add -g tree-sitter-cli @mermaid-js/mermaid-cli && \
+RUN pnpm add -g tree-sitter-cli @mermaid-js/mermaid-cli @google/gemini-cli zod@3.25 && \
     # Ensure tree-sitter binary is downloaded (postinstall sometimes fails silently)
     # install.js writes to cwd, so cd into the package directory first
     cd "$(pnpm root -g)/tree-sitter-cli" && node install.js
