@@ -13,18 +13,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
     spec = {
-        -- Install luarocks.nvim first (required for plugins that need luarocks)
-        {
-            "vhyrro/luarocks.nvim",
-            priority = 1000, -- Very high priority to load before other plugins
-            config = true,
-        },
-        -- Load all plugins from config.plugins directory
         { import = "config.plugins" },
     },
     change_detection = { notify = false },
-    -- Disable lazy.nvim's built-in rocks support to avoid conflicts with luarocks.nvim
-    rocks = {
-        enabled = false,
-    },
 })
