@@ -35,7 +35,7 @@ if [[ "$OSTYPE" == darwin* ]]; then
     function quarto-preview() {
         local ws="1"  # Dev workspace
         local host="${1:-localhost}"
-        local url="http://${host}:9013"
+        local url="http://${host}:9142"
         local aerospace="/opt/homebrew/bin/aerospace"
 
         # Check for existing Orion window in dev workspace (includes error states like "Failed to open page")

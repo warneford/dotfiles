@@ -134,11 +134,11 @@ RUN R -e "pak::pak(c('languageserver', 'lintr', 'styler', 'devtools', 'here', 'r
 # Copy entrypoint script (as root, before user switch)
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# Configure SSH server (runs on port 9015 to avoid conflict with host sshd)
+# Configure SSH server (runs on port 9143 to avoid conflict with host sshd)
 # Must be done as root before user switch
 # AcceptEnv allows client to pass terminal env vars for graphics protocol support
 RUN mkdir -p /run/sshd && \
-    echo "Port 9015" >> /etc/ssh/sshd_config && \
+    echo "Port 9143" >> /etc/ssh/sshd_config && \
     echo "AcceptEnv TERM COLORTERM" >> /etc/ssh/sshd_config
 
 # Create non-root user matching host UID (configurable at build time)
@@ -202,7 +202,7 @@ RUN echo '# Source dotfiles zsh config\n\
 [[ -f "$HOME/dotfiles/zsh/.zshrc" ]] && source "$HOME/dotfiles/zsh/.zshrc"' > ~/.zshrc
 
 # Expose SSH port
-EXPOSE 9015
+EXPOSE 9143
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["zsh"]

@@ -15,8 +15,8 @@ services:
     tty: true
     restart: unless-stopped
     ports:
-      - "9013:9013" # quarto preview
-      - "9015:9015" # SSH
+      - "9142:9142" # quarto preview
+      - "9143:9143" # SSH
     volumes:
       # Mount dotfiles (install.sh creates symlinks to these)
       - ~/dotfiles:/home/${USER:-dev}/dotfiles
@@ -73,7 +73,7 @@ services:
       # GitHub PAT for pak/remotes to install private packages
       - GITHUB_PAT=${GITHUB_PAT}
     ports:
-      - "9010:8787" # RStudio Server
+      - "9140:8787" # RStudio Server
     volumes:
       - ~/projects:/home/rstudio/projects:rw
       - /data/home/scott/projects/argoAPI:/home/rstudio/argoAPI:ro

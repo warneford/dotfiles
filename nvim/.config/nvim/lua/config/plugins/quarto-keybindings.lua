@@ -354,16 +354,17 @@ return {
         local preview_cmd = "quarto preview "
           .. current_file
           .. (extra_args or "")
-          .. " --port 9013 --host 0.0.0.0 --no-browser"
+          .. " --port 9142 --host 0.0.0.0 --no-browser"
 
         -- Kill existing tmux session and start a fresh detached one.
-        -- remain-on-exit keeps the pane alive after quarto exits so errors stay visible.
+        -- Run quarto as the session command (not via interactive shell) to avoid
+        -- gitstatus/p10k race condition with quarto's directory walker.
+        -- direnv exec . loads the project environment (.envrc) without a full shell.
         local tmux_cmd = "tmux kill-session -t quarto 2>/dev/null; "
-          .. "tmux new-session -d -s quarto \\; "
-          .. "set-option -t quarto remain-on-exit on \\; "
-          .. "send-keys -t quarto '"
-          .. preview_cmd:gsub("'", "'\\''")
-          .. "' Enter"
+          .. "tmux new-session -d -s quarto "
+          .. "-c " .. vim.fn.shellescape(vim.fn.getcwd()) .. " "
+          .. vim.fn.shellescape("direnv exec . " .. preview_cmd)
+          .. " \\; set-option -t quarto remain-on-exit on"
 
         vim.fn.jobstart(tmux_cmd, {
           on_exit = function(_, code)
@@ -416,14 +417,14 @@ return {
             1000,
             vim.schedule_wrap(function()
               attempts = attempts + 1
-              local handle = io.popen("fuser 9013/tcp 2>/dev/null")
+              local handle = io.popen("fuser 9142/tcp 2>/dev/null")
               local result = handle:read("*a")
               handle:close()
               if result and result ~= "" then
                 timer:stop()
                 timer:close()
                 vim.fn.jobstart(
-                  "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9011 "
+                  "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p dockerhost' -p 9141 "
                     .. local_user
                     .. "@localhost 'source ~/dotfiles/zsh/aliases.zsh && quarto-preview " .. host_fqdn .. "'",
                   {
