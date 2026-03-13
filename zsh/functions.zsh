@@ -16,11 +16,10 @@ if [[ "$(hostname)" == "rwt-mind-palace" ]]; then
         fi
     }
     zle -N paste-image-widget
-    # Bind to Ctrl+Shift+V
-    # Ghostty sends \e[34~ which arrives as \e[21;2~ in tmux (see tmux.conf)
-    # Bind both sequences for direct Ghostty and through-tmux usage
-    bindkey '\e[34~' paste-image-widget    # Direct from Ghostty
-    bindkey '\e[21;2~' paste-image-widget  # Through tmux translation
+    # Bind to Ctrl+Shift+V (fallback for when tmux doesn't intercept)
+    # Ghostty sends \e[57361~ (private-use sequence, see ghostty config)
+    # tmux user-keys intercepts this for Claude Code; zsh catches any passthrough
+    bindkey '\e[57361~' paste-image-widget
 fi
 
 # Initialize a directory with direnv + uv for Python development

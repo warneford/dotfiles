@@ -78,8 +78,10 @@ keybind = super+comma=open_config
 
 # Pass Ctrl+Shift+V through to terminal (used for remote image paste)
 # Ghostty default is paste_from_clipboard - override to send custom sequence
-# Using esc: to send raw escape sequence for F20 (ESC [ 3 4 ~)
-keybind = ctrl+shift+v=esc:[34~
+# Using a private-use sequence that tmux won't recognize via terminfo,
+# so tmux user-keys can intercept it before it reaches the application.
+# (F20 / \e[34~ was recognized by tmux terminfo, bypassing user-keys)
+keybind = ctrl+shift+v=esc:[57361~
 
 # ============================================================================
 # Shell Integration
