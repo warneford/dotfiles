@@ -81,7 +81,8 @@ keybind = super+comma=open_config
 # Using a private-use sequence that tmux won't recognize via terminfo,
 # so tmux user-keys can intercept it before it reaches the application.
 # (F20 / \e[34~ was recognized by tmux terminfo, bypassing user-keys)
-keybind = ctrl+shift+v=esc:[57361~
+# (57361 was in kitty keyboard protocol range, also recognized by tmux)
+keybind = ctrl+shift+v=esc:[333~
 
 # ============================================================================
 # Shell Integration
