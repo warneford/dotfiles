@@ -26,6 +26,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     texlive-latex-base \
     # System resource monitor
     btop \
+    # Terminal email client
+    aerc \
     # SSH server for proper terminal capabilities (kitty graphics protocol)
     openssh-server \
     # sudo for user permissions (not in r-ver base)
