@@ -44,6 +44,8 @@ services:
       # Claude Code auth and config
       - ~/.claude.json:/home/${USER:-dev}/.claude.json
       - ~/.claude:/home/${USER:-dev}/.claude
+      # Gemini CLI auth
+      - ~/.gemini:/home/${USER:-dev}/.gemini
       # Google auth tokens for gargle/googlesheets4/googledrive
       - ~/.secrets:/home/${USER:-dev}/.secrets
       # Environment variables (secrets, API keys, etc.)

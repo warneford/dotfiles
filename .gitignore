@@ -20,3 +20,6 @@ bin/.local/bin/claude
 
 # Claude Code machine-specific settings
 **/settings.local.json
+
+# Compiled binaries (installed via install.sh)
+tree-sitter

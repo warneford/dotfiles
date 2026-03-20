@@ -163,6 +163,8 @@ RUN if getent passwd ${USER_ID} > /dev/null; then \
     fi && \
     echo "${USERNAME}:${DEV_PASSWORD}" | chpasswd && \
     usermod -aG sudo ${USERNAME} && \
+    (getent group 1015 > /dev/null || groupadd -g 1015 projects) && \
+    usermod -aG projects ${USERNAME} && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers.d/${USERNAME}
 
 # Install pnpm via corepack (needs root for symlinks in /usr/bin)

@@ -23,7 +23,21 @@ if [ ! -f "$INSTALL_MARKER" ] && [ -f "$HOME/dotfiles/install.sh" ]; then
     # Mason tools install automatically on first interactive nvim launch
     echo "Syncing neovim plugins..."
     nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
+    echo "Activating Supermaven free tier..."
+    nvim --headless "+SupermavenUseFree" +qa 2>/dev/null || true
     echo "Neovim setup complete!"
+fi
+
+# Allow direnv and sync uv for any project with both .envrc and pyproject.toml
+PROJECTS_DIR="$HOME/projects"
+if [ -d "$PROJECTS_DIR" ]; then
+    for dir in "$PROJECTS_DIR"/*/; do
+        if [ -f "$dir/.envrc" ] && [ -f "$dir/pyproject.toml" ]; then
+            echo "Setting up $(basename "$dir"): direnv allow + uv sync..."
+            direnv allow "$dir"
+            (cd "$dir" && uv sync 2>&1) || echo "  uv sync failed for $(basename "$dir"), skipping"
+        fi
+    done
 fi
 
 # Execute the CMD (default: zsh)
