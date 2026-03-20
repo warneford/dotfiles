@@ -60,12 +60,12 @@ _comp_options+=(globdots)
 # Disable default zsh completion menu (let fzf-tab handle it)
 zstyle ':completion:*' menu no
 
-# fzf-tab styling - rounded border with solid background
+# fzf-tab styling - rounded border, black-on-yellow selected item
 zstyle ':fzf-tab:*' fzf-flags \
-    --color=bg+:#3b4261,bg:#1a1b26,border:#7aa2f7 \
-    --color=fg:#a9b1d6,fg+:#c0caf5,header:#9ece6a \
-    --color=hl:#7aa2f7,hl+:#bb9af7 \
-    --color=pointer:#bb9af7,marker:#e0af68,prompt:#7dcfff \
+    --color=bg+:#e0af68,bg:#1a1b26,border:#7aa2f7 \
+    --color=fg:#a9b1d6,fg+:#1a1b26,header:#9ece6a \
+    --color=hl:#7aa2f7,hl+:#1a1b26 \
+    --color=pointer:#1a1b26,marker:#e0af68,prompt:#7dcfff \
     --color=info:#7aa2f7,spinner:#bb9af7 \
     --border=rounded \
     --padding=0,1
