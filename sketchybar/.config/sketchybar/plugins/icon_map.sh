@@ -128,6 +128,9 @@ if [ "$icon_result" = "" ] || [ "$icon_result" = ":default:" ]; then
   "Flighty")
     icon_result="󰀝"
     ;;
+  "Papers")
+    icon_result="󱉟"
+    ;;
   *)
     icon_result="󰘔"
     ;;
