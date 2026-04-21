@@ -185,7 +185,8 @@ RUN if getent passwd ${USER_ID} > /dev/null; then \
     echo "${USERNAME} ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers.d/${USERNAME}
 
 # Install pnpm via corepack (needs root for symlinks in /usr/bin)
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Note: Node.js no longer bundles corepack, so we install it first via npm
+RUN npm install -g corepack && corepack enable && corepack prepare pnpm@latest --activate
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
