@@ -71,10 +71,21 @@ RUN curl -fsSL https://dl.google.com/linux/direct/google-chrome-stable_current_a
     rm /tmp/chrome.deb && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Node.js (pre-built binary, avoids nvm compiling from source)
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
+# Install Node.js (official binary distribution — more reliable than
+# nodesource, which has inconsistent packaging for npm/corepack/node)
+RUN NODE_VERSION=$(curl -fsSL https://nodejs.org/dist/latest-v22.x/ \
+        | grep -oE 'node-v22\.[0-9]+\.[0-9]+-linux-x64\.tar\.xz' | head -1 \
+        | sed 's/-linux-x64.*//;s/node-//') && \
+    echo "Installing Node.js ${NODE_VERSION}" && \
+    curl -fsSL "https://nodejs.org/dist/${NODE_VERSION}/node-${NODE_VERSION}-linux-x64.tar.xz" -o /tmp/node.tar.xz && \
+    mkdir -p /opt/nodejs && \
+    tar -xJf /tmp/node.tar.xz --strip-components=1 -C /opt/nodejs && \
+    ln -sf /opt/nodejs/bin/node /usr/local/bin/node && \
+    ln -sf /opt/nodejs/bin/npm /usr/local/bin/npm && \
+    ln -sf /opt/nodejs/bin/npx /usr/local/bin/npx && \
+    ln -sf /opt/nodejs/bin/corepack /usr/local/bin/corepack && \
+    rm /tmp/node.tar.xz && \
+    node --version && npm --version
 
 
 # Install rclone for cloud storage sync (Dropbox, etc.)
