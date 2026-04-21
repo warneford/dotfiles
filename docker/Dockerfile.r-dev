@@ -184,9 +184,10 @@ RUN if getent passwd ${USER_ID} > /dev/null; then \
     usermod -aG projects ${USERNAME} && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD: /usr/sbin/sshd" >> /etc/sudoers.d/${USERNAME}
 
-# Install pnpm via corepack (needs root for symlinks in /usr/bin)
-# Note: Node.js no longer bundles corepack, so we install it first via npm
-RUN npm install -g corepack && corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm directly as a static binary (nodesource's nodejs no longer
+# bundles npm or corepack, so the old corepack approach fails)
+RUN curl -fsSL "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" -o /usr/local/bin/pnpm && \
+    chmod +x /usr/local/bin/pnpm
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
