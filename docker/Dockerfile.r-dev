@@ -26,8 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     texlive-latex-base \
     # System resource monitor
     btop \
-    # Terminal email client
-    aerc \
     # SSH server for proper terminal capabilities (kitty graphics protocol)
     openssh-server \
     # sudo for user permissions (not in r-ver base)
@@ -92,6 +90,25 @@ RUN NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/l
     mv nvim-linux-x86_64 /opt/nvim && \
     ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim && \
     rm nvim-linux-x86_64.tar.gz
+
+# Install aerc from source (Ubuntu 24.04 ships 0.17.0 which uses older
+# styleset/config syntax than our dotfiles target). Resolves the latest
+# stable release tag at build time; use --no-cache to force a refresh.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends golang-go scdoc && \
+    AERC_VERSION=$(git ls-remote --tags --refs --sort=-v:refname https://git.sr.ht/~rjarry/aerc \
+        | awk -F'refs/tags/' '$2 ~ /^[0-9]+\.[0-9]+\.[0-9]+$/{print $2; exit}') && \
+    echo "Building aerc ${AERC_VERSION}" && \
+    curl -fsSL "https://git.sr.ht/~rjarry/aerc/archive/${AERC_VERSION}.tar.gz" -o /tmp/aerc.tar.gz && \
+    tar -xzf /tmp/aerc.tar.gz -C /tmp && \
+    cd /tmp/aerc-${AERC_VERSION} && \
+    make && \
+    make install PREFIX=/usr/local && \
+    cd / && \
+    rm -rf /tmp/aerc.tar.gz /tmp/aerc-${AERC_VERSION} /root/.cache/go-build && \
+    apt-get purge -y golang-go scdoc && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install fzf (latest from GitHub release - apt version is outdated)
 RUN FZF_VERSION=$(curl -sI https://github.com/junegunn/fzf/releases/latest | grep -i "^location:" | sed -E 's|.*/v?([0-9.]+).*|\1|') && \

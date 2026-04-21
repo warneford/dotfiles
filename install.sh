@@ -625,6 +625,18 @@ stow_package "bin"
 stow_package "terminfo"
 stow_package "claude"
 
+# aerc: symlink dotfiles/aerc directly to ~/.config/aerc
+# (not stowed because dotfiles/aerc IS the config dir, no nested .config/aerc layer)
+if [ -d "$DOTFILES_DIR/aerc" ]; then
+    if [ ! -L "$HOME/.config/aerc" ]; then
+        backup_if_exists "$HOME/.config/aerc"
+        ln -s "$DOTFILES_DIR/aerc" "$HOME/.config/aerc"
+        print_success "Linked aerc config"
+    else
+        print_success "aerc config already linked"
+    fi
+fi
+
 # Remove old .radian_profile if it exists and isn't a symlink
 if [ -f "$HOME/.radian_profile" ] && [ ! -L "$HOME/.radian_profile" ]; then
     rm "$HOME/.radian_profile"
