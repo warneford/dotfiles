@@ -23,8 +23,11 @@ msglist_flagged.bold=true
 msglist_result.fg=#c4a7e7
 msglist_result.bold=true
 msglist_*.selected.bold=true
-msglist_*.selected.bg=#eb6f92
+msglist_*.selected.bg=#c4a7e7
 msglist_*.selected.fg=#191724
+msglist_marked.bg=#9ccfd8
+msglist_marked.fg=#191724
+msglist_marked.bold=true
 
 dirlist_*.selected.bold=true
 dirlist_*.selected.bg=#403d52
