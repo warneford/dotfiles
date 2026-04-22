@@ -136,6 +136,15 @@ RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tm
     /tmp/aws/install && \
     rm -rf /tmp/awscliv2.zip /tmp/aws
 
+# Install Databricks CLI (Go-based, latest release from GitHub)
+# Version extracted from redirect header to avoid GitHub API rate limits
+RUN DATABRICKS_VERSION=$(curl -sI https://github.com/databricks/cli/releases/latest | grep -i "^location:" | sed -E 's|.*/v([0-9.]+).*|\1|' | tr -d '\r') && \
+    curl -fsSL "https://github.com/databricks/cli/releases/download/v${DATABRICKS_VERSION}/databricks_cli_${DATABRICKS_VERSION}_linux_amd64.zip" -o /tmp/databricks.zip && \
+    unzip -q /tmp/databricks.zip -d /usr/local/bin && \
+    chmod +x /usr/local/bin/databricks && \
+    rm /tmp/databricks.zip && \
+    databricks --version
+
 # Install GitHub CLI (gh)
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
         | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
