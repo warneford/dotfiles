@@ -1,12 +1,6 @@
 return {
 	{
 		"R-nvim/R.nvim",
-		-- TODO: remove this branch pin once the fix is merged to main and a new
-		-- release is tagged (currently pinned at v0.99.3). After removal, run
-		-- `:Lazy sync` and delete ~/dotfiles/patches/rnvim-bracketed-paste-quarto.*
-		-- Pinned to fix/quarto-chunk-sending branch for quarto multi-line fix
-		-- See: https://github.com/R-nvim/R.nvim/issues/549
-		branch = "fix/quarto-chunk-sending",
 		lazy = false,
 		config = function()
 			-- Create a table with the options to be passed to setup()
