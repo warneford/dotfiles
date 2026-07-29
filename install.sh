@@ -625,6 +625,13 @@ stow_package "bin"
 stow_package "terminfo"
 stow_package "claude"
 
+# SSH: only client-agnostic defaults are tracked (~/.ssh/config.d/defaults.conf).
+# The machine-specific ~/.ssh/config stays untracked and pulls them in via
+# "Include config.d/*.conf". Pre-create config.d so stow links the file, not
+# the whole directory (leaving room for other machine-local includes).
+mkdir -p "$HOME/.ssh/config.d"
+stow_package "ssh"
+
 # aerc: symlink dotfiles/aerc directly to ~/.config/aerc
 # (not stowed because dotfiles/aerc IS the config dir, no nested .config/aerc layer)
 if [ -d "$DOTFILES_DIR/aerc" ]; then
